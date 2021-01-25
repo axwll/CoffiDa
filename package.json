@@ -16,8 +16,14 @@
         "pre-push": "npm run audit && npm run lint && npm run test"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^1.2.34",
+        "@fortawesome/free-regular-svg-icons": "^5.15.2",
+        "@fortawesome/free-solid-svg-icons": "^5.15.2",
+        "@fortawesome/react-native-fontawesome": "^0.2.6",
+        "native-base": "^2.15.2",
         "react": "16.13.1",
-        "react-native": "0.63.4"
+        "react-native": "0.63.4",
+        "react-native-svg": "^12.1.0"
     },
     "devDependencies": {
         "@babel/core": "^7.8.4",
