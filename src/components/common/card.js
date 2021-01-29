@@ -5,12 +5,8 @@ import React, { Component } from 'react';
 import { StyleSheet } from 'react-native';
 
 // import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-
-class Profile extends Component {
-  constructor(props) {
-    super(props);
-  }
-
+// https://docs.nativebase.io/Components.html#card-def-headref
+class TopBar extends Component {
   render() {
     return (
       <Container style={styles.container}>
@@ -30,7 +26,7 @@ class Profile extends Component {
           </Body>
 
           <Right style={styles.header_right}>
-            <FontAwesomeIcon icon={faCog} size={20} color={'#F06543'} onPress={() => this.props.navigation.navigate('Settings')}/>
+            <FontAwesomeIcon icon={faCog} size={20} color={'#F06543'} />
           </Right>
         </Header>
 
@@ -40,38 +36,6 @@ class Profile extends Component {
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#E8E9EB',
-  },
-  header: {
-    height: 50,
-    borderBottomWidth: 0.5,
-    backgroundColor: '#E8E9EB',
-  },
-  header_left: {
-    // backgroundColor: 'grey',
-    flex: 1,
-  },
-  header_body: {
-    flex: 4,
-    alignItems: 'center',
-  },
-  title: {
-    color: 'black',
-  },
-  header_right: {
-    flex: 1,
-  },
-  icon: {
-    fontSize: 20,
-  },
-  content: {
-    flex: 12,
-    // backgroundColor: 'green',
-  },
-});
+const styles = StyleSheet.create({});
 
-export default Profile;
+export default TopBar;

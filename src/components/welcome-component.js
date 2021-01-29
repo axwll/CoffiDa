@@ -1,24 +1,13 @@
-import { faEnvelope } from '@fortawesome/free-regular-svg-icons';
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 class Welcome extends Component {
-  logIn = () => {
-    console.log('Logging in');
-  };
-
   render() {
-    return (
-      // <View styles={styles.container}>
-      //     <Text styles={styles.title}>CoffiDa</Text>
-      //     <Text>Welcome</Text>
-      //     <Text>Only a couple of steps away from coffee!</Text>
-      //     <Text>New here?</Text>
+    const navigation = this.props.navigation;
 
-      //     {/* <TextInput placeholder="Enter an email.." onChangeText={this.handleEmailInput} value={this.state.email} /> */}
-      //     {/* <TextInput placeholder="Enter a password.." onChangeText={this.handlePasswordlInput} value={this.state.password} /> */}
-      // </View>
+    return (
       <View style={styles.container}>
         <Text style={styles.title_dark}>
           Coffi<Text style={styles.title_primary}>Da</Text>
@@ -32,7 +21,7 @@ class Welcome extends Component {
         <View style={styles.btn_view}>
           <TouchableOpacity
             style={styles.btn_primary}
-            onPress={() => this.logIn()}>
+            onPress={() => navigation.navigate('Login')}>
             <Text style={styles.btn_text}>Log in</Text>
           </TouchableOpacity>
         </View>
@@ -42,7 +31,7 @@ class Welcome extends Component {
         <View style={styles.btn_view}>
           <TouchableOpacity
             style={styles.btn_secondary}
-            onPress={() => this.logIn()}>
+            onPress={() => navigation.navigate('Signup')}>
             <View style={styles.btn_icon_view}>
               <FontAwesomeIcon icon={faEnvelope} />
             </View>

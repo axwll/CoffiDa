@@ -1,10 +1,8 @@
-// import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-// import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Content, Form, Header, Icon, Input, Item, Left, Right, Title } from 'native-base';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Container, Content, Form, Header, Input, Item, Left, Right, Title } from 'native-base';
 import React, { Component } from 'react';
 import { StyleSheet } from 'react-native';
-
-// import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 class Login extends Component {
   constructor(props) {
@@ -32,50 +30,20 @@ class Login extends Component {
     console.log('Logging in');
   };
 
-  // <View style={styles.container}>
-  //     <View style={styles.header}>
-  //         <View style={styles.flex_header}>
-  //             <View style={styles.header_left}>
-  //                 <View style={styles.header_left_icon}>
-  //                     <FontAwesomeIcon icon={ faChevronLeft } />
-  //                 </View>
-
-  //                 <View style={styles.header_left_text}>
-  //                     <Text style={styles.back_btn}>Back</Text>
-  //                 </View>
-  //             </View>
-
-  //             <View style={styles.header_center}>
-  //                 <Text style={styles.app_name}>CoffiDa</Text>
-  //             </View>
-
-  //             {/* <View style={styles.header_right}> */}
-  //                 <TouchableOpacity
-  //                     disabled={this.state.allowLogin}
-  //                     style={[ styles.login_btn, this.state.allowLogin ? styles.btn_disabled : '' ]}
-  //                     onPress={() => this.logIn()}>
-  //                     <Text style={styles.login_text}>Log In</Text>
-  //                 </TouchableOpacity>
-  //             {/* </View> */}
-  //         </View>
-  //     </View>
-
-  //     <View style={styles.body}>
-  //         <TextInput style={styles.input} placeholder="Email" onChangeText={this.handleEmailInput} value={this.state.email} />
-  //         <TextInput style={styles.input} placeholder="Password" onChangeText={this.handlePasswordlInput} value={this.state.password} />
-  //         <View style={styles.forgot_pass}>
-  //             <Text style={styles.text}>Forgot Password?</Text>
-  //         </View>
-  //     </View>
-
-  // </View>
   render() {
+    const navigation = this.props.navigation;
+
     return (
       <Container>
         <Header>
           <Left>
             <Button transparent>
-              <Icon name="arrow-back" />
+              <FontAwesomeIcon
+                icon={faChevronLeft}
+                size={20}
+                color={'#F06543'}
+                onPress={() => navigation.goBack()}
+              />
             </Button>
           </Left>
 
@@ -84,9 +52,7 @@ class Login extends Component {
           </Body>
 
           <Right>
-            <Button transparent>
-              <Icon name="Log In" />
-            </Button>
+            <Button transparent>{/* <Icon name="Log In" /> */}</Button>
           </Right>
         </Header>
 
