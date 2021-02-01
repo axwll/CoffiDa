@@ -1,35 +1,17 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import React, { Component } from 'react';
+import { createStackNavigator } from 'react-navigation-stack';
 
-import Login from '../components/login-component';
-import Signup from '../components/signup-component';
-import Welcome from '../components/welcome-component';
+import LoginScreen from '../components/login-component';
+import SignupScreen from '../components/signup-component';
+import WelcomeScreen from '../components/welcome-component';
 
-const Stack = createStackNavigator();
-
-function Nav() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Welcome">
-        <Stack.Screen
-          name="Welcome"
-          component={Welcome}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="Login"
-          component={Login}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="Signup"
-          component={Signup}
-          options={{headerShown: false}}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-}
-
-export default Nav;
+export default createStackNavigator(
+  {
+    Welcome: WelcomeScreen,
+    Login: LoginScreen,
+    Signup: SignupScreen,
+  },
+  {
+    initialRouteName: 'Welcome',
+    headerMode: 'none',
+  },
+);

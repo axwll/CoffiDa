@@ -1,10 +1,30 @@
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Body, Button, Card, CardItem, Container, Content, Header, Left, Text, Title } from 'native-base';
 import React, { Component } from 'react';
 import { StyleSheet } from 'react-native';
 
+// const AuthContext = React.createContext();
+
 class Settings extends Component {
+  //   signOut = async () => {
+  //     console.log('signout');
+  //     try {
+  //       await AsyncStorage.removeItem('userToken');
+  //       console.log('removed');
+  //     } catch (error) {
+  //       console.log('async store error');
+  //     }
+  //   };
+
+  signOut = async () => {
+    console.log('signout');
+    // React.useContext(AuthContext);
+    await AsyncStorage.clear();
+    this.props.navigation.navigate('Auth');
+  };
+
   render() {
     const navigation = this.props.navigation;
 
@@ -66,7 +86,7 @@ class Settings extends Component {
             </CardItem>
           </Card>
           <Button block>
-            <Text>Sign Out</Text>
+            <Text onPress={() => this.signOut()}>Sign Out</Text>
           </Button>
         </Content>
       </Container>
