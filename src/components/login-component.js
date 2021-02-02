@@ -1,10 +1,12 @@
-// import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-// import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Content, Form, Header, Icon, Input, Item, Left, Right, Title } from 'native-base';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Body, Button, Container, Content, Form, Header, Input, Item, Left, Title } from 'native-base';
 import React, { Component } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import RNSecureKeyStore, { ACCESSIBLE } from 'react-native-secure-key-store';
 
-// import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+const AuthContext = React.createContext();
 
 class Login extends Component {
   constructor(props) {
@@ -14,13 +16,15 @@ class Login extends Component {
       email: '',
       password: '',
       allowLogin: false,
+      loading: true,
+      data: null,
     };
   }
 
-  // handleEmailInput = (email) => {
-  //     // Validate email
-  //     this.setState({email: email});
-  // }
+  handleEmailInput = (email) => {
+    // Validate email
+    this.setState({email: email});
+  };
 
   handlePasswordlInput = (password) => {
     // Validate password
@@ -28,77 +32,102 @@ class Login extends Component {
   };
 
   logIn = () => {
-    // this.props.allowLogin = true;
     console.log('Logging in');
+    return fetch('http://10.0.2.2:3333/api/1.0.0/user/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: this.state.email,
+        password: this.state.password,
+      }),
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({
+          loading: false,
+          data: responseJson,
+        });
+        // React.useContext(AuthContext);
+        this.st();
+        // this.storeToken(responseJson.token);
+      })
+      .catch((error) => {
+        // response.status
+        console.log('err');
+        console.log(error);
+      });
   };
 
-  // <View style={styles.container}>
-  //     <View style={styles.header}>
-  //         <View style={styles.flex_header}>
-  //             <View style={styles.header_left}>
-  //                 <View style={styles.header_left_icon}>
-  //                     <FontAwesomeIcon icon={ faChevronLeft } />
-  //                 </View>
+  st = async () => {
+    await AsyncStorage.setItem('userToken', 'abc');
+    this.props.navigation.navigate('App');
+    // console.log('store');
+    // try {
+    //   await AsyncStorage.setItem('userToken', token);
+    // } catch (error) {
+    //   console.log('async store error');
+    // }
+  };
 
-  //                 <View style={styles.header_left_text}>
-  //                     <Text style={styles.back_btn}>Back</Text>
-  //                 </View>
-  //             </View>
+  storeToken = (token) => {
+    RNSecureKeyStore.set('userToken', token, {
+      accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY,
+    }).then(
+      (res) => {
+        console.log('Successfully storeed token');
+      },
+      (err) => {
+        console.log('Failed to store token');
+      },
+    );
+  };
 
-  //             <View style={styles.header_center}>
-  //                 <Text style={styles.app_name}>CoffiDa</Text>
-  //             </View>
-
-  //             {/* <View style={styles.header_right}> */}
-  //                 <TouchableOpacity
-  //                     disabled={this.state.allowLogin}
-  //                     style={[ styles.login_btn, this.state.allowLogin ? styles.btn_disabled : '' ]}
-  //                     onPress={() => this.logIn()}>
-  //                     <Text style={styles.login_text}>Log In</Text>
-  //                 </TouchableOpacity>
-  //             {/* </View> */}
-  //         </View>
-  //     </View>
-
-  //     <View style={styles.body}>
-  //         <TextInput style={styles.input} placeholder="Email" onChangeText={this.handleEmailInput} value={this.state.email} />
-  //         <TextInput style={styles.input} placeholder="Password" onChangeText={this.handlePasswordlInput} value={this.state.password} />
-  //         <View style={styles.forgot_pass}>
-  //             <Text style={styles.text}>Forgot Password?</Text>
-  //         </View>
-  //     </View>
-
-  // </View>
   render() {
+    const navigation = this.props.navigation;
     return (
       <Container>
         <Header>
           <Left>
             <Button transparent>
-              <Icon name="arrow-back" />
+              <FontAwesomeIcon
+                icon={faChevronLeft}
+                size={20}
+                color={'#F06543'}
+                onPress={() => navigation.goBack()}
+              />
             </Button>
           </Left>
 
           <Body>
-            <Title>CoffiDa</Title>
+            <Title>Log In</Title>
           </Body>
-
-          <Right>
-            <Button transparent>
-              <Icon name="Log In" />
-            </Button>
-          </Right>
         </Header>
 
         <Content>
           <Form>
             <Item style={styles.item}>
-              <Input style={styles.input} placeholder="Username" />
+              <Input
+                style={styles.input}
+                placeholder="Email"
+                onChangeText={this.handleEmailInput}
+              />
             </Item>
 
             <Item style={styles.item} last>
-              <Input style={styles.input} placeholder="Password" />
+              <Input
+                style={styles.input}
+                placeholder="Password"
+                onChangeText={this.handlePasswordlInput}
+              />
             </Item>
+
+            <TouchableOpacity
+              style={styles.btn_primary}
+              onPress={() => this.st()}>
+              <Text style={styles.btn_text}>Log In</Text>
+            </TouchableOpacity>
           </Form>
         </Content>
       </Container>
@@ -112,20 +141,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0DFD5',
   },
   header: {
-    // backgroundColor: 'blue',
     height: 50,
-    // flex: 1,
-    // flexDirection: 'row',
     borderBottomWidth: 0.5,
-    // borderBottomColor: '#313638',
-    // borderBottomColor: '#313638',
   },
   flex_header: {
-    // backgroundColor: 'green',
     flex: 1,
     flexDirection: 'row',
     borderBottomWidth: 0.5,
-    // borderBottomColor: '#313638',
   },
   header_left: {
     flex: 1,
@@ -135,15 +157,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   header_left_icon: {
-    // flex: 1,
     justifyContent: 'flex-end',
   },
   header_left_text: {
-    // flex: 1,
     justifyContent: 'flex-start',
   },
   header_center: {
-    // backgroundColor: '#F06543',
     flex: 4,
     alignItems: 'center',
   },
@@ -160,7 +179,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-end',
     backgroundColor: 'green',
-    // color: 'grey',
   },
   btn_disabled: {
     color: 'red',
@@ -185,7 +203,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   forgot_pass: {
-    // flex: 50,
     left: 0,
   },
   text: {
@@ -195,6 +212,18 @@ const styles = StyleSheet.create({
   },
   test: {
     backgroundColor: 'red',
+  },
+  btn_primary: {
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F06543',
+    backgroundColor: '#F06543',
+    borderRadius: 5,
+  },
+  btn_text: {
+    padding: 10,
+    color: '#FFFFFF',
+    alignItems: 'center',
   },
 });
 

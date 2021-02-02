@@ -1,30 +1,18 @@
-import React, { Component } from 'react';
+import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 
-import Login from './src/components/login-component';
+import AppNav from './src/navigations/app-navigator';
+import AuthNav from './src/navigations/auth-navigator';
+import SplashScreen from './src/navigations/splash-screen';
 
-// import Welcome from './src/components/welcome-component';
-
-// import User from './src/components/User';
-
-class App extends Component {
-    render() {
-        return (
-            // <View styles={styles.flexContainer}>
-                // {/* <User name="Max" email="maxj131@hotmail.com"/> */}
-                // {/* <User name="Maxwell" email="maxwell.johnson@realitymine.com"/> */}
-                // {/* <User name="Macks" email="maxj131@gmail.com"/> */}
-            // <Welcome />
-            <Login />
-            // </View>
-        );
-    }
-}
-
-// const styles = StyleSheet.create({
-//     flexContainer: {
-//         flex: 1,
-//         backgroundColor: 'steelblue',
-//     },
-// });
-
-export default App;
+export default createAppContainer(
+  createSwitchNavigator(
+    {
+      Loading: SplashScreen,
+      App: AuthNav,
+      Auth: AppNav,
+    },
+    {
+      initialRouteName: 'Loading',
+    },
+  ),
+);
