@@ -1,18 +1,25 @@
 import { faCompass, faMugHot, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { Component } from 'react';
-import { StyleSheet } from 'react-native';
+import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
 import ExploreScreen from '../components/explore-component';
+import HomeScreen from '../components/home-component';
 import ProfileScreen from '../components/profile-component';
-import HomeScreen from '../components/settings-component';
+import SettingsScreen from '../components/settings-component';
 
-const styles = StyleSheet.create({
-  icon: {
-    fontSize: 12,
+const ProfileStack = createStackNavigator(
+  {
+    Profile: ProfileScreen,
+    Settings: SettingsScreen,
   },
-});
+  {
+    initialRouteName: 'Profile',
+
+    headerMode: 'none',
+  },
+);
 
 export default createBottomTabNavigator(
   {
@@ -33,8 +40,7 @@ export default createBottomTabNavigator(
           iconName = faUser;
         }
 
-        // You can return any component that you like here!
-        return <FontAwesomeIcon icon={iconName} size={size} color={color} />;
+        return <FontAwesomeIcon icon={iconName} color={tintColor} size={20} />;
       },
     }),
     tabBarOptions: {

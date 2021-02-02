@@ -4,9 +4,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Body, Button, Container, Content, Form, Header, Input, Item, Left, Title } from 'native-base';
 import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
-import RNSecureKeyStore, { ACCESSIBLE } from 'react-native-secure-key-store';
-
-const AuthContext = React.createContext();
 
 class Login extends Component {
   constructor(props) {
@@ -15,7 +12,6 @@ class Login extends Component {
     this.state = {
       email: '',
       password: '',
-      allowLogin: false,
       loading: true,
       data: null,
     };
@@ -49,9 +45,7 @@ class Login extends Component {
           loading: false,
           data: responseJson,
         });
-        // React.useContext(AuthContext);
-        this.st();
-        // this.storeToken(responseJson.token);
+        this.storeToken(responseJson.token);
       })
       .catch((error) => {
         // response.status
@@ -60,28 +54,31 @@ class Login extends Component {
       });
   };
 
-  st = async () => {
-    await AsyncStorage.setItem('userToken', 'abc');
-    this.props.navigation.navigate('App');
-    // console.log('store');
-    // try {
-    //   await AsyncStorage.setItem('userToken', token);
-    // } catch (error) {
-    //   console.log('async store error');
-    // }
-  };
+  //   logIn = () => {
+  //     let response = Requests.post('user/login', {
+  //       email: this.state.email,
+  //       password: this.state.password,
+  //     });
 
-  storeToken = (token) => {
-    RNSecureKeyStore.set('userToken', token, {
-      accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY,
-    }).then(
-      (res) => {
-        console.log('Successfully storeed token');
-      },
-      (err) => {
-        console.log('Failed to store token');
-      },
-    );
+  //     console.log('here');
+  //     console.log(response);
+
+  //     if (response) {
+  //       this.setState({data: response});
+  //       this.storeToken();
+  //     }
+
+  //     this.setState({loading: false});
+  //   };
+
+  storeToken = async (token) => {
+    try {
+      await AsyncStorage.setItem('userToken', token);
+      this.props.navigation.navigate('App');
+    } catch (error) {
+      console.log('Failed to store token');
+      console.log(error);
+    }
   };
 
   render() {
@@ -125,7 +122,7 @@ class Login extends Component {
 
             <TouchableOpacity
               style={styles.btn_primary}
-              onPress={() => this.st()}>
+              onPress={() => this.logIn()}>
               <Text style={styles.btn_text}>Log In</Text>
             </TouchableOpacity>
           </Form>
