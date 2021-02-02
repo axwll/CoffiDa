@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Body, Button, Container, Content, Header, Left, Right, Title } from 'native-base';
 import React, { Component } from 'react';
 import { StyleSheet } from 'react-native';
+import { withNavigation } from 'react-navigation';
 
 // import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -10,6 +11,12 @@ class Profile extends Component {
   constructor(props) {
     super(props);
   }
+
+  press = () => {
+    console.log('press');
+    console.log(this.props.navigation.navigate);
+    this.props.navigation.navigate('Settings');
+  };
 
   render() {
     return (
@@ -30,7 +37,12 @@ class Profile extends Component {
           </Body>
 
           <Right style={styles.header_right}>
-            <FontAwesomeIcon icon={faCog} size={20} color={'#F06543'} onPress={() => this.props.navigation.navigate('Settings')}/>
+            <FontAwesomeIcon
+              icon={faCog}
+              size={20}
+              color={'#F06543'}
+              onPress={() => this.press()}
+            />
           </Right>
         </Header>
 
@@ -74,4 +86,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Profile;
+export default withNavigation(Profile);
