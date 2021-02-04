@@ -1,9 +1,20 @@
-import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Body, Button, Container, Content, Form, Header, Input, Item, Left, Title } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import {
+  Body,
+  Button,
+  Container,
+  Content,
+  Form,
+  Header,
+  Input,
+  Item,
+  Left,
+  Title,
+} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet, Text, TouchableOpacity} from 'react-native';
 
 class Login extends Component {
   constructor(props) {
@@ -45,9 +56,10 @@ class Login extends Component {
           loading: false,
           data: responseJson,
         });
-        this.storeToken(responseJson.token);
+        this.storeUserInfo(responseJson);
       })
       .catch((error) => {
+        console.log(error.status);
         // response.status
         console.log('err');
         console.log(error);
@@ -71,9 +83,11 @@ class Login extends Component {
   //     this.setState({loading: false});
   //   };
 
-  storeToken = async (token) => {
+  storeUserInfo = async (data) => {
     try {
-      await AsyncStorage.setItem('userToken', token);
+      console.log(data);
+      await AsyncStorage.setItem('userToken', data.token);
+      await AsyncStorage.setItem('userId', data.id.toString());
       this.props.navigation.navigate('App');
     } catch (error) {
       console.log('Failed to store token');

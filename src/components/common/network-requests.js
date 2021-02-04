@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 
 const BASE_URL = 'http://10.0.2.2:3333/api/1.0.0/';
 
@@ -64,6 +64,10 @@ class NetworkRequests extends Component {
         console.log(error);
       });
   };
+
+  //   find = (keyword) => {
+
+  //   }
 }
 
 const Requests = new NetworkRequests();

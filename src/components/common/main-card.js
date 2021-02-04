@@ -1,22 +1,36 @@
-import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Card, CardItem, Left, Right } from 'native-base';
-import React, { Component } from 'react';
-import { Image, StyleSheet, Text } from 'react-native';
-import Stars from 'react-native-stars';
+import {faMapMarkerAlt} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {Body, Card, CardItem, Left, Right} from 'native-base';
+import React, {Component} from 'react';
+import {Image, StyleSheet, Text} from 'react-native';
+
+import Star from '../common/star';
+
+// import SelectedShop from '../selected-shop-component';
 
 class MainCard extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  clicked = () => {
+    console.log('click');
+    const {navigate} = this.props.navigation;
+    // this.props.navigation.navigate('Explore');
+    navigate('SelectedShop', {shopData: this.props.shopData});
+  };
+
   render() {
     return (
       <Card>
-        <CardItem>
+        <CardItem button onPress={() => this.clicked()}>
           <Left>
             <Body>
               <Text>{this.props.shopData.location_name}</Text>
             </Body>
           </Left>
         </CardItem>
-        <CardItem cardBody>
+        <CardItem cardBody button onPress={() => this.clicked()}>
           <Image
             source={require('../../assets/lofi-coffee.png')}
             style={{height: 200, width: 100, flex: 1}}
@@ -34,15 +48,10 @@ class MainCard extends Component {
           </Left>
 
           <Right style={styles.right}>
-            <Text>(327)</Text>
-            <Stars
-              display={this.props.shopData.avg_overall_rating}
-              spacing={8}
-              count={5}
-              starSize={20}
-              fullStar={require('../../assets/ratings/rating-full-primary.png')}
-              halfStar={require('../../assets/ratings/rating-half-primary.png')}
-              emptyStar={require('../../assets/ratings/rating-empty-primary.png')}
+            <Text>({this.props.shopData.location_reviews.length})</Text>
+            <Star
+              rating={this.props.shopData.avg_overall_rating}
+              primary={true}
             />
           </Right>
         </CardItem>

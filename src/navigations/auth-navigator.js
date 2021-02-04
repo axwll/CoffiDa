@@ -1,12 +1,13 @@
-import { faCompass, faMugHot, faUser } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { Component } from 'react';
-import { createStackNavigator } from 'react-navigation-stack';
-import { createBottomTabNavigator } from 'react-navigation-tabs';
+import {faCompass, faMugHot, faUser} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import React, {Component} from 'react';
+import {createStackNavigator} from 'react-navigation-stack';
+import {createBottomTabNavigator} from 'react-navigation-tabs';
 
 import ExploreScreen from '../components/explore-component';
 import HomeScreen from '../components/home-component';
-import ProfileScreen from '../components/profile-component';
+import ProfileScreen from '../components/profile/profile-component';
+import SelectedShopScreen from '../components/selected-shop-component';
 import SettingsScreen from '../components/settings-component';
 
 const ProfileStack = createStackNavigator(
@@ -16,16 +17,26 @@ const ProfileStack = createStackNavigator(
   },
   {
     initialRouteName: 'Profile',
+    headerMode: 'none',
+  },
+);
 
+const HomeStack = createStackNavigator(
+  {
+    Home: HomeScreen,
+    SelectedShop: SelectedShopScreen,
+  },
+  {
+    initialRouteName: 'Home',
     headerMode: 'none',
   },
 );
 
 export default createBottomTabNavigator(
   {
-    Home: HomeScreen,
+    Home: HomeStack,
     Explore: ExploreScreen,
-    Profile: ProfileScreen,
+    Profile: ProfileStack,
   },
   {
     defaultNavigationOptions: ({navigation}) => ({
