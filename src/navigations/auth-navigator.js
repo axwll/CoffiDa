@@ -4,6 +4,7 @@ import React, {Component} from 'react';
 import {createStackNavigator} from 'react-navigation-stack';
 import {createBottomTabNavigator} from 'react-navigation-tabs';
 
+import AddReviewScreen from '../components/add-review-component';
 import ExploreScreen from '../components/explore-component';
 import HomeScreen from '../components/home-component';
 import ProfileScreen from '../components/profile/profile-component';
@@ -25,6 +26,7 @@ const HomeStack = createStackNavigator(
   {
     Home: HomeScreen,
     SelectedShop: SelectedShopScreen,
+    AddReview: AddReviewScreen,
   },
   {
     initialRouteName: 'Home',

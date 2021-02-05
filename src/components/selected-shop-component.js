@@ -22,13 +22,24 @@ import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 
 import Star from './common/star';
 
+let shopData = null;
+
 class SelectedShop extends Component {
   constructor(props) {
     super(props);
+
+    shopData = this.props.navigation.getParam('shopData');
   }
 
+  getDirections = () => {
+    this.props.navigation.navigate('Explore');
+  };
+
+  addReview = () => {
+    this.props.navigation.navigate('AddReview', {shopData: shopData});
+  };
+
   render() {
-    const shopData = this.props.navigation.getParam('shopData');
     console.log(shopData);
     return (
       <Container style={styles.container}>
@@ -64,7 +75,12 @@ class SelectedShop extends Component {
               </CardItem>
               <CardItem style={styles.carditem_two}>
                 <View style={styles.icon}>
-                  <FontAwesomeIcon icon={faPlus} size={20} color={'#F06543'} />
+                  <FontAwesomeIcon
+                    icon={faPlus}
+                    size={20}
+                    color={'#F06543'}
+                    onPress={() => this.addReview()}
+                  />
                 </View>
                 <View style={styles.num_reviews}>
                   <Text>
@@ -77,6 +93,7 @@ class SelectedShop extends Component {
                     icon={faDirections}
                     size={20}
                     color={'#F06543'}
+                    onPress={() => this.getDirections()}
                   />
                 </View>
               </CardItem>
