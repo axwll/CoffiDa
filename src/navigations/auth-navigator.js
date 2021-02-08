@@ -8,8 +8,8 @@ import AddReviewScreen from '../components/add-review-component';
 import ExploreScreen from '../components/explore-component';
 import HomeScreen from '../components/home-component';
 import ProfileScreen from '../components/profile/profile-component';
+import SettingsScreen from '../components/profile/settings-component';
 import SelectedShopScreen from '../components/selected-shop-component';
-import SettingsScreen from '../components/settings-component';
 
 const ProfileStack = createStackNavigator(
   {

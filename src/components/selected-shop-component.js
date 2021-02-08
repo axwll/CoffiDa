@@ -1,4 +1,4 @@
-import {faHeart, faStar} from '@fortawesome/free-regular-svg-icons';
+import {faStar} from '@fortawesome/free-regular-svg-icons';
 import {
   faChevronLeft,
   faDirections,
@@ -20,6 +20,7 @@ import {
 import React, {Component} from 'react';
 import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 
+import ReviewCard from './common/review-card';
 import Star from './common/star';
 
 let shopData = null;
@@ -40,7 +41,6 @@ class SelectedShop extends Component {
   };
 
   render() {
-    console.log(shopData);
     return (
       <Container style={styles.container}>
         <Header style={styles.header}>
@@ -121,54 +121,7 @@ class SelectedShop extends Component {
             </View>
 
             {shopData.location_reviews.map((review) => {
-              return (
-                <Card key={review.review_id}>
-                  <CardItem style={styles.first_item}>
-                    <Left>
-                      <Text style={styles.user}>
-                        User: {review.review_user_id}
-                      </Text>
-                    </Left>
-
-                    <Right style={styles.right}>
-                      <Star
-                        rating={review.review_overallrating}
-                        size={15}
-                        spacing={5}
-                      />
-                    </Right>
-                  </CardItem>
-                  <CardItem>
-                    <Left>
-                      <Text>{review.review_body}</Text>
-                    </Left>
-
-                    <Right>
-                      <Text style={styles.light_text}>
-                        Price: {review.review_pricerating}/5
-                      </Text>
-                      <Text style={styles.light_text}>
-                        Cleanliness: {review.review_clenlinessrating}/5
-                      </Text>
-                      <Text style={styles.light_text}>
-                        Quality: {review.review_qualityrating}/5
-                      </Text>
-                    </Right>
-                  </CardItem>
-                  <CardItem style={styles.last_item}>
-                    <Left>
-                      <Button transparent style={styles.light_text}>
-                        <FontAwesomeIcon
-                          icon={faHeart}
-                          size={15}
-                          color={'#F06543'}
-                        />
-                      </Button>
-                      <Text style={styles.like_count}>{review.likes}</Text>
-                    </Left>
-                  </CardItem>
-                </Card>
-              );
+              return <ReviewCard key={review.review_id} shopReview={review} />;
             })}
           </ScrollView>
         </Content>
@@ -217,11 +170,6 @@ const styles = StyleSheet.create({
     flex: 10,
     alignItems: 'center',
   },
-  user: {
-    color: 'tomato',
-    fontWeight: 'bold',
-  },
-
   icon: {
     flex: 1,
     alignItems: 'center',
@@ -232,20 +180,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
-  },
-  light_text: {
-    color: '#313638',
-  },
-  like_btn: {
-    paddingRight: 5,
-  },
-  last_item: {
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
-  first_item: {
-    paddingBottom: 0,
-    marginBottom: 0,
   },
 });
 

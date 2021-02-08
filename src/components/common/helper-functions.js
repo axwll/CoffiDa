@@ -1,47 +1,27 @@
 import {ToastAndroid} from 'react-native';
 
-export function profanityFilter(sampleText) {
+export const profanityFilter = (sampleText) => {
   const ILLEGAL_WORDS = ['tea', 'cake', 'pastries', 'pastry'];
-  let profanityFound = false;
 
   ILLEGAL_WORDS.forEach((word) => {
-    // Makes a capitalised word of each illegal word
+    // Makes a capitalised string of each illegal word
     const capitalised = word.charAt(0).toUpperCase() + word.slice(1);
 
-    // Makes an array of both types of illegal word
     const toCheck = [word, capitalised];
 
-    // const res = toCheck.some(function (check) {
-    //   console.log(sampleText.includes(check));
-    //   console.log(sampleText);
-    //   if (sampleText.includes(check)) {
-    //     return sampleText.replace(check, 'non related coffee item');
-    //   } else {
-    //     return sampleText;
-    //   }
-    // });
-
-    // console.log('FONE');
-    // console.log(sampleText);
-
-    // // Checks the words against the sample
-    // This doesnt replace the word becuase it needs to replace 'check' not 'word' if you get me
-    if (toCheck.some((check) => sampleText.includes(check))) {
-      profanityFound = true;
-      //   sampleText = sampleText.replace(word, '*'.repeat(word.length));
-      sampleText = sampleText.replace(word, 'non related coffee item');
-    }
+    toCheck.forEach((check) => {
+      if (sampleText.includes(check)) {
+        sampleText = sampleText.replace(check, 'non related coffee item');
+        toast(
+          'Please try to keep your reviews clean. I have had to remove all profanity from your review.',
+        );
+      }
+    });
   });
-  console.log('FONE');
 
-  console.log(sampleText);
+  return sampleText;
+};
 
-  return {
-    cleanText: profanityFound,
-    data: sampleText,
-  };
-}
-
-export function toast(message, length = ToastAndroid.SHORT) {
+export const toast = (message, length = ToastAndroid.SHORT) => {
   ToastAndroid.show(message, length);
-}
+};

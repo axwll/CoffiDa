@@ -1,20 +1,10 @@
-import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  Body,
-  Button,
-  Container,
-  Content,
-  Form,
-  Header,
-  Input,
-  Item,
-  Left,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, Text, TouchableOpacity} from 'react-native';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Container, Content, Form, Header, Input, Item, Left, Title } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+
+import { setItem } from './common/async-storage-helper';
 
 class Login extends Component {
   constructor(props) {
@@ -23,7 +13,6 @@ class Login extends Component {
     this.state = {
       email: '',
       password: '',
-      loading: true,
       data: null,
     };
   }
@@ -38,8 +27,15 @@ class Login extends Component {
     this.setState({password: password});
   };
 
-  logIn = () => {
-    console.log('Logging in');
+  logInEvent = async () => {
+    await this.logIn();
+    if (this.state.data) {
+      await this.getUserInfo();
+    }
+    this.props.navigation.navigate('App');
+  };
+
+  logIn = async () => {
     return fetch('http://10.0.2.2:3333/api/1.0.0/user/login', {
       method: 'POST',
       headers: {
@@ -53,10 +49,9 @@ class Login extends Component {
       .then((response) => response.json())
       .then((responseJson) => {
         this.setState({
-          loading: false,
           data: responseJson,
         });
-        this.storeUserInfo(responseJson);
+        setItem('AUTH_TOKEN', responseJson.token);
       })
       .catch((error) => {
         console.log(error.status);
@@ -66,33 +61,22 @@ class Login extends Component {
       });
   };
 
-  //   logIn = () => {
-  //     let response = Requests.post('user/login', {
-  //       email: this.state.email,
-  //       password: this.state.password,
-  //     });
-
-  //     console.log('here');
-  //     console.log(response);
-
-  //     if (response) {
-  //       this.setState({data: response});
-  //       this.storeToken();
-  //     }
-
-  //     this.setState({loading: false});
-  //   };
-
-  storeUserInfo = async (data) => {
-    try {
-      console.log(data);
-      await AsyncStorage.setItem('userToken', data.token);
-      await AsyncStorage.setItem('userId', data.id.toString());
-      this.props.navigation.navigate('App');
-    } catch (error) {
-      console.log('Failed to store token');
-      console.log(error);
-    }
+  getUserInfo = async (userId) => {
+    return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + this.state.data.id, {
+      headers: {
+        'x-Authorization': this.state.data.token,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        setItem('USER_DATA', JSON.stringify(responseJson));
+      })
+      .catch((error) => {
+        console.log(error.status);
+        // response.status
+        console.log('err');
+        console.log(error);
+      });
   };
 
   render() {
@@ -136,7 +120,7 @@ class Login extends Component {
 
             <TouchableOpacity
               style={styles.btn_primary}
-              onPress={() => this.logIn()}>
+              onPress={() => this.logInEvent()}>
               <Text style={styles.btn_text}>Log In</Text>
             </TouchableOpacity>
           </Form>

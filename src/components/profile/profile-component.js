@@ -1,20 +1,11 @@
-import {faCog, faPencilAlt} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  Body,
-  Button,
-  Container,
-  Content,
-  Header,
-  Left,
-  Right,
-  Segment,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import { faCog, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Container, Content, Header, Left, Right, Segment, Title } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
+import { translate } from '../../locales';
+import { getItem } from '../common/async-storage-helper';
 import FavoriteScreen from './favorites';
 import LikeScreen from './likes';
 import ReviewScreen from './reviews';
@@ -30,39 +21,30 @@ class Profile extends Component {
   }
 
   async componentDidMount() {
-    const userId = await this.getUserId();
-    this.getUserInfo(userId);
+    this.setState({
+      token: await getItem('AUTH_TOKEN'),
+      userInfo: JSON.parse(await getItem('USER_DATA')),
+    });
   }
 
-  getUserId = async () => {
-    try {
-      return await AsyncStorage.getItem('userId');
-    } catch (error) {
-      console.log('Unable to find User Id');
-      return null;
-    }
-  };
-
-  getUserInfo = (id) => {
-    console.log(id);
-    console.log(`{$id}`);
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
-      method: 'GET',
-      headers: {
-        'x-Authorization': '90776a72966ec49e06eb7a3023b8c251', // PLS chnage this
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        console.log(responseJson);
-        this.setState({
-          userInfo: responseJson,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
+//   getUserInfo = async (id) => {
+//     return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
+//       method: 'GET',
+//       headers: {
+//         'x-Authorization': this.state.token,
+//       },
+//     })
+//       .then((response) => response.json())
+//       .then((responseJson) => {
+//         console.log(responseJson);
+//         this.setState({
+//           userInfo: responseJson,
+//         });
+//       })
+//       .catch((error) => {
+//         console.log(error);
+//       });
+//   };
 
   openSettings = () => {
     this.props.navigation.navigate('Settings');
@@ -115,7 +97,7 @@ class Profile extends Component {
                 ]}
                 active={this.state.activePage === 1}
                 onPress={this.selectComponent(1)}>
-                <Text>Reviews</Text>
+                <Text>{translate('reviews')}</Text>
               </Button>
               <Button
                 style={[
@@ -125,7 +107,7 @@ class Profile extends Component {
                 ]}
                 active={this.state.activePage === 2}
                 onPress={this.selectComponent(2)}>
-                <Text>Favorites</Text>
+                <Text>{translate('favorites')}</Text>
               </Button>
               <Button
                 style={[
@@ -135,7 +117,7 @@ class Profile extends Component {
                 ]}
                 active={this.state.activePage === 3}
                 onPress={this.selectComponent(3)}>
-                <Text>Likes</Text>
+                <Text>{translate('likes')}</Text>
               </Button>
             </Segment>
           </View>

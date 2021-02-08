@@ -1,10 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { Component } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import React, {Component} from 'react';
+import {StyleSheet, Text} from 'react-native';
 
 class SplashScreen extends Component {
   constructor() {
-    console.log('SPLASH');
     super();
     this._bootstrapAsync();
   }

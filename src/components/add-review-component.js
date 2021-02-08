@@ -17,10 +17,10 @@ import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
+import {getItem} from './common/async-storage-helper';
 import {profanityFilter, toast} from './common/helper-functions';
 
 // import {profanityFilter} from './common/helper-functions';
-
 class AddReview extends Component {
   constructor(props) {
     super(props);
@@ -34,7 +34,11 @@ class AddReview extends Component {
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    this.setState({
+      token: await getItem('AUTH_TOKEN'),
+    });
+
     this.calculateOverall();
   }
 
@@ -51,10 +55,6 @@ class AddReview extends Component {
     this.setState({[identifier]: rating}, function () {
       this.calculateOverall();
     });
-    // console.log(this.state);
-    // console.log(identifier);
-    // console.log(this.state.priceRating);
-    // this.calculateOverall();
   };
 
   validateReview = (text) => {
@@ -62,34 +62,20 @@ class AddReview extends Component {
       toast("Please write a review, thats why you're here");
       return false;
     }
-    console.log('pass1');
 
     if (text.length > 500) {
       toast('Too many characters in your review. Please write less. :)');
       return false;
     }
-    console.log('pass2');
-    const response = profanityFilter(text);
 
-    if (!response.cleanText) {
-      toast(
-        'Please try to keep your reviews clean. I have had to remove all profanity from your review.',
-      );
-    }
-
-    return response.data;
+    return profanityFilter(text);
   };
 
   leaveReview = (locationId) => {
     const validReview = this.validateReview(this.state.reviewBody);
-    console.log(validReview);
     if (!validReview) {
       // Dont store an invalid review
       // set a bool here to show some error text
-      console.log('invalid');
-      return;
-    } else {
-      console.log('valid');
       return;
     }
 
@@ -99,7 +85,7 @@ class AddReview extends Component {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-Authorization': '90776a72966ec49e06eb7a3023b8c251',
+          'x-Authorization': this.state.token,
         },
         body: JSON.stringify({
           overall_rating: this.state.overallRating,
@@ -110,13 +96,9 @@ class AddReview extends Component {
         }),
       },
     )
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({
-          loading: false,
-          data: responseJson,
-        });
-        this.storeUserInfo(responseJson);
+      .then((response) => {
+        toast('Review created!');
+        this.props.navigation.goBack();
       })
       .catch((error) => {
         console.log(error.status);

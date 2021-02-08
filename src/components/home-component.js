@@ -11,6 +11,8 @@ import {
   View,
 } from 'react-native';
 
+import {translate} from '../locales';
+import {getItem} from './common/async-storage-helper';
 import MainCard from './common/main-card';
 
 class Home extends Component {
@@ -21,6 +23,12 @@ class Home extends Component {
       loading: true,
       coffeeShops: [],
     };
+  }
+
+  async componentDidMount() {
+    this.setState({
+      token: await getItem('AUTH_TOKEN'),
+    });
 
     this.listShops();
   }
@@ -28,7 +36,7 @@ class Home extends Component {
   listShops = () => {
     return fetch('http://10.0.2.2:3333/api/1.0.0/find', {
       headers: {
-        'x-Authorization': '90776a72966ec49e06eb7a3023b8c251', // PLS chnage this
+        'x-Authorization': this.state.token,
       },
     })
       .then((response) => response.json())
@@ -62,7 +70,7 @@ class Home extends Component {
 
     return fetch(`http://10.0.2.2:3333/api/1.0.0/find?q=${text}`, {
       headers: {
-        'x-Authorization': '90776a72966ec49e06eb7a3023b8c251',
+        'x-Authorization': this.state.token,
       },
     })
       .then((response) => response.json())
@@ -126,7 +134,7 @@ class Home extends Component {
             </Content>
           ) : (
             <View>
-              <Text>No resultss found</Text>
+              <Text>{translate('no_results')}</Text>
             </View>
           )}
         </Container>

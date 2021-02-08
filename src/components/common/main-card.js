@@ -1,8 +1,8 @@
-import {faMapMarkerAlt} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {Body, Card, CardItem, Left, Right} from 'native-base';
-import React, {Component} from 'react';
-import {Image, StyleSheet, Text} from 'react-native';
+import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Card, CardItem, Left, Right } from 'native-base';
+import React, { Component } from 'react';
+import { Image, StyleSheet, Text } from 'react-native';
 
 import Star from '../common/star';
 
@@ -14,7 +14,6 @@ class MainCard extends Component {
   }
 
   clicked = () => {
-    console.log('click');
     const {navigate} = this.props.navigation;
     // this.props.navigation.navigate('Explore');
     navigate('SelectedShop', {shopData: this.props.shopData});
