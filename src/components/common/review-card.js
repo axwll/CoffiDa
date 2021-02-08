@@ -1,10 +1,11 @@
-import {faHeart} from '@fortawesome/free-regular-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {Button, Card, CardItem, Left, Right} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, Text} from 'react-native';
+import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
+import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Button, Card, CardItem, Left, Right } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text } from 'react-native';
 
-import {getItem} from '../common/async-storage-helper';
+import { getItem } from '../common/async-storage-helper';
 import Star from '../common/star';
 
 class ReviewCard extends Component {
@@ -14,78 +15,103 @@ class ReviewCard extends Component {
     this.state = {
       loading: true,
       reviewUser: null,
+      liked: false,
     };
   }
 
   async componentDidMount() {
     this.setState({
       token: await getItem('AUTH_TOKEN'),
+      currentUser: JSON.parse(await getItem('USER_DATA')),
     });
 
-    this.getUserFromId(this.props.shopReview.review_user_id);
+    await this.getReviewUserFromId(this.props.shopReview.review_user_id);
+    await this.checkIfAlreadyLiked();
+    this.setState({loading: false});
   }
 
-  getUserFromId = (userId) => {
+  getReviewUserFromId = (userId) => {
     return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + userId, {
       headers: {
-        'x-Authorization': this.state.token, // PLS chnage this
+        'x-Authorization': this.state.token,
       },
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        this.setState({
-          reviewUser: responseJson,
-          loading: false,
-        });
+        this.setState({reviewUser: responseJson});
       })
       .catch((error) => {
         console.log(error);
-        this.setState({
-          loading: false,
-        });
       });
   };
 
-  likeReview = () => {
-    if (this.props.shopReview.likes !== 0) {
-      console.log('check');
-      //   this.checkIfAlreadyLiked();
+  checkIfAlreadyLiked = () => {
+    const liked_reviews = this.state.currentUser.liked_reviews;
+    if (liked_reviews.length !== 0) {
+      liked_reviews.forEach((like) => {
+        if (like.review.review_id === this.props.shopReview.review_id) {
+          // User has already liked this review
+          this.setState({liked: true});
+          return;
+        }
+      });
     }
 
-    console.log('done');
-    // console.log(this.props.shopReview);
+    // User has not previously liked the review
+    this.setState({liked: false});
+    return;
   };
 
-  //   checkIfAlreadyLiked() {
-  //     console.log(this.state.currentUser);
-  //     const liked_reviews = this.state.currentUser.liked_reviews;
-  //     if (liked_reviews.length === 0) {
-  //       // User has no existing reviews
-  //       console.log('User has no existing reviews');
+  likeButtonPressed = (locationId, reviewId) => {
+    if (this.state.liked) {
+      this.unlikeReview(locationId, reviewId);
+      return;
+    }
 
-  //       return false;
-  //     }
+    this.likeReview(locationId, reviewId);
+  };
 
-  //     liked_reviews.forEach((like) => {
-  //       if (like.review.review_id === this.props.shopReview.review_id) {
-  //         // User has already liked this review
-  //         console.log('User has already liked this review');
+  likeReview = (locationId, reviewId) => {
+    return fetch(
+      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/review/${reviewId}/like`,
+      {
+        method: 'POST',
+        headers: {'x-Authorization': this.state.token},
+      },
+    )
+      .then(() => {
+        this.setState({liked: true});
+        console.log('liked');
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
-  //         return true;
-  //       }
-  //     });
-
-  // User has not previously liked the review
-  //     console.log('User has not previously liked the review');
-
-  //     return false;
-  //   }
+  unlikeReview = (locationId, reviewId) => {
+    return fetch(
+      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/review/${reviewId}/like`,
+      {
+        method: 'DELETE',
+        headers: {'x-Authorization': this.state.token},
+      },
+    )
+      .then(() => {
+        this.setState({liked: false});
+        console.log('unliked');
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   render() {
     if (this.state.loading) {
       return <Text>Waiting for data</Text>;
     } else {
       const review = this.props.shopReview;
+      const locationId = this.props.locationId;
+      //   console.log(this.state.reviewUser);
 
       return (
         <Card>
@@ -126,10 +152,12 @@ class ReviewCard extends Component {
             <Left>
               <Button transparent style={styles.light_text}>
                 <FontAwesomeIcon
-                  icon={faHeart}
+                  icon={this.state.liked ? faHeartSolid : faHeartRegular}
                   size={15}
                   color={'#F06543'}
-                  onPress={() => this.likeReview()}
+                  onPress={() =>
+                    this.likeButtonPressed(locationId, review.review_id)
+                  }
                 />
               </Button>
               <Text style={styles.like_count}>{review.likes}</Text>

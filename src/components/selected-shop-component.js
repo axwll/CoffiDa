@@ -1,8 +1,9 @@
-import {faStar} from '@fortawesome/free-regular-svg-icons';
+import {faStar as faStarRegular} from '@fortawesome/free-regular-svg-icons';
 import {
   faChevronLeft,
   faDirections,
   faPlus,
+  faStar as faStarSolid,
 } from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {
@@ -20,6 +21,7 @@ import {
 import React, {Component} from 'react';
 import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 
+import {getItem} from './common/async-storage-helper';
 import ReviewCard from './common/review-card';
 import Star from './common/star';
 
@@ -29,8 +31,83 @@ class SelectedShop extends Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      favorite: false,
+    };
+
     shopData = this.props.navigation.getParam('shopData');
   }
+
+  async componentDidMount() {
+    this.setState({
+      token: await getItem('AUTH_TOKEN'),
+      currentUser: JSON.parse(await getItem('USER_DATA')),
+    });
+
+    await this.checkIfAlreadyFavorited();
+  }
+
+  checkIfAlreadyFavorited = () => {
+    const fav_locations = this.state.currentUser.favourite_locations;
+    if (fav_locations.length !== 0) {
+      fav_locations.forEach((favs) => {
+        if (favs.location_id === shopData.location_id) {
+          // User has already favorited the location
+          this.setState({favorite: true});
+          return;
+        }
+      });
+    }
+
+    // User has not previously favorited the location
+    this.setState({favorite: false});
+    return;
+  };
+
+  favButtonPressed = () => {
+    const locationId = shopData.location_id;
+
+    if (this.state.favorite) {
+      this.unFavLocation(locationId);
+      return;
+    }
+
+    this.favLocation();
+  };
+
+  favLocation = (locationId) => {
+    return fetch(
+      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/favorite`,
+      {
+        method: 'POST',
+        headers: {'x-Authorization': this.state.token},
+      },
+    )
+      .then(() => {
+        this.setState({favorite: true});
+        console.log('favorited');
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  unFavLocation = (locationId) => {
+    return fetch(
+      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/favorite`,
+      {
+        method: 'DELETE',
+        headers: {'x-Authorization': this.state.token},
+      },
+    )
+      .then(() => {
+        this.setState({favorite: false});
+        console.log('unfavorited');
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   getDirections = () => {
     this.props.navigation.navigate('Explore');
@@ -60,7 +137,12 @@ class SelectedShop extends Component {
           </Body>
 
           <Right style={styles.header_right}>
-            <FontAwesomeIcon icon={faStar} size={20} color={'#F06543'} />
+            <FontAwesomeIcon
+              icon={this.state.favorite ? faStarSolid : faStarRegular}
+              size={20}
+              color={'#F06543'}
+              onPress={() => this.favButtonPressed(shopData.location_id)}
+            />
           </Right>
         </Header>
 
@@ -121,7 +203,13 @@ class SelectedShop extends Component {
             </View>
 
             {shopData.location_reviews.map((review) => {
-              return <ReviewCard key={review.review_id} shopReview={review} />;
+              return (
+                <ReviewCard
+                  key={review.review_id}
+                  shopReview={review}
+                  locationId={shopData.location_id}
+                />
+              );
             })}
           </ScrollView>
         </Content>

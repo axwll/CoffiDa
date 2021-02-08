@@ -1,11 +1,21 @@
-import { faCog, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Content, Header, Left, Right, Segment, Title } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {faCog, faPencilAlt} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  Body,
+  Button,
+  Container,
+  Content,
+  Header,
+  Left,
+  Right,
+  Segment,
+  Title,
+} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet, Text, View} from 'react-native';
 
-import { translate } from '../../locales';
-import { getItem } from '../common/async-storage-helper';
+import {translate} from '../../locales';
+import {getItem} from '../common/async-storage-helper';
 import FavoriteScreen from './favorites';
 import LikeScreen from './likes';
 import ReviewScreen from './reviews';
@@ -27,24 +37,24 @@ class Profile extends Component {
     });
   }
 
-//   getUserInfo = async (id) => {
-//     return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
-//       method: 'GET',
-//       headers: {
-//         'x-Authorization': this.state.token,
-//       },
-//     })
-//       .then((response) => response.json())
-//       .then((responseJson) => {
-//         console.log(responseJson);
-//         this.setState({
-//           userInfo: responseJson,
-//         });
-//       })
-//       .catch((error) => {
-//         console.log(error);
-//       });
-//   };
+  //   getUserInfo = async (id) => {
+  //     return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
+  //       method: 'GET',
+  //       headers: {
+  //         'x-Authorization': this.state.token,
+  //       },
+  //     })
+  //       .then((response) => response.json())
+  //       .then((responseJson) => {
+  //         console.log(responseJson);
+  //         this.setState({
+  //           userInfo: responseJson,
+  //         });
+  //       })
+  //       .catch((error) => {
+  //         console.log(error);
+  //       });
+  //   };
 
   openSettings = () => {
     this.props.navigation.navigate('Settings');
@@ -56,9 +66,11 @@ class Profile extends Component {
     if (this.state.activePage === 1) {
       return <ReviewScreen reviews={this.state.userInfo.reviews} />;
     } else if (this.state.activePage === 2) {
-      return <FavoriteScreen />;
+      return (
+        <FavoriteScreen favorites={this.state.userInfo.favourite_locations} />
+      );
     } else {
-      return <LikeScreen />;
+      return <LikeScreen likes={this.state.userInfo.liked_reviews} />;
     }
   };
 
