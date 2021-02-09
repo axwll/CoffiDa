@@ -1,11 +1,22 @@
-import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Body, Button, Card, CardItem, Container, Content, Header, Left, Text, Title } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet } from 'react-native';
+import {
+  Body,
+  Button,
+  Card,
+  CardItem,
+  Container,
+  Content,
+  Header,
+  Left,
+  Text,
+  Title,
+} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet} from 'react-native';
 
-// const AuthContext = React.createContext();
+import {translate} from '../../locales';
 
 class Settings extends Component {
   //   signOut = async () => {
@@ -20,7 +31,6 @@ class Settings extends Component {
 
   signOut = async () => {
     console.log('signout');
-    // React.useContext(AuthContext);
     await AsyncStorage.clear();
     this.props.navigation.navigate('Auth');
   };
@@ -43,57 +53,49 @@ class Settings extends Component {
           </Left>
 
           <Body style={styles.header_body}>
-            <Title style={styles.title}>Settings</Title>
+            <Title style={styles.title}>{translate('settings')}</Title>
           </Body>
         </Header>
 
         <Content padder style={styles.content}>
-          <Text>Account maxj131@hotmail.com</Text>
+          <Text>{translate('account')} maxj131@hotmail.com</Text>
           <Card transparent>
             <CardItem>
               <Body>
-                <Text>Change Email Address</Text>
+                <Text>{translate('change_email')}</Text>
               </Body>
             </CardItem>
           </Card>
           <Card transparent>
             <CardItem>
               <Body>
-                <Text>Reset Password</Text>
+                <Text>{translate('reset_password')}</Text>
               </Body>
             </CardItem>
           </Card>
-          <Text>Preferences</Text>
+          <Text>{translate('preferences')}</Text>
           <Card transparent>
             <CardItem>
               <Body>
-                <Text>Currency</Text>
-              </Body>
-            </CardItem>
-          </Card>
-          <Card transparent>
-            <CardItem>
-              <Body>
-                <Text>Permissions</Text>
+                <Text>{translate('permissions')}</Text>
               </Body>
             </CardItem>
           </Card>
           <Card transparent>
             <CardItem>
               <Body>
-                <Text>Accessibility</Text>
+                <Text>{translate('accessibility')}</Text>
               </Body>
             </CardItem>
           </Card>
           <Button block>
-            <Text onPress={() => this.signOut()}>Sign Out</Text>
+            <Text onPress={() => this.signOut()}>{translate('signout')}</Text>
           </Button>
         </Content>
       </Container>
     );
   }
 }
-//   {/* <Text>Account maxj131@hotmail.com</Text> */}
 
 const styles = StyleSheet.create({
   container: {
@@ -107,7 +109,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8E9EB',
   },
   header_left: {
-    // backgroundColor: 'grey',
     flex: 1,
   },
   header_body: {
@@ -125,7 +126,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 12,
-    // backgroundColor: 'green',
   },
 });
 

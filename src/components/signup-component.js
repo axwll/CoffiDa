@@ -1,10 +1,22 @@
-import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Button, CheckBox, Container, Content, Form, Header, Input, Item, Left, Text } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  Button,
+  CheckBox,
+  Container,
+  Content,
+  Form,
+  Header,
+  Input,
+  Item,
+  Left,
+  Text,
+} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet, TouchableOpacity} from 'react-native';
 
-import { setItem } from './common/async-storage-helper';
+import {translate} from '../locales';
+import {setItem} from './common/async-storage-helper';
 
 class Signup extends Component {
   constructor(props) {
@@ -169,14 +181,14 @@ class Signup extends Component {
             </Item>
 
             <Text style={styles.checkbox}>
-              I agree to the Terms & conditions
+              {translate('terms_conditions')}
               <CheckBox checked={true} />
             </Text>
 
             <TouchableOpacity
               style={styles.btn_primary}
               onPress={() => this.signUpEvent()}>
-              <Text style={styles.btn_text}>Sign up</Text>
+              <Text style={styles.btn_text}>{translate('signup')}</Text>
             </TouchableOpacity>
           </Form>
         </Content>
@@ -194,13 +206,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderBottomWidth: 0.5,
   },
-  header_left: {
-    // flex: 1,
-    // alignItems: 'flex-start',
-    // flexDirection: 'row',
-    backgroundColor: 'yellow',
-    // justifyContent: 'center',
-  },
+  header_left: {},
   item: {
     borderBottomWidth: 0,
   },

@@ -1,29 +1,14 @@
-import {faStar as faStarRegular} from '@fortawesome/free-regular-svg-icons';
-import {
-  faChevronLeft,
-  faDirections,
-  faPlus,
-  faStar as faStarSolid,
-} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Body,
-  Button,
-  Card,
-  CardItem,
-  Container,
-  Content,
-  Header,
-  Left,
-  Right,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
+import { faStar as faStarRegular } from '@fortawesome/free-regular-svg-icons';
+import { faChevronLeft, faDirections, faPlus, faStar as faStarSolid } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Card, CardItem, Container, Content, Header, Left, Right, Title } from 'native-base';
+import React, { Component } from 'react';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import {getItem} from './common/async-storage-helper';
+import { translate } from '../locales';
+import { getItem } from './common/async-storage-helper';
 import ReviewCard from './common/review-card';
-import Star from './common/star';
+import ReviewIcon from './common/review-icon';
 
 let shopData = null;
 
@@ -166,7 +151,8 @@ class SelectedShop extends Component {
                 </View>
                 <View style={styles.num_reviews}>
                   <Text>
-                    {shopData.location_reviews.length} review(s) for{' '}
+                    {shopData.location_reviews.length}{' '}
+                    {translate('reviews_for')}
                     {shopData.location_name}, {shopData.location_town}
                   </Text>
                 </View>
@@ -180,17 +166,17 @@ class SelectedShop extends Component {
                 </View>
               </CardItem>
               <CardItem style={styles.reviews_card}>
-                <Star
+                <ReviewIcon
                   name="Price"
                   rating={shopData.avg_price_rating}
                   rotate={true}
                 />
-                <Star
+                <ReviewIcon
                   name="Cleanliness"
                   rating={shopData.avg_clenliness_rating}
                   rotate={true}
                 />
-                <Star
+                <ReviewIcon
                   name="Quality"
                   rating={shopData.avg_quality_rating}
                   rotate={true}
@@ -199,7 +185,9 @@ class SelectedShop extends Component {
             </Card>
 
             <View style={styles.sub_heading_view}>
-              <Title style={styles.sub_heading_text}>Ratings & Reviews</Title>
+              <Title style={styles.sub_heading_text}>
+                {translate('raiting_review')}
+              </Title>
             </View>
 
             {shopData.location_reviews.map((review) => {

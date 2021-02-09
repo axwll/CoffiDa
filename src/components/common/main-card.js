@@ -4,9 +4,7 @@ import { Body, Card, CardItem, Left, Right } from 'native-base';
 import React, { Component } from 'react';
 import { Image, StyleSheet, Text } from 'react-native';
 
-import Star from '../common/star';
-
-// import SelectedShop from '../selected-shop-component';
+import ReviewIcon from '../common/review-icon';
 
 class MainCard extends Component {
   constructor(props) {
@@ -15,7 +13,6 @@ class MainCard extends Component {
 
   clicked = () => {
     const {navigate} = this.props.navigation;
-    // this.props.navigation.navigate('Explore');
     navigate('SelectedShop', {shopData: this.props.shopData});
   };
 
@@ -31,7 +28,7 @@ class MainCard extends Component {
         </CardItem>
         <CardItem cardBody button onPress={() => this.clicked()}>
           <Image
-            source={require('../../assets/lofi-coffee.png')}
+            source={require('../../assets/lofi-coffee.png')} // change this
             style={{height: 200, width: 100, flex: 1}}
           />
         </CardItem>
@@ -48,7 +45,7 @@ class MainCard extends Component {
 
           <Right style={styles.right}>
             <Text>({this.props.shopData.location_reviews.length})</Text>
-            <Star
+            <ReviewIcon
               rating={this.props.shopData.avg_overall_rating}
               primary={true}
             />

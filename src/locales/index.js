@@ -1,7 +1,7 @@
 import i18n from 'i18n-js';
 import memoize from 'lodash.memoize';
 import React from 'react';
-import { I18nManager } from 'react-native';
+import {I18nManager} from 'react-native';
 import * as RNLocalize from 'react-native-localize';
 
 // Code sourced from online tutorial
@@ -33,17 +33,3 @@ export const setI18nConfig = () => {
   i18n.translations = {[languageTag]: translationGetters[languageTag]()};
   i18n.locale = languageTag;
 };
-
-// export function getLanguage() {
-//   try {
-//     const choice = Localization.locale;
-//     I18n.locale = choice.substr(0, 2);
-//     I18n.initAsync();
-//   } catch (err) {
-//     console.log('Error during get langauge: ' + err);
-//   }
-// }
-
-// export function t(name) {
-//   return I18n.t(name);
-// }

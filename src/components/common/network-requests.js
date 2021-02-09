@@ -29,8 +29,6 @@ class NetworkRequests extends Component {
       .then((responseJson) => {
         console.log(responseJson);
         return responseJson;
-        // console.log('success');
-        // Alert.alert('Item Added');
       })
       .catch((error) => {
         console.log('An error occoured during POST ' + url);
@@ -64,10 +62,6 @@ class NetworkRequests extends Component {
         console.log(error);
       });
   };
-
-  //   find = (keyword) => {
-
-  //   }
 }
 
 const Requests = new NetworkRequests();

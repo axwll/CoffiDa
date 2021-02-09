@@ -1,18 +1,11 @@
-import {faMapMarkedAlt} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {Container, Content, Header, Icon, Input, Item} from 'native-base';
-import React, {Component} from 'react';
-import {
-  Keyboard,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { faMapMarkedAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Container, Content, Header, Icon, Input, Item } from 'native-base';
+import React, { Component } from 'react';
+import { Keyboard, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import {translate} from '../locales';
-import {getItem} from './common/async-storage-helper';
+import { translate } from '../locales';
+import { getItem } from './common/async-storage-helper';
 import MainCard from './common/main-card';
 
 class Home extends Component {
@@ -75,14 +68,12 @@ class Home extends Component {
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        // console.log(responseJson);
         this.setState({
           coffeeShops: responseJson,
           loading: false,
         });
       })
       .catch((error) => {
-        // response.status
         console.log(error);
         this.setState({
           loading: false,

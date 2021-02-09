@@ -1,12 +1,13 @@
-import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
-import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Button, Card, CardItem, Left, Right } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import {faHeart as faHeartRegular} from '@fortawesome/free-regular-svg-icons';
+import {faHeart as faHeartSolid} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {Button, Card, CardItem, Left, Right} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet, Text} from 'react-native';
 
-import { getItem } from '../common/async-storage-helper';
-import Star from '../common/star';
+import {translate} from '../../locales';
+import {getItem} from '../common/async-storage-helper';
+import ReviewIcon from '../common/review-icon';
 
 class ReviewCard extends Component {
   constructor(props) {
@@ -111,20 +112,19 @@ class ReviewCard extends Component {
     } else {
       const review = this.props.shopReview;
       const locationId = this.props.locationId;
-      //   console.log(this.state.reviewUser);
 
       return (
         <Card>
           <CardItem style={styles.first_item}>
             <Left>
               <Text style={styles.user}>
-                User: {this.state.reviewUser.first_name}{' '}
+                {translate('user')}: {this.state.reviewUser.first_name}{' '}
                 {this.state.reviewUser.last_name}
               </Text>
             </Left>
 
             <Right>
-              <Star
+              <ReviewIcon
                 rating={review.review_overallrating}
                 size={15}
                 spacing={5}
@@ -138,13 +138,13 @@ class ReviewCard extends Component {
 
             <Right>
               <Text style={styles.light_text}>
-                Price: {review.review_pricerating}/5
+                {translate('price')}: {review.review_pricerating}/5
               </Text>
               <Text style={styles.light_text}>
-                Cleanliness: {review.review_clenlinessrating}/5
+                {translate('cleanliness')}: {review.review_clenlinessrating}/5
               </Text>
               <Text style={styles.light_text}>
-                Quality: {review.review_qualityrating}/5
+                {translate('quality')}: {review.review_qualityrating}/5
               </Text>
             </Right>
           </CardItem>

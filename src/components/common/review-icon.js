@@ -1,5 +1,5 @@
-import React, {Component} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import React, { Component } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../../assets/ratings/rating-empty-light.png';
@@ -9,7 +9,7 @@ import PrimaryFull from '../../assets/ratings/rating-full-primary.png';
 import Half from '../../assets/ratings/rating-half-light.png';
 import PrimaryHalf from '../../assets/ratings/rating-half-primary.png';
 
-class Star extends Component {
+class ReviewIcon extends Component {
   render() {
     return (
       <View style={styles.review_section}>
@@ -64,4 +64,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Star;
+export default ReviewIcon;

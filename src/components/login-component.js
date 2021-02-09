@@ -1,10 +1,22 @@
-import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Content, Form, Header, Input, Item, Left, Title } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  Body,
+  Button,
+  Container,
+  Content,
+  Form,
+  Header,
+  Input,
+  Item,
+  Left,
+  Title,
+} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet, Text, TouchableOpacity} from 'react-native';
 
-import { setItem } from './common/async-storage-helper';
+import {translate} from '../locales';
+import {setItem} from './common/async-storage-helper';
 
 class Login extends Component {
   constructor(props) {
@@ -54,9 +66,6 @@ class Login extends Component {
         setItem('AUTH_TOKEN', responseJson.token);
       })
       .catch((error) => {
-        console.log(error.status);
-        // response.status
-        console.log('err');
         console.log(error);
       });
   };
@@ -72,9 +81,6 @@ class Login extends Component {
         setItem('USER_DATA', JSON.stringify(responseJson));
       })
       .catch((error) => {
-        console.log(error.status);
-        // response.status
-        console.log('err');
         console.log(error);
       });
   };
@@ -96,7 +102,7 @@ class Login extends Component {
           </Left>
 
           <Body>
-            <Title>Log In</Title>
+            <Title>{translate('login')}</Title>
           </Body>
         </Header>
 
@@ -121,7 +127,7 @@ class Login extends Component {
             <TouchableOpacity
               style={styles.btn_primary}
               onPress={() => this.logInEvent()}>
-              <Text style={styles.btn_text}>Log In</Text>
+              <Text style={styles.btn_text}>{translate('login')}</Text>
             </TouchableOpacity>
           </Form>
         </Content>

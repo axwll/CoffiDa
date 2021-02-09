@@ -1,26 +1,16 @@
-import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Body,
-  Button,
-  Container,
-  Content,
-  Form,
-  Header,
-  Left,
-  Textarea,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Container, Content, Form, Header, Left, Textarea, Title } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
-import {getItem} from './common/async-storage-helper';
-import {profanityFilter, toast} from './common/helper-functions';
+import { translate } from '../locales';
+import { getItem } from './common/async-storage-helper';
+import { profanityFilter, toast } from './common/helper-functions';
 
-// import {profanityFilter} from './common/helper-functions';
 class AddReview extends Component {
   constructor(props) {
     super(props);
@@ -101,9 +91,6 @@ class AddReview extends Component {
         this.props.navigation.goBack();
       })
       .catch((error) => {
-        console.log(error.status);
-        // response.status
-        console.log('err');
         console.log(error);
       });
   };
@@ -125,7 +112,7 @@ class AddReview extends Component {
           </Left>
 
           <Body style={styles.header_body}>
-            <Title style={styles.title}>Add new review</Title>
+            <Title style={styles.title}>{translate('add_review')}</Title>
           </Body>
         </Header>
 
@@ -139,7 +126,6 @@ class AddReview extends Component {
             <View style={styles.review_section}>
               <View style={styles.review_rating}>
                 <Stars
-                  //   half={true}
                   default={this.state.priceRating}
                   update={(rating) => {
                     this.updateState('priceRating', rating);
@@ -149,11 +135,10 @@ class AddReview extends Component {
                   count={5}
                   fullStar={Full}
                   emptyStar={Empty}
-                  //   halfStar={Half}
                 />
               </View>
               <View style={styles.review_description}>
-                <Text>Price</Text>
+                <Text>{translate('price')}</Text>
               </View>
             </View>
 
@@ -161,7 +146,6 @@ class AddReview extends Component {
             <View style={styles.review_section}>
               <View style={styles.review_rating}>
                 <Stars
-                  //   half={true}
                   default={this.state.cleanRating}
                   update={(rating) => {
                     this.updateState('cleanRating', rating);
@@ -171,11 +155,10 @@ class AddReview extends Component {
                   count={5}
                   fullStar={Full}
                   emptyStar={Empty}
-                  //   halfStar={Half}
                 />
               </View>
               <View style={styles.review_description}>
-                <Text>Cleanliness</Text>
+                <Text>{translate('cleanliness')}</Text>
               </View>
             </View>
 
@@ -183,7 +166,6 @@ class AddReview extends Component {
             <View style={styles.review_section}>
               <View style={styles.review_rating}>
                 <Stars
-                  //   half={true}
                   default={this.state.qualRating}
                   update={(rating) => {
                     this.updateState('qualRating', rating);
@@ -193,24 +175,25 @@ class AddReview extends Component {
                   count={5}
                   fullStar={Full}
                   emptyStar={Empty}
-                  //   halfStar={Half}
                 />
               </View>
               <View style={styles.review_description}>
-                <Text>Quality</Text>
+                <Text>{translate('quality')}</Text>
               </View>
             </View>
           </View>
 
           <View>
-            <Text>Overall Rating: {this.state.overallRating}</Text>
+            <Text>
+              {translate('overall_rating')} {this.state.overallRating}
+            </Text>
           </View>
 
           <Form>
             <Textarea
               rowSpan={5}
               bordered
-              placeholder="Leave your review..."
+              placeholder={translate('leave_review')}
               onChangeText={(text) => this.setState({reviewBody: text})}
             />
           </Form>
@@ -218,7 +201,7 @@ class AddReview extends Component {
           <TouchableOpacity
             style={styles.btn_primary}
             onPress={() => this.leaveReview(shopData.location_id)}>
-            <Text style={styles.btn_text}>Post review</Text>
+            <Text style={styles.btn_text}>{translate('post_review')}</Text>
           </TouchableOpacity>
         </Content>
       </Container>
