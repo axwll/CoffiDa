@@ -27,6 +27,7 @@
     "settings": "Settings",
     "account": "Account",
     "change_email": "Change Email Address",
+    "update_email": "Update Email Address",
     "reset_password": "Reset Password",
     "preferences": "Preferences",
     "permissions": "Permissions",

@@ -8,13 +8,25 @@ import AddReviewScreen from '../components/add-review-component';
 import ExploreScreen from '../components/explore-component';
 import HomeScreen from '../components/home-component';
 import ProfileScreen from '../components/profile/profile-component';
-import SettingsScreen from '../components/profile/settings-component';
+import EditProfileScreen from '../components/profile/settings/edit-profile';
+import SettingsScreen from '../components/profile/settings/settings-component';
 import SelectedShopScreen from '../components/selected-shop-component';
+
+const SettingsStack = createStackNavigator(
+  {
+    Settings: SettingsScreen,
+    EditAccount: EditProfileScreen,
+  },
+  {
+    initialRouteName: 'Settings',
+    headerMode: 'none',
+  },
+);
 
 const ProfileStack = createStackNavigator(
   {
     Profile: ProfileScreen,
-    Settings: SettingsScreen,
+    Settings: SettingsStack,
   },
   {
     initialRouteName: 'Profile',

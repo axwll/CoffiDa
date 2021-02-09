@@ -1,6 +1,5 @@
 import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Body,
   Button,
@@ -14,24 +13,56 @@ import {
   Title,
 } from 'native-base';
 import React, {Component} from 'react';
-import {StyleSheet} from 'react-native';
+import {StyleSheet, TouchableOpacity} from 'react-native';
 
-import {translate} from '../../locales';
+import {translate} from '../../../locales';
+import {clear, getItem, setItem} from '../../common/async-storage-helper';
 
 class Settings extends Component {
-  //   signOut = async () => {
-  //     console.log('signout');
-  //     try {
-  //       await AsyncStorage.removeItem('userToken');
-  //       console.log('removed');
-  //     } catch (error) {
-  //       console.log('async store error');
-  //     }
-  //   };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      userInfo: [],
+    };
+  }
+
+  async componentDidMount() {
+    this.setState({
+      token: await getItem('AUTH_TOKEN'),
+      userInfo: JSON.parse(await getItem('USER_DATA')),
+    });
+  }
+
+  openEditProfile = async (type) => {
+    this.props.navigation.navigate('EditAccount', {
+      type: type,
+      userInfo: this.state.userInfo,
+      onGoBack: () => this.getUserInfo(),
+    });
+  };
+
+  getUserInfo = () => {
+    console.log('goback');
+    const userId = this.state.userInfo.user_id;
+
+    return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
+      headers: {
+        'x-Authorization': this.state.token,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        setItem('USER_DATA', JSON.stringify(responseJson));
+        this.setState({userInfo: responseJson});
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   signOut = async () => {
-    console.log('signout');
-    await AsyncStorage.clear();
+    await clear();
     this.props.navigation.navigate('Auth');
   };
 
@@ -47,7 +78,7 @@ class Settings extends Component {
                 icon={faChevronLeft}
                 size={20}
                 color={'#F06543'}
-                onPress={() => navigation.goBack()}
+                onPress={() => navigation.navigate('Profile')}
               />
             </Button>
           </Left>
@@ -58,20 +89,26 @@ class Settings extends Component {
         </Header>
 
         <Content padder style={styles.content}>
-          <Text>{translate('account')} maxj131@hotmail.com</Text>
+          <Text>
+            {translate('account')}: {this.state.userInfo.email}
+          </Text>
           <Card transparent>
-            <CardItem>
-              <Body>
-                <Text>{translate('change_email')}</Text>
-              </Body>
-            </CardItem>
+            <TouchableOpacity onPress={() => this.openEditProfile('email')}>
+              <CardItem>
+                <Body>
+                  <Text>{translate('change_email')}</Text>
+                </Body>
+              </CardItem>
+            </TouchableOpacity>
           </Card>
           <Card transparent>
-            <CardItem>
-              <Body>
-                <Text>{translate('reset_password')}</Text>
-              </Body>
-            </CardItem>
+            <TouchableOpacity onPress={() => this.openEditProfile('password')}>
+              <CardItem>
+                <Body>
+                  <Text>{translate('reset_password')}</Text>
+                </Body>
+              </CardItem>
+            </TouchableOpacity>
           </Card>
           <Text>{translate('preferences')}</Text>
           <Card transparent>

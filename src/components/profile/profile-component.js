@@ -37,27 +37,8 @@ class Profile extends Component {
     });
   }
 
-  //   getUserInfo = async (id) => {
-  //     return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
-  //       method: 'GET',
-  //       headers: {
-  //         'x-Authorization': this.state.token,
-  //       },
-  //     })
-  //       .then((response) => response.json())
-  //       .then((responseJson) => {
-  //         console.log(responseJson);
-  //         this.setState({
-  //           userInfo: responseJson,
-  //         });
-  //       })
-  //       .catch((error) => {
-  //         console.log(error);
-  //       });
-  //   };
-
   openSettings = () => {
-    this.props.navigation.navigate('Settings');
+    this.props.navigation.navigate('Settings', {userInfo: this.state.userInfo});
   };
 
   selectComponent = (activePage) => () => this.setState({activePage});
@@ -99,6 +80,11 @@ class Profile extends Component {
         </Header>
 
         <Content style={styles.content} padder>
+          <View>
+            <Text>
+              {this.state.userInfo.first_name} {this.state.userInfo.last_name}
+            </Text>
+          </View>
           <View style={styles.segment_view}>
             <Segment style={styles.segment}>
               <Button
