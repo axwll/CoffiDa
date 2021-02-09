@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { translate } from '../locales';
+
 class Welcome extends Component {
   render() {
     const navigation = this.props.navigation;
@@ -12,21 +14,19 @@ class Welcome extends Component {
         <Text style={styles.title_dark}>
           Coffi<Text style={styles.title_primary}>Da</Text>
         </Text>
-        <Text style={styles.heading_dark}>Welcome</Text>
-        <Text style={styles.text_dark}>
-          You're only a couple of steps away from coffee!
-        </Text>
-        <Text style={styles.text_primary}>Already have an account?</Text>
+        <Text style={styles.heading_dark}>{translate('welcome_text')}</Text>
+        <Text style={styles.text_dark}>{translate('welcome_subtext')}</Text>
+        <Text style={styles.text_primary}>{translate('account_already')}</Text>
 
         <View style={styles.btn_view}>
           <TouchableOpacity
             style={styles.btn_primary}
             onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.btn_text}>Log in</Text>
+            <Text style={styles.btn_text}>{translate('login')}</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.text_primary}>New to CoffiDa? Sign up.</Text>
+        <Text style={styles.text_primary}>{translate('new_here')}</Text>
 
         <View style={styles.btn_view}>
           <TouchableOpacity
@@ -36,7 +36,7 @@ class Welcome extends Component {
               <FontAwesomeIcon icon={faEnvelope} />
             </View>
             <View style={styles.btn_text_view}>
-              <Text style={styles.btn_text_light}>Sign up</Text>
+              <Text style={styles.btn_text_light}>{translate('signup')}</Text>
             </View>
           </TouchableOpacity>
         </View>

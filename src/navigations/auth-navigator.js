@@ -1,24 +1,44 @@
-import { faCompass, faMugHot, faUser } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { Component } from 'react';
-import { StyleSheet } from 'react-native';
-import { createBottomTabNavigator } from 'react-navigation-tabs';
+import {faCompass, faMugHot, faUser} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import React, {Component} from 'react';
+import {createStackNavigator} from 'react-navigation-stack';
+import {createBottomTabNavigator} from 'react-navigation-tabs';
 
+import AddReviewScreen from '../components/add-review-component';
 import ExploreScreen from '../components/explore-component';
-import ProfileScreen from '../components/profile-component';
-import HomeScreen from '../components/settings-component';
+import HomeScreen from '../components/home-component';
+import ProfileScreen from '../components/profile/profile-component';
+import SettingsScreen from '../components/profile/settings-component';
+import SelectedShopScreen from '../components/selected-shop-component';
 
-const styles = StyleSheet.create({
-  icon: {
-    fontSize: 12,
+const ProfileStack = createStackNavigator(
+  {
+    Profile: ProfileScreen,
+    Settings: SettingsScreen,
   },
-});
+  {
+    initialRouteName: 'Profile',
+    headerMode: 'none',
+  },
+);
+
+const HomeStack = createStackNavigator(
+  {
+    Home: HomeScreen,
+    SelectedShop: SelectedShopScreen,
+    AddReview: AddReviewScreen,
+  },
+  {
+    initialRouteName: 'Home',
+    headerMode: 'none',
+  },
+);
 
 export default createBottomTabNavigator(
   {
-    Home: HomeScreen,
+    Home: HomeStack,
     Explore: ExploreScreen,
-    Profile: ProfileScreen,
+    Profile: ProfileStack,
   },
   {
     defaultNavigationOptions: ({navigation}) => ({
@@ -33,8 +53,7 @@ export default createBottomTabNavigator(
           iconName = faUser;
         }
 
-        // You can return any component that you like here!
-        return <FontAwesomeIcon icon={iconName} size={size} color={color} />;
+        return <FontAwesomeIcon icon={iconName} color={tintColor} size={20} />;
       },
     }),
     tabBarOptions: {

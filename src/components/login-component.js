@@ -1,12 +1,22 @@
-import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Body, Button, Container, Content, Form, Header, Input, Item, Left, Title } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
-import RNSecureKeyStore, { ACCESSIBLE } from 'react-native-secure-key-store';
+import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  Body,
+  Button,
+  Container,
+  Content,
+  Form,
+  Header,
+  Input,
+  Item,
+  Left,
+  Title,
+} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet, Text, TouchableOpacity} from 'react-native';
 
-const AuthContext = React.createContext();
+import {translate} from '../locales';
+import {setItem} from './common/async-storage-helper';
 
 class Login extends Component {
   constructor(props) {
@@ -15,8 +25,6 @@ class Login extends Component {
     this.state = {
       email: '',
       password: '',
-      allowLogin: false,
-      loading: true,
       data: null,
     };
   }
@@ -31,8 +39,15 @@ class Login extends Component {
     this.setState({password: password});
   };
 
-  logIn = () => {
-    console.log('Logging in');
+  logInEvent = async () => {
+    await this.logIn();
+    if (this.state.data) {
+      await this.getUserInfo();
+    }
+    this.props.navigation.navigate('App');
+  };
+
+  logIn = async () => {
     return fetch('http://10.0.2.2:3333/api/1.0.0/user/login', {
       method: 'POST',
       headers: {
@@ -46,42 +61,28 @@ class Login extends Component {
       .then((response) => response.json())
       .then((responseJson) => {
         this.setState({
-          loading: false,
           data: responseJson,
         });
-        // React.useContext(AuthContext);
-        this.st();
-        // this.storeToken(responseJson.token);
+        setItem('AUTH_TOKEN', responseJson.token);
       })
       .catch((error) => {
-        // response.status
-        console.log('err');
         console.log(error);
       });
   };
 
-  st = async () => {
-    await AsyncStorage.setItem('userToken', 'abc');
-    this.props.navigation.navigate('App');
-    // console.log('store');
-    // try {
-    //   await AsyncStorage.setItem('userToken', token);
-    // } catch (error) {
-    //   console.log('async store error');
-    // }
-  };
-
-  storeToken = (token) => {
-    RNSecureKeyStore.set('userToken', token, {
-      accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY,
-    }).then(
-      (res) => {
-        console.log('Successfully storeed token');
+  getUserInfo = async (userId) => {
+    return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + this.state.data.id, {
+      headers: {
+        'x-Authorization': this.state.data.token,
       },
-      (err) => {
-        console.log('Failed to store token');
-      },
-    );
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        setItem('USER_DATA', JSON.stringify(responseJson));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   render() {
@@ -101,7 +102,7 @@ class Login extends Component {
           </Left>
 
           <Body>
-            <Title>Log In</Title>
+            <Title>{translate('login')}</Title>
           </Body>
         </Header>
 
@@ -125,8 +126,8 @@ class Login extends Component {
 
             <TouchableOpacity
               style={styles.btn_primary}
-              onPress={() => this.st()}>
-              <Text style={styles.btn_text}>Log In</Text>
+              onPress={() => this.logInEvent()}>
+              <Text style={styles.btn_text}>{translate('login')}</Text>
             </TouchableOpacity>
           </Form>
         </Content>
