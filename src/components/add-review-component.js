@@ -1,15 +1,25 @@
-import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Content, Form, Header, Left, Textarea, Title } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  Body,
+  Button,
+  Container,
+  Content,
+  Form,
+  Header,
+  Left,
+  Textarea,
+  Title,
+} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
-import { translate } from '../locales';
-import { getItem } from './common/async-storage-helper';
-import { profanityFilter, toast } from './common/helper-functions';
+import {translate} from '../locales';
+import {getItem} from './common/async-storage-helper';
+import {profanityFilter, toast} from './common/helper-functions';
 
 class AddReview extends Component {
   constructor(props) {
@@ -28,6 +38,19 @@ class AddReview extends Component {
     this.setState({
       token: await getItem('AUTH_TOKEN'),
     });
+
+    const updateReview = this.props.navigation.getParam('update');
+
+    if (updateReview) {
+      const reviewData = this.props.navigation.getParam('reviewData');
+      this.setState({
+        overallRating: reviewData.overall_rating,
+        priceRating: reviewData.price_rating,
+        cleanRating: reviewData.clenliness_rating,
+        qualRating: reviewData.quality_rating,
+        reviewBody: reviewData.review_body,
+      });
+    }
 
     this.calculateOverall();
   }
@@ -95,8 +118,14 @@ class AddReview extends Component {
       });
   };
 
+  updateReview = () => {
+    console.log('update');
+  };
+
   render() {
     const shopData = this.props.navigation.getParam('shopData');
+    const updateReview = this.props.navigation.getParam('update');
+
     return (
       <Container style={styles.container}>
         <Header style={styles.header}>
@@ -194,15 +223,23 @@ class AddReview extends Component {
               rowSpan={5}
               bordered
               placeholder={translate('leave_review')}
+              value={this.state.reviewBody}
               onChangeText={(text) => this.setState({reviewBody: text})}
             />
           </Form>
-
-          <TouchableOpacity
-            style={styles.btn_primary}
-            onPress={() => this.leaveReview(shopData.location_id)}>
-            <Text style={styles.btn_text}>{translate('post_review')}</Text>
-          </TouchableOpacity>
+          {updateReview ? (
+            <TouchableOpacity
+              style={styles.btn_primary}
+              onPress={() => this.updateReview()}>
+              <Text style={styles.btn_text}>{translate('update_review')}</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.btn_primary}
+              onPress={() => this.leaveReview(shopData.location_id)}>
+              <Text style={styles.btn_text}>{translate('post_review')}</Text>
+            </TouchableOpacity>
+          )}
         </Content>
       </Container>
     );

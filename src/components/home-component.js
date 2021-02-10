@@ -81,10 +81,6 @@ class Home extends Component {
       });
   };
 
-  openExplore = () => {
-    this.props.navigation.navigate('Explore');
-  };
-
   render() {
     const data = this.state.shopData;
 
@@ -101,7 +97,7 @@ class Home extends Component {
                 onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
               />
             </Item>
-            <TouchableOpacity onPress={() => this.openExplore()}>
+            <TouchableOpacity onPress={() => this.props.navigation.navigate('Explore')}>
               <FontAwesomeIcon
                 icon={faMapMarkedAlt}
                 style={styles.explore_icon}
