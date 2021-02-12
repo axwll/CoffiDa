@@ -17,6 +17,7 @@ class SelectedShop extends Component {
     super(props);
 
     this.state = {
+      loading: true,
       favorite: false,
     };
 
@@ -30,6 +31,8 @@ class SelectedShop extends Component {
     });
 
     await this.checkIfAlreadyFavorited();
+
+    this.setState({loading: false});
   }
 
   checkIfAlreadyFavorited = () => {
@@ -43,32 +46,28 @@ class SelectedShop extends Component {
         }
       });
     }
-
-    // User has not previously favorited the location
-    this.setState({favorite: false});
-    return;
   };
 
   favButtonPressed = () => {
     const locationId = shopData.location_id;
-
     if (this.state.favorite) {
       this.unFavLocation(locationId);
       return;
     }
 
-    this.favLocation();
+    this.favLocation(locationId);
   };
 
   favLocation = (locationId) => {
     return fetch(
-      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/favorite`,
+      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/favourite`,
       {
         method: 'POST',
         headers: {'x-Authorization': this.state.token},
       },
     )
-      .then(() => {
+      .then((response) => {
+        console.log(response.status);
         this.setState({favorite: true});
         console.log('favorited');
       })
@@ -99,110 +98,119 @@ class SelectedShop extends Component {
   };
 
   addReview = () => {
+    // console.log(shopData);
     this.props.navigation.navigate('AddReview', {shopData: shopData});
   };
 
   render() {
-    return (
-      <Container style={styles.container}>
-        <Header style={styles.header}>
-          <Left style={styles.header_left}>
-            <Button transparent>
+    if (this.state.loading) {
+      return (
+        <View style={styles.loading_view}>
+          <Text style={styles.load_text}>Loading</Text>
+        </View>
+      );
+    } else {
+      return (
+        <Container style={styles.container}>
+          <Header style={styles.header}>
+            <Left style={styles.header_left}>
+              <Button transparent>
+                <FontAwesomeIcon
+                  icon={faChevronLeft}
+                  size={20}
+                  color={'#F06543'}
+                  onPress={() => this.props.navigation.goBack()}
+                />
+              </Button>
+            </Left>
+
+            <Body style={styles.header_body}>
+              <Title style={styles.title}>{shopData.location_name}</Title>
+            </Body>
+
+            <Right style={styles.header_right}>
               <FontAwesomeIcon
-                icon={faChevronLeft}
+                icon={this.state.favorite ? faStarSolid : faStarRegular}
                 size={20}
                 color={'#F06543'}
-                onPress={() => this.props.navigation.goBack()}
+                onPress={() => this.favButtonPressed(shopData.location_id)}
               />
-            </Button>
-          </Left>
+            </Right>
+          </Header>
 
-          <Body style={styles.header_body}>
-            <Title style={styles.title}>{shopData.location_name}</Title>
-          </Body>
-
-          <Right style={styles.header_right}>
-            <FontAwesomeIcon
-              icon={this.state.favorite ? faStarSolid : faStarRegular}
-              size={20}
-              color={'#F06543'}
-              onPress={() => this.favButtonPressed(shopData.location_id)}
-            />
-          </Right>
-        </Header>
-
-        <Content style={styles.content} padder>
-          <ScrollView>
-            <Card>
-              <CardItem cardBody button>
-                <Image
-                  source={require('../assets/lofi-coffee.png')}
-                  style={{height: 200, width: 100, flex: 1}}
-                />
-              </CardItem>
-              <CardItem style={styles.carditem_two}>
-                <View style={styles.icon}>
-                  <FontAwesomeIcon
-                    icon={faPlus}
-                    size={20}
-                    color={'#F06543'}
-                    onPress={() => this.addReview()}
+          <Content style={styles.content} padder>
+            <ScrollView>
+              <Card>
+                <CardItem cardBody button>
+                  <Image
+                    source={require('../assets/lofi-coffee.png')}
+                    style={{height: 200, width: 100, flex: 1}}
                   />
-                </View>
-                <View style={styles.num_reviews}>
-                  <Text>
-                    {shopData.location_reviews.length}{' '}
-                    {translate('reviews_for')}
-                    {shopData.location_name}, {shopData.location_town}
-                  </Text>
-                </View>
-                <View style={styles.icon}>
-                  <FontAwesomeIcon
-                    icon={faDirections}
-                    size={20}
-                    color={'#F06543'}
-                    onPress={() => this.getDirections()}
+                </CardItem>
+                <CardItem style={styles.carditem_two}>
+                  <View style={styles.icon}>
+                    <FontAwesomeIcon
+                      icon={faPlus}
+                      size={20}
+                      color={'#F06543'}
+                      onPress={() => this.addReview()}
+                    />
+                  </View>
+                  <View style={styles.num_reviews}>
+                    <Text>
+                      {shopData.location_reviews.length}{' '}
+                      {translate('reviews_for')}
+                      {shopData.location_name}, {shopData.location_town}
+                    </Text>
+                  </View>
+                  <View style={styles.icon}>
+                    <FontAwesomeIcon
+                      icon={faDirections}
+                      size={20}
+                      color={'#F06543'}
+                      onPress={() => this.getDirections()}
+                    />
+                  </View>
+                </CardItem>
+                <CardItem style={styles.reviews_card}>
+                  <ReviewIcon
+                    name="Price"
+                    rating={shopData.avg_price_rating}
+                    rotate={true}
                   />
-                </View>
-              </CardItem>
-              <CardItem style={styles.reviews_card}>
-                <ReviewIcon
-                  name="Price"
-                  rating={shopData.avg_price_rating}
-                  rotate={true}
-                />
-                <ReviewIcon
-                  name="Cleanliness"
-                  rating={shopData.avg_clenliness_rating}
-                  rotate={true}
-                />
-                <ReviewIcon
-                  name="Quality"
-                  rating={shopData.avg_quality_rating}
-                  rotate={true}
-                />
-              </CardItem>
-            </Card>
+                  <ReviewIcon
+                    name="Cleanliness"
+                    rating={shopData.avg_clenliness_rating}
+                    rotate={true}
+                  />
+                  <ReviewIcon
+                    name="Quality"
+                    rating={shopData.avg_quality_rating}
+                    rotate={true}
+                  />
+                </CardItem>
+              </Card>
 
-            <View style={styles.sub_heading_view}>
-              <Title style={styles.sub_heading_text}>
-                {translate('raiting_review')}
-              </Title>
-            </View>
+              <View style={styles.sub_heading_view}>
+                <Title style={styles.sub_heading_text}>
+                  {translate('raiting_review')}
+                </Title>
+              </View>
 
-            {shopData.location_reviews.map((review) => {
-              return (
-                <ReviewCard
-                  key={review.review_id}
-                  shopReview={review}
-                  locationId={shopData.location_id}
-                />
-              );
-            })}
-          </ScrollView>
-        </Content>
-      </Container>
-    );
+              {shopData.location_reviews.map((review) => {
+                return (
+                  <ReviewCard
+                    key={review.review_id}
+                    shopReview={review}
+                    locationId={shopData.location_id}
+                  />
+                );
+              })}
+            </ScrollView>
+          </Content>
+        </Container>
+      );
+    }
   }
 }
 

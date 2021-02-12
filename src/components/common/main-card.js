@@ -75,9 +75,6 @@ const styles = StyleSheet.create({
     height: 50,
     backgroundColor: 'grey',
   },
-  btn: {
-    backgroundColor: 'green',
-  },
   right: {
     flex: 1,
     flexDirection: 'row',

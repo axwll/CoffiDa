@@ -1,22 +1,11 @@
-import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Body,
-  Button,
-  Container,
-  Content,
-  Form,
-  Header,
-  Input,
-  Item,
-  Left,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, Text, TouchableOpacity} from 'react-native';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Container, Content, Form, Header, Input, Item, Left, Title } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
-import {translate} from '../locales';
-import {setItem} from './common/async-storage-helper';
+import { translate } from '../locales';
+import { setItem } from './common/async-storage-helper';
 
 class Login extends Component {
   constructor(props) {
@@ -121,6 +110,7 @@ class Login extends Component {
                 style={styles.input}
                 placeholder="Password"
                 onChangeText={this.handlePasswordlInput}
+                secureTextEntry={true}
               />
             </Item>
 

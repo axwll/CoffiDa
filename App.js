@@ -1,8 +1,8 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import * as RNLocalize from 'react-native-localize';
-import {createAppContainer, createSwitchNavigator} from 'react-navigation';
+import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 
-import {setI18nConfig} from './src/locales';
+import { setI18nConfig } from './src/locales';
 import AppNav from './src/navigations/app-navigator';
 import AuthNav from './src/navigations/auth-navigator';
 import SplashScreen from './src/navigations/splash-screen';
@@ -11,8 +11,8 @@ const AppContainer = createAppContainer(
   createSwitchNavigator(
     {
       Loading: SplashScreen,
-      App: AuthNav,
-      Auth: AppNav,
+      App: AppNav,
+      Auth: AuthNav,
     },
     {
       initialRouteName: 'Loading',

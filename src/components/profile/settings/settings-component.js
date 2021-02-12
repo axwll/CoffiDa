@@ -1,22 +1,11 @@
-import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Body,
-  Button,
-  Card,
-  CardItem,
-  Container,
-  Content,
-  Header,
-  Left,
-  Text,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, TouchableOpacity} from 'react-native';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Card, CardItem, Container, Content, Header, Left, Text, Title } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 
-import {translate} from '../../../locales';
-import {clear, getItem, setItem} from '../../common/async-storage-helper';
+import { translate } from '../../../locales';
+import { clear, getItem, setItem } from '../../common/async-storage-helper';
 
 class Settings extends Component {
   constructor(props) {

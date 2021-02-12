@@ -1,12 +1,11 @@
-import {faHeart as faHeartSolid} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {Button, Card, CardItem, Left, Right} from 'native-base';
-import React, {Component} from 'react';
-import {ScrollView, StyleSheet, Text} from 'react-native';
+import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Button, Card, CardItem, Left } from 'native-base';
+import React, { Component } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import {translate} from '../../locales';
-import {getItem, setItem} from '../common/async-storage-helper';
-import ReviewIcon from '../common/review-icon';
+import { getItem, setItem } from '../common/async-storage-helper';
+import ProfileReviewCard from '../common/profile-review-card';
 
 class Likes extends Component {
   constructor(props) {
@@ -70,51 +69,27 @@ class Likes extends Component {
 
   render() {
     if (this.state.loading) {
-      return <Text>{this.state.loadingMessage}</Text>;
+      return (
+        <View style={styles.loading_view}>
+          <Text style={styles.load_text}>{this.state.loadingMessage}</Text>
+        </View>
+      );
     } else {
       return (
         <ScrollView>
           {this.state.userInfo.liked_reviews.map((item) => {
+            const review = item.review;
             return (
               <Card key={item.review.review_id}>
-                <CardItem>
-                  <Left style={styles.card_left}>
-                    <Text style={styles.loc_name}>
-                      {item.location.location_name}
-                    </Text>
-                    <Text style={styles.light_text}>
-                      {item.location.location_town}
-                    </Text>
-                  </Left>
-
-                  <Right>
-                    <ReviewIcon
-                      rating={item.review.overall_rating}
-                      size={15}
-                      spacing={5}
-                    />
-                  </Right>
-                </CardItem>
-                <CardItem style={styles.card_body}>
-                  <Left style={styles.body_left}>
-                    <Text>{item.review.review_body}</Text>
-                  </Left>
-
-                  <Right style={styles.body_right}>
-                    <Text style={styles.light_text}>
-                      {translate('price')}: {item.review.price_rating}/5
-                    </Text>
-                    <Text style={styles.light_text}>
-                      {translate('cleanliness')}:{' '}
-                      {item.review.review_clenlinessrating}
-                      /5
-                    </Text>
-                    <Text style={styles.light_text}>
-                      {translate('quality')}: {item.review.quality_rating}
-                      /5
-                    </Text>
-                  </Right>
-                </CardItem>
+                <ProfileReviewCard
+                  title={item.location.location_name}
+                  subHeading={item.location.location_town}
+                  body={review.review_body}
+                  overall_rate={review.overall_rating}
+                  price_rate={review.price_rating}
+                  clean_rate={review.clenliness_rating}
+                  qual_rate={review.quality_rating}
+                />
                 <CardItem style={styles.last_item}>
                   <Left>
                     <Button transparent style={styles.light_text}>
@@ -143,31 +118,21 @@ class Likes extends Component {
 }
 
 const styles = StyleSheet.create({
-  card_left: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-  },
-  loc_name: {
-    color: 'tomato',
-    fontWeight: 'bold',
-  },
   light_text: {
     color: '#313638',
-  },
-  card_body: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  body_left: {
-    flex: 4,
-  },
-  body_right: {
-    flex: 2,
   },
   last_item: {
     paddingTop: 0,
     paddingBottom: 0,
+  },
+  loading_view: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  load_text: {
+    fontSize: 20,
+    color: '#313638',
   },
 });
 

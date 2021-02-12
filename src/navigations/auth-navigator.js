@@ -1,76 +1,17 @@
-import {faCompass, faMugHot, faUser} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import React, {Component} from 'react';
-import {createStackNavigator} from 'react-navigation-stack';
-import {createBottomTabNavigator} from 'react-navigation-tabs';
+import { createStackNavigator } from 'react-navigation-stack';
 
-import AddReviewScreen from '../components/add-review-component';
-import ExploreScreen from '../components/explore-component';
-import HomeScreen from '../components/home-component';
-import ProfileScreen from '../components/profile/profile-component';
-import EditProfileScreen from '../components/profile/settings/edit-profile';
-import SettingsScreen from '../components/profile/settings/settings-component';
-import SelectedShopScreen from '../components/selected-shop-component';
+import LoginScreen from '../components/login-component';
+import SignupScreen from '../components/signup-component';
+import WelcomeScreen from '../components/welcome-component';
 
-const SettingsStack = createStackNavigator(
+export default createStackNavigator(
   {
-    Settings: SettingsScreen,
-    EditAccount: EditProfileScreen,
+    Welcome: WelcomeScreen,
+    Login: LoginScreen,
+    Signup: SignupScreen,
   },
   {
-    initialRouteName: 'Settings',
+    initialRouteName: 'Welcome',
     headerMode: 'none',
-  },
-);
-
-const ProfileStack = createStackNavigator(
-  {
-    Profile: ProfileScreen,
-    Settings: SettingsStack,
-  },
-  {
-    initialRouteName: 'Profile',
-    headerMode: 'none',
-  },
-);
-
-const HomeStack = createStackNavigator(
-  {
-    Home: HomeScreen,
-    SelectedShop: SelectedShopScreen,
-    AddReview: AddReviewScreen,
-  },
-  {
-    initialRouteName: 'Home',
-    headerMode: 'none',
-  },
-);
-
-export default createBottomTabNavigator(
-  {
-    Home: HomeStack,
-    Explore: ExploreScreen,
-    Profile: ProfileStack,
-  },
-  {
-    defaultNavigationOptions: ({navigation}) => ({
-      tabBarIcon: ({focused, horizontal, tintColor}) => {
-        const {routeName} = navigation.state;
-        let iconName;
-        if (routeName === 'Home') {
-          iconName = faMugHot;
-        } else if (routeName === 'Explore') {
-          iconName = faCompass;
-        } else if (routeName === 'Profile') {
-          iconName = faUser;
-        }
-
-        return <FontAwesomeIcon icon={iconName} color={tintColor} size={20} />;
-      },
-    }),
-    tabBarOptions: {
-      activeTintColor: 'tomato',
-      inactiveTintColor: 'grey',
-    },
   },
 );

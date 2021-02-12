@@ -1,14 +1,16 @@
 import { faMapMarkedAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Container, Content, Header, Icon, Input, Item } from 'native-base';
-import React, { Component } from 'react';
+import React from 'react';
 import { Keyboard, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { translate } from '../locales';
+import AbstractComponent from './abstract-component';
 import { getItem } from './common/async-storage-helper';
 import MainCard from './common/main-card';
 
-class Home extends Component {
+// import React, { Component } from 'react';
+class Home extends AbstractComponent {
   constructor(props) {
     super(props);
 
@@ -19,10 +21,14 @@ class Home extends Component {
   }
 
   async componentDidMount() {
-    this.setState({
-      token: await getItem('AUTH_TOKEN'),
-    });
+    const token = await getItem('AUTH_TOKEN');
 
+    if (!token) {
+      this.props.navigation.navigate('Auth');
+      return;
+    }
+
+    this.setState({token: token});
     this.listShops();
   }
 
@@ -84,49 +90,50 @@ class Home extends Component {
   render() {
     const data = this.state.shopData;
 
-    if (this.state.loading) {
-      return <Text>Waiting for data</Text>;
-    } else {
-      return (
-        <Container style={styles.container}>
-          <Header searchBar rounded style={styles.header}>
-            <Item rounded style={styles.srch}>
-              <Icon name="ios-search" />
-              <Input
-                placeholder="Search"
-                onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
-              />
-            </Item>
-            <TouchableOpacity onPress={() => this.props.navigation.navigate('Explore')}>
-              <FontAwesomeIcon
-                icon={faMapMarkedAlt}
-                style={styles.explore_icon}
-                size={20}
-              />
-            </TouchableOpacity>
-          </Header>
-          {this.state.coffeeShops.length > 0 ? (
-            <Content>
-              <ScrollView>
-                {this.state.coffeeShops.map((shop) => {
-                  return (
-                    <MainCard
-                      key={shop.location_id}
-                      shopData={shop}
-                      navigation={this.props.navigation}
-                    />
-                  );
-                })}
-              </ScrollView>
-            </Content>
-          ) : (
-            <View>
-              <Text>{translate('no_results')}</Text>
-            </View>
-          )}
-        </Container>
-      );
-    }
+    return (
+      <Container style={styles.container}>
+        <Header searchBar rounded style={styles.header}>
+          <Item rounded style={styles.srch}>
+            <Icon name="ios-search" />
+            <Input
+              placeholder="Search"
+              onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
+            />
+          </Item>
+          <TouchableOpacity
+            onPress={() => this.props.navigation.navigate('Explore')}>
+            <FontAwesomeIcon
+              icon={faMapMarkedAlt}
+              style={styles.explore_icon}
+              size={20}
+            />
+          </TouchableOpacity>
+        </Header>
+        {this.state.coffeeShops.length > 0 ? (
+          <Content>
+            <ScrollView>
+              {this.state.coffeeShops.map((shop) => {
+                return (
+                  <MainCard
+                    key={shop.location_id}
+                    shopData={shop}
+                    navigation={this.props.navigation}
+                  />
+                );
+              })}
+            </ScrollView>
+          </Content>
+        ) : (
+          <View style={styles.loading_view}>
+            <Text style={styles.load_text}>
+              {this.state.loading
+                ? translate('loading')
+                : translate('no_results')}
+            </Text>
+          </View>
+        )}
+      </Container>
+    );
   }
 }
 
@@ -156,6 +163,15 @@ const styles = StyleSheet.create({
   explore_icon: {
     color: '#F06543',
     margin: 10,
+  },
+  loading_view: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  load_text: {
+    fontSize: 20,
+    color: '#313638',
   },
 });
 

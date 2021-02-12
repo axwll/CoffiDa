@@ -1,21 +1,11 @@
-import {faCog} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Body,
-  Button,
-  Container,
-  Content,
-  Header,
-  Left,
-  Right,
-  Segment,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {ScrollView, StyleSheet, Text, View} from 'react-native';
+import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Container, Content, Header, Left, Right, Segment, Title } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-import {translate} from '../../locales';
-import {getItem, setItem} from '../common/async-storage-helper';
+import { translate } from '../../locales';
+import { getItem, setItem } from '../common/async-storage-helper';
 import FavoritesTab from './favorites';
 import LikesTab from './likes';
 import ReviewsTab from './reviews';
@@ -138,15 +128,13 @@ class Profile extends Component {
               </Button>
             </Segment>
           </View>
-          <ScrollView>
-            <View style={styles.segment_content}>
-              {this.state.userInfo.length === 0 ? (
-                <Text>Loading</Text>
-              ) : (
-                <View>{this._renderComponent()}</View>
-              )}
-            </View>
-          </ScrollView>
+          <View style={styles.segment_content}>
+            {this.state.userInfo.length === 0 ? (
+              <Text>Loading</Text>
+            ) : (
+              <View>{this._renderComponent()}</View>
+            )}
+          </View>
         </Content>
       </Container>
     );
@@ -192,8 +180,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8E9EB',
   },
   segment_view: {
-    // marginTop: 200,
-    // backgroundColor: '#FFFFFF',
     backgroundColor: '#E8E9EB',
   },
   segment_btn: {
@@ -211,15 +197,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8E9EB',
     borderColor: '#E8E9EB',
   },
+
   segment_content: {
-    // backgroundColor: '#FFFFFF',
-    // paddingBottom: 200,
-    paddingTop: 0,
-    marginTop: 0,
-  },
-  card: {
-    paddingTop: 0,
-    marginTop: 0,
+    flex: 1,
   },
 });
 
