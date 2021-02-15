@@ -1,24 +1,14 @@
-import {faCog, faPencilAlt} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Body,
-  Button,
-  Container,
-  Content,
-  Header,
-  Left,
-  Right,
-  Segment,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Container, Content, Header, Left, Right, Segment, Title } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-import {translate} from '../../locales';
-import {getItem} from '../common/async-storage-helper';
-import FavoriteScreen from './favorites';
-import LikeScreen from './likes';
-import ReviewScreen from './reviews';
+import { translate } from '../../locales';
+import { getItem, setItem } from '../common/async-storage-helper';
+import FavoritesTab from './favorites';
+import LikesTab from './likes';
+import ReviewsTab from './reviews';
 
 class Profile extends Component {
   constructor(props) {
@@ -27,6 +17,7 @@ class Profile extends Component {
     this.state = {
       activePage: 1,
       userInfo: [],
+      tab: 'review',
     };
   }
 
@@ -35,42 +26,43 @@ class Profile extends Component {
       token: await getItem('AUTH_TOKEN'),
       userInfo: JSON.parse(await getItem('USER_DATA')),
     });
+
+    this.getUserInfo();
   }
 
-  //   getUserInfo = async (id) => {
-  //     return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + id, {
-  //       method: 'GET',
-  //       headers: {
-  //         'x-Authorization': this.state.token,
-  //       },
-  //     })
-  //       .then((response) => response.json())
-  //       .then((responseJson) => {
-  //         console.log(responseJson);
-  //         this.setState({
-  //           userInfo: responseJson,
-  //         });
-  //       })
-  //       .catch((error) => {
-  //         console.log(error);
-  //       });
-  //   };
+  getUserInfo = () => {
+    const userId = this.state.userInfo.user_id;
+
+    return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
+      headers: {
+        'x-Authorization': this.state.token,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        setItem('USER_DATA', JSON.stringify(responseJson));
+        this.setState({userInfo: responseJson});
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   openSettings = () => {
-    this.props.navigation.navigate('Settings');
+    this.props.navigation.navigate('Settings', {userInfo: this.state.userInfo});
   };
 
   selectComponent = (activePage) => () => this.setState({activePage});
 
   _renderComponent = () => {
     if (this.state.activePage === 1) {
-      return <ReviewScreen reviews={this.state.userInfo.reviews} />;
+      return <ReviewsTab reviews={this.state.userInfo.reviews} />;
     } else if (this.state.activePage === 2) {
       return (
-        <FavoriteScreen favorites={this.state.userInfo.favourite_locations} />
+        <FavoritesTab favorites={this.state.userInfo.favourite_locations} />
       );
     } else {
-      return <LikeScreen likes={this.state.userInfo.liked_reviews} />;
+      return <LikesTab likes={this.state.userInfo.liked_reviews} />;
     }
   };
 
@@ -80,7 +72,7 @@ class Profile extends Component {
         <Header style={styles.header}>
           <Left style={styles.header_left}>
             <Button transparent>
-              <FontAwesomeIcon icon={faPencilAlt} size={20} color={'#F06543'} />
+              {/* <FontAwesomeIcon icon={faPencilAlt} size={20} color={'#F06543'} /> */}
             </Button>
           </Left>
 
@@ -98,7 +90,10 @@ class Profile extends Component {
           </Right>
         </Header>
 
-        <Content style={styles.content} padder>
+        <Content style={styles.content}>
+          <View>
+            <Text>Max Johnson</Text>
+          </View>
           <View style={styles.segment_view}>
             <Segment style={styles.segment}>
               <Button
@@ -147,6 +142,9 @@ class Profile extends Component {
 }
 
 const styles = StyleSheet.create({
+  test: {
+    backgroundColor: 'tomato',
+  },
   container: {
     flex: 1,
     flexDirection: 'column',
@@ -177,29 +175,31 @@ const styles = StyleSheet.create({
   segment: {
     flex: 1,
     flexDirection: 'row',
+    marginBottom: 0,
+    paddingBottom: 0,
+    backgroundColor: '#E8E9EB',
   },
   segment_view: {
-    marginTop: 200,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#E8E9EB',
   },
   segment_btn: {
     flex: 1,
     justifyContent: 'center',
-    // border: 'none',
-
-    borderBottomColor: '#E8E9EB',
+    borderBottomColor: '#FFFFFF',
+    borderBottomWidth: 1.5,
+    borderColor: '#E8E9EB',
   },
   active_segment: {
     flex: 1,
     justifyContent: 'center',
-    // backgroundColor: 'tomato',
     borderBottomWidth: 3,
-    // borderColor: '#E8E9EB',
     borderBottomColor: 'tomato',
+    backgroundColor: '#E8E9EB',
+    borderColor: '#E8E9EB',
   },
+
   segment_content: {
-    backgroundColor: '#FFFFFF',
-    paddingBottom: 200,
+    flex: 1,
   },
 });
 

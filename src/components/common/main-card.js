@@ -1,8 +1,8 @@
-import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Card, CardItem, Left, Right } from 'native-base';
-import React, { Component } from 'react';
-import { Image, StyleSheet, Text } from 'react-native';
+import {faMapMarkerAlt} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {Body, Card, CardItem, Left, Right} from 'native-base';
+import React, {Component} from 'react';
+import {Image, StyleSheet, Text} from 'react-native';
 
 import ReviewIcon from '../common/review-icon';
 
@@ -13,7 +13,7 @@ class MainCard extends Component {
 
   clicked = () => {
     const {navigate} = this.props.navigation;
-    navigate('SelectedShop', {shopData: this.props.shopData});
+    navigate('SelectedShop', {locationId: this.props.shopData.location_id});
   };
 
   render() {
@@ -74,9 +74,6 @@ const styles = StyleSheet.create({
   subHeading: {
     height: 50,
     backgroundColor: 'grey',
-  },
-  btn: {
-    backgroundColor: 'green',
   },
   right: {
     flex: 1,

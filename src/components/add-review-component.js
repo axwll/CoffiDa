@@ -29,6 +29,20 @@ class AddReview extends Component {
       token: await getItem('AUTH_TOKEN'),
     });
 
+    const updateReview = this.props.navigation.getParam('update');
+
+    if (updateReview) {
+      const reviewData = this.props.navigation.getParam('reviewData');
+      this.setState({
+        reviewId: reviewData.review_id,
+        overallRating: reviewData.overall_rating,
+        priceRating: reviewData.price_rating,
+        cleanRating: reviewData.clenliness_rating,
+        qualRating: reviewData.quality_rating,
+        reviewBody: reviewData.review_body,
+      });
+    }
+
     this.calculateOverall();
   }
 
@@ -61,18 +75,32 @@ class AddReview extends Component {
     return profanityFilter(text);
   };
 
-  leaveReview = (locationId) => {
-    const validReview = this.validateReview(this.state.reviewBody);
-    if (!validReview) {
-      // Dont store an invalid review
-      // set a bool here to show some error text
+  createReview = (locationId) => {
+    if (!this.validateReview(this.state.reviewBody, locationId)) {
       return;
     }
 
+    this.modifyReview('POST', 'Review created!', locationId);
+  };
+
+  updateReview = (locationId) => {
+    if (!this.validateReview(this.state.reviewBody)) {
+      return;
+    }
+
+    this.modifyReview(
+      'PATCH',
+      'Review updated!',
+      locationId,
+      this.state.reviewId,
+    );
+  };
+
+  modifyReview = (method, successText, locationId, reviewId = '') => {
     return fetch(
-      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/review`,
+      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/review/${reviewId}`,
       {
-        method: 'POST',
+        method: method,
         headers: {
           'Content-Type': 'application/json',
           'x-Authorization': this.state.token,
@@ -87,7 +115,7 @@ class AddReview extends Component {
       },
     )
       .then((response) => {
-        toast('Review created!');
+        toast(successText);
         this.props.navigation.goBack();
       })
       .catch((error) => {
@@ -97,6 +125,9 @@ class AddReview extends Component {
 
   render() {
     const shopData = this.props.navigation.getParam('shopData');
+    const updateReview = this.props.navigation.getParam('update');
+    console.log(shopData);
+
     return (
       <Container style={styles.container}>
         <Header style={styles.header}>
@@ -194,15 +225,23 @@ class AddReview extends Component {
               rowSpan={5}
               bordered
               placeholder={translate('leave_review')}
+              value={this.state.reviewBody}
               onChangeText={(text) => this.setState({reviewBody: text})}
             />
           </Form>
-
-          <TouchableOpacity
-            style={styles.btn_primary}
-            onPress={() => this.leaveReview(shopData.location_id)}>
-            <Text style={styles.btn_text}>{translate('post_review')}</Text>
-          </TouchableOpacity>
+          {updateReview ? (
+            <TouchableOpacity
+              style={styles.btn_primary}
+              onPress={() => this.updateReview(shopData.location_id)}>
+              <Text style={styles.btn_text}>{translate('update_review')}</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.btn_primary}
+              onPress={() => this.createReview(shopData.location_id)}>
+              <Text style={styles.btn_text}>{translate('post_review')}</Text>
+            </TouchableOpacity>
+          )}
         </Content>
       </Container>
     );

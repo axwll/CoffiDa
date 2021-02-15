@@ -18,3 +18,7 @@ export const setItem = async (key, value) => {
     return null;
   }
 };
+
+export const clear = async () => {
+  return await AsyncStorage.clear();
+};

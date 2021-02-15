@@ -1,15 +1,15 @@
-import React, {Component} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import React, { Component } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-import {getItem} from '../components/common/async-storage-helper';
+import { getItem } from '../components/common/async-storage-helper';
 
 class SplashScreen extends Component {
   constructor() {
     super();
-    this._bootstrapAsync();
+    this.checkToken();
   }
 
-  _bootstrapAsync = async () => {
+  checkToken = async () => {
     const authToken = await getItem('AUTH_TOKEN');
 
     this.props.navigation.navigate(authToken ? 'App' : 'Auth');
@@ -18,7 +18,7 @@ class SplashScreen extends Component {
   render() {
     return (
       <View style={styles.view}>
-        <Text style={styles.text}>Splash Screen</Text>
+        <Text style={styles.text}>CoffiDa</Text>
       </View>
     );
   }
@@ -30,10 +30,12 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'tomato',
   },
   text: {
-    fontSize: 30,
-    color: 'tomato',
+    fontSize: 50,
+    fontFamily: 'Pacifico-Regular',
+    color: 'white',
   },
 });
 
