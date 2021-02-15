@@ -1,9 +1,13 @@
-import React, { Component } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { withNavigation } from 'react-navigation';
+import React, {Component} from 'react';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
+import {withNavigation} from 'react-navigation';
 
 import MainCard from '../common/main-card';
 
+/**
+ * You can use the find endpoint for this page!
+ * Use instead of user data in async storage
+ */
 class FavoritesTab extends Component {
   constructor(props) {
     super(props);
