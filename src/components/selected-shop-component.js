@@ -10,7 +10,7 @@ import { getItem } from './common/async-storage-helper';
 import ReviewCard from './common/review-card';
 import ReviewIcon from './common/review-icon';
 
-let shopData = null;
+let locationId = null;
 
 class SelectedShop extends Component {
   constructor(props) {
@@ -19,9 +19,10 @@ class SelectedShop extends Component {
     this.state = {
       loading: true,
       favorite: false,
+      shopData: null,
     };
 
-    shopData = this.props.navigation.getParam('shopData');
+    locationId = this.props.navigation.getParam('locationId');
   }
 
   async componentDidMount() {
@@ -30,16 +31,32 @@ class SelectedShop extends Component {
       currentUser: JSON.parse(await getItem('USER_DATA')),
     });
 
+    await this.getLocation();
+
     await this.checkIfAlreadyFavorited();
 
     this.setState({loading: false});
   }
 
+  getLocation = () => {
+    return fetch(`http://10.0.2.2:3333/api/1.0.0/location/${locationId}`, {
+      method: 'GET',
+      headers: {'x-Authorization': this.state.token},
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({shopData: responseJson});
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   checkIfAlreadyFavorited = () => {
     const fav_locations = this.state.currentUser.favourite_locations;
     if (fav_locations.length !== 0) {
       fav_locations.forEach((favs) => {
-        if (favs.location_id === shopData.location_id) {
+        if (favs.location_id === locationId) {
           // User has already favorited the location
           this.setState({favorite: true});
           return;
@@ -49,7 +66,6 @@ class SelectedShop extends Component {
   };
 
   favButtonPressed = () => {
-    const locationId = shopData.location_id;
     if (this.state.favorite) {
       this.unFavLocation(locationId);
       return;
@@ -98,8 +114,9 @@ class SelectedShop extends Component {
   };
 
   addReview = () => {
-    // console.log(shopData);
-    this.props.navigation.navigate('AddReview', {shopData: shopData});
+    this.props.navigation.navigate('AddReview', {
+      shopData: this.state.shopData,
+    });
   };
 
   render() {
@@ -111,7 +128,7 @@ class SelectedShop extends Component {
       );
     } else {
       return (
-        <Container style={styles.container}>
+        <Container style={styles.container} key={locationId}>
           <Header style={styles.header}>
             <Left style={styles.header_left}>
               <Button transparent>
@@ -125,7 +142,9 @@ class SelectedShop extends Component {
             </Left>
 
             <Body style={styles.header_body}>
-              <Title style={styles.title}>{shopData.location_name}</Title>
+              <Title style={styles.title}>
+                {this.state.shopData.location_name}
+              </Title>
             </Body>
 
             <Right style={styles.header_right}>
@@ -133,7 +152,7 @@ class SelectedShop extends Component {
                 icon={this.state.favorite ? faStarSolid : faStarRegular}
                 size={20}
                 color={'#F06543'}
-                onPress={() => this.favButtonPressed(shopData.location_id)}
+                onPress={() => this.favButtonPressed()}
               />
             </Right>
           </Header>
@@ -158,9 +177,10 @@ class SelectedShop extends Component {
                   </View>
                   <View style={styles.num_reviews}>
                     <Text>
-                      {shopData.location_reviews.length}{' '}
-                      {translate('reviews_for')}
-                      {shopData.location_name}, {shopData.location_town}
+                      {this.state.shopData.location_reviews.length}{' '}
+                      {translate('reviews_for')}{' '}
+                      {this.state.shopData.location_name},{' '}
+                      {this.state.shopData.location_town}
                     </Text>
                   </View>
                   <View style={styles.icon}>
@@ -175,17 +195,17 @@ class SelectedShop extends Component {
                 <CardItem style={styles.reviews_card}>
                   <ReviewIcon
                     name="Price"
-                    rating={shopData.avg_price_rating}
+                    rating={this.state.shopData.avg_price_rating}
                     rotate={true}
                   />
                   <ReviewIcon
                     name="Cleanliness"
-                    rating={shopData.avg_clenliness_rating}
+                    rating={this.state.shopData.avg_clenliness_rating}
                     rotate={true}
                   />
                   <ReviewIcon
                     name="Quality"
-                    rating={shopData.avg_quality_rating}
+                    rating={this.state.shopData.avg_quality_rating}
                     rotate={true}
                   />
                 </CardItem>
@@ -197,12 +217,12 @@ class SelectedShop extends Component {
                 </Title>
               </View>
 
-              {shopData.location_reviews.map((review) => {
+              {this.state.shopData.location_reviews.map((review) => {
                 return (
                   <ReviewCard
                     key={review.review_id}
                     shopReview={review}
-                    locationId={shopData.location_id}
+                    locationId={this.state.shopData.location_id}
                   />
                 );
               })}

@@ -1,12 +1,12 @@
-import {faHeart as faHeartRegular} from '@fortawesome/free-regular-svg-icons';
-import {faHeart as faHeartSolid} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {Button, Card, CardItem, Left, Right} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, Text} from 'react-native';
+import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
+import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Button, Card, CardItem, Left, Right } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text } from 'react-native';
 
-import {translate} from '../../locales';
-import {getItem} from '../common/async-storage-helper';
+import { translate } from '../../locales';
+import { getItem } from '../common/async-storage-helper';
 import ReviewIcon from '../common/review-icon';
 
 class ReviewCard extends Component {
@@ -26,11 +26,12 @@ class ReviewCard extends Component {
       currentUser: JSON.parse(await getItem('USER_DATA')),
     });
 
-    await this.getReviewUserFromId(this.props.shopReview.review_user_id);
+    // await this.getReviewUserFromId(this.props.shopReview.review_user_id);
     await this.checkIfAlreadyLiked();
     this.setState({loading: false});
   }
 
+  // Not being used as i dont have review_user_id in the /location/{id} endpoint :((
   getReviewUserFromId = (userId) => {
     return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + userId, {
       headers: {
@@ -115,22 +116,14 @@ class ReviewCard extends Component {
 
       return (
         <Card>
-          <CardItem style={styles.first_item}>
+        {/* <CardItem style={styles.first_item}>
             <Left>
               <Text style={styles.user}>
                 {translate('user')}: {this.state.reviewUser.first_name}{' '}
                 {this.state.reviewUser.last_name}
               </Text>
             </Left>
-
-            <Right>
-              <ReviewIcon
-                rating={review.review_overallrating}
-                size={15}
-                spacing={5}
-              />
-            </Right>
-          </CardItem>
+          </CardItem> */}
           <CardItem>
             <Left>
               <Text>{review.review_body}</Text>
@@ -138,13 +131,13 @@ class ReviewCard extends Component {
 
             <Right>
               <Text style={styles.light_text}>
-                {translate('price')}: {review.review_pricerating}/5
+                {translate('price')}: {review.price_rating}/5
               </Text>
               <Text style={styles.light_text}>
-                {translate('cleanliness')}: {review.review_clenlinessrating}/5
+                {translate('cleanliness')}: {review.clenliness_rating}/5
               </Text>
               <Text style={styles.light_text}>
-                {translate('quality')}: {review.review_qualityrating}/5
+                {translate('quality')}: {review.quality_rating}/5
               </Text>
             </Right>
           </CardItem>
@@ -162,6 +155,13 @@ class ReviewCard extends Component {
               </Button>
               <Text style={styles.like_count}>{review.likes}</Text>
             </Left>
+            <Right>
+              <ReviewIcon
+                rating={review.overall_rating}
+                size={15}
+                spacing={5}
+              />
+            </Right>
           </CardItem>
         </Card>
       );

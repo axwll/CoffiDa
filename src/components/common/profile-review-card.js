@@ -1,8 +1,8 @@
-import { CardItem, Left, Right } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {CardItem, Left, Right} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet, Text, View} from 'react-native';
 
-import { translate } from '../../locales';
+import {translate} from '../../locales';
 import ReviewIcon from './review-icon';
 
 class ProfileReviewCard extends Component {
