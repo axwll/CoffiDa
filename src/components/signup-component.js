@@ -1,22 +1,11 @@
-import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Button,
-  CheckBox,
-  Container,
-  Content,
-  Form,
-  Header,
-  Input,
-  Item,
-  Left,
-  Text,
-} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, TouchableOpacity} from 'react-native';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Button, CheckBox, Container, Content, Form, Header, Input, Item, Left, Text } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 
-import {translate} from '../locales';
-import {setItem} from './common/async-storage-helper';
+import { translate } from '../locales';
+import { setItem } from './common/async-storage-helper';
 
 class Signup extends Component {
   constructor(props) {
@@ -101,6 +90,7 @@ class Signup extends Component {
           data: responseJson,
         });
         setItem('AUTH_TOKEN', responseJson.token);
+        setItem('USER_ID', responseJson.id.toString());
       })
       .catch((error) => {
         console.log(error.status);

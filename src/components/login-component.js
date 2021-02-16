@@ -37,26 +37,32 @@ class Login extends Component {
   };
 
   logIn = async () => {
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: this.state.email,
-        password: this.state.password,
-      }),
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({
-          data: responseJson,
-        });
-        setItem('AUTH_TOKEN', responseJson.token);
+    return (
+      fetch('http://10.0.2.2:3333/api/1.0.0/user/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: this.state.email,
+          password: this.state.password,
+        }),
       })
-      .catch((error) => {
-        console.log(error);
-      });
+        .then((response) => {
+          console.log(response.status);
+          return response.json();
+        })
+        .then((responseJson) => {
+          this.setState({
+            data: responseJson,
+          });
+          setItem('AUTH_TOKEN', responseJson.token);
+          setItem('USER_ID', responseJson.id.toString());
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
   getUserInfo = async (userId) => {

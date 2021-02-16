@@ -72,7 +72,6 @@ class Profile extends Component {
         <Header style={styles.header}>
           <Left style={styles.header_left}>
             <Button transparent>
-              {/* <FontAwesomeIcon icon={faPencilAlt} size={20} color={'#F06543'} /> */}
             </Button>
           </Left>
 

@@ -55,7 +55,14 @@ class Home extends AbstractComponent {
         'x-Authorization': this.state.token,
       },
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (response.status === 401) {
+          // Unauthorized
+          this.props.navigation.navigate('Auth');
+          return;
+        }
+        return response.json();
+      })
       .then((responseJson) => {
         this.setState({coffeeShops: responseJson});
       })
@@ -290,7 +297,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     backgroundColor: '#E8E9EB',
-    // backgroundColor: 'blue',
   },
   header: {
     borderBottomWidth: 0.5,

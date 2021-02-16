@@ -7,11 +7,17 @@ import { createBottomTabNavigator } from 'react-navigation-tabs';
 import AddReviewScreen from '../components/add-review-component';
 import ExploreScreen from '../components/explore-component';
 import HomeScreen from '../components/home-component';
+import PhotoDecisionScreen from '../components/photo-decision-component';
 import ProfileScreen from '../components/profile/profile-component';
 import EditProfileScreen from '../components/profile/settings/edit-profile';
 import SettingsScreen from '../components/profile/settings/settings-component';
 import SelectedShopScreen from '../components/selected-shop-component';
+import TakePhotoScreen from '../components/take-photo-component';
+import UpdateReviewScreen from '../components/update-review-component';
 
+/**
+ * The Profile stack has a nested Settings stack navigator
+ */
 const SettingsStack = createStackNavigator(
   {
     Settings: SettingsScreen,
@@ -23,11 +29,15 @@ const SettingsStack = createStackNavigator(
   },
 );
 
+/**
+ * The Profile screen tab is set up as a stack navigator
+ */
 const ProfileStack = createStackNavigator(
   {
     Profile: ProfileScreen,
     Settings: SettingsStack,
-    UpdateReview: AddReviewScreen,
+    UpdateReview: UpdateReviewScreen,
+    UpdateDeletePhoto: PhotoDecisionScreen,
   },
   {
     initialRouteName: 'Profile',
@@ -35,11 +45,16 @@ const ProfileStack = createStackNavigator(
   },
 );
 
+/**
+ * The home screen tab is set up as a stack navigator
+ */
 const HomeStack = createStackNavigator(
   {
     Home: HomeScreen,
     SelectedShop: SelectedShopScreen,
     AddReview: AddReviewScreen,
+    AddPhoto: PhotoDecisionScreen,
+    TakePhoto: TakePhotoScreen,
   },
   {
     initialRouteName: 'Home',
@@ -47,6 +62,27 @@ const HomeStack = createStackNavigator(
   },
 );
 
+/**
+ * Hides the TabBar from the 'TakePhoto' Screen
+ */
+HomeStack.navigationOptions = ({navigation}) => {
+  let tabBarVisible = true;
+
+  let routeName = navigation.state.routes[navigation.state.index].routeName;
+
+  if (routeName == 'TakePhoto') {
+    tabBarVisible = false;
+  }
+
+  return {
+    tabBarVisible,
+  };
+};
+
+/**
+ * Creates the bottom Tab navigator for the App
+ * and decides which icon should be used
+ */
 export default createBottomTabNavigator(
   {
     Home: HomeStack,

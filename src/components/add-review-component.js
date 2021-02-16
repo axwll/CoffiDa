@@ -2,7 +2,7 @@ import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Body, Button, Container, Content, Form, Header, Left, Textarea, Title } from 'native-base';
 import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
@@ -16,7 +16,7 @@ class AddReview extends Component {
     super(props);
 
     this.state = {
-      overallRating: 0,
+      overallRating: 1,
       priceRating: 1,
       cleanRating: 1,
       qualRating: 1,
@@ -81,6 +81,8 @@ class AddReview extends Component {
     }
 
     this.modifyReview('POST', 'Review created!', locationId);
+
+    this.findReview(locationId);
   };
 
   updateReview = (locationId) => {
@@ -110,23 +112,78 @@ class AddReview extends Component {
           price_rating: this.state.priceRating,
           quality_rating: this.state.qualRating,
           clenliness_rating: this.state.cleanRating,
-          review_body: validReview,
+          review_body: this.state.reviewBody,
         }),
       },
     )
       .then((response) => {
         toast(successText);
-        this.props.navigation.goBack();
       })
       .catch((error) => {
         console.log(error);
       });
   };
 
+  findReview = (locationId) => {
+    return fetch(`http://10.0.2.2:3333/api/1.0.0/find?search_in=reviewed`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-Authorization': this.state.token,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        const location = responseJson.find(
+          (loc) => loc.location_id === locationId,
+        );
+
+        if (location.length === 0) {
+          // location has no reviews? it should do. Something must have gone wrong.
+          return;
+        }
+
+        this.extractId(location);
+        if (this.state.reviewId) {
+          this.props.navigation.navigate('AddPhoto', {
+            locationId: locationId,
+            reviewId: this.state.reviewId,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  extractId = (location) => {
+    let reviewIds = [];
+    location.location_reviews.forEach((rev) => {
+      // find the review matching the review body
+      if (rev.review_body === this.state.reviewBody) {
+        reviewIds.push(rev.review_id);
+      }
+    });
+
+    if (reviewIds.length === 0) {
+      // cant find review in database, something went horribly wrong but didnt error
+      return;
+    }
+
+    // The array will be greater than one if reviews have the same review body
+    // Find the largest ID (latest entry) and set state
+    this.setState({reviewId: Math.max(...reviewIds)});
+  };
+
+  checkImage = (updateReview, imageUri) => {
+    if (!updateReview) {
+      return false;
+    }
+  };
+
   render() {
     const shopData = this.props.navigation.getParam('shopData');
     const updateReview = this.props.navigation.getParam('update');
-    console.log(shopData);
 
     return (
       <Container style={styles.container}>
@@ -149,8 +206,18 @@ class AddReview extends Component {
 
         <Content padder>
           <View>
-            <Text>{shopData.location_name}</Text>
+            <Text style={styles.title}>{shopData.location_name}</Text>
           </View>
+
+          {this.checkImage() && (
+            <View>
+              <Image
+                //   source={require('../assets/lofi-coffee.png')} // change this
+                source={{uri: shopData.photo_path}} // change this
+                style={{height: 200, width: 'auto', flex: 1}}
+              />
+            </View>
+          )}
 
           <View style={styles.review_container}>
             {/* Price Rating Buttons */}
@@ -263,11 +330,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header_body: {
-    flex: 4,
+    flex: 99,
     alignItems: 'center',
   },
   title: {
     color: '#313638',
+    fontSize: 20,
   },
   header_right: {
     flex: 1,

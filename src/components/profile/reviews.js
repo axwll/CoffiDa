@@ -52,7 +52,6 @@ class Reviews extends Component {
   editReview = (data) => {
     this.props.navigation.navigate('UpdateReview', {
       reviewData: data.review,
-      update: true,
       shopData: data.location,
     });
   };

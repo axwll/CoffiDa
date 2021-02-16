@@ -1,12 +1,28 @@
-import { faStar as faStarRegular } from '@fortawesome/free-regular-svg-icons';
-import { faChevronLeft, faDirections, faPlus, faStar as faStarSolid } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Card, CardItem, Container, Content, Header, Left, Right, Title } from 'native-base';
-import React, { Component } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {faStar as faStarRegular} from '@fortawesome/free-regular-svg-icons';
+import {
+  faChevronLeft,
+  faDirections,
+  faPlus,
+  faStar as faStarSolid,
+} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  Body,
+  Button,
+  Card,
+  CardItem,
+  Container,
+  Content,
+  Header,
+  Left,
+  Right,
+  Title,
+} from 'native-base';
+import React, {Component} from 'react';
+import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 
-import { translate } from '../locales';
-import { getItem } from './common/async-storage-helper';
+import {translate} from '../locales';
+import {getItem} from './common/async-storage-helper';
 import ReviewCard from './common/review-card';
 import ReviewIcon from './common/review-icon';
 
@@ -28,14 +44,21 @@ class SelectedShop extends Component {
   async componentDidMount() {
     this.setState({
       token: await getItem('AUTH_TOKEN'),
-      currentUser: JSON.parse(await getItem('USER_DATA')),
+      userId: await getItem('USER_ID'),
     });
 
-    await this.getLocation();
+    this._onFocusListener = this.props.navigation.addListener(
+      'didFocus',
+      async (payload) => {
+        this.setState({loading: true});
 
-    await this.checkIfAlreadyFavorited();
+        await this.getUserInfo(this.state.userId);
+        await this.getLocation();
+        await this.checkIfAlreadyFavorited();
 
-    this.setState({loading: false});
+        this.setState({loading: false});
+      },
+    );
   }
 
   getLocation = () => {
@@ -65,6 +88,21 @@ class SelectedShop extends Component {
     }
   };
 
+  getUserInfo = (userId) => {
+    return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
+      headers: {
+        'x-Authorization': this.state.token,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({currentUser: responseJson});
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   favButtonPressed = () => {
     if (this.state.favorite) {
       this.unFavLocation(locationId);
@@ -85,7 +123,6 @@ class SelectedShop extends Component {
       .then((response) => {
         console.log(response.status);
         this.setState({favorite: true});
-        console.log('favorited');
       })
       .catch((error) => {
         console.log(error);
