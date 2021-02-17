@@ -1,11 +1,12 @@
 import {faFilter, faTimes} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {Container, Content, Header, Icon, Input, Item} from 'native-base';
+import {Container, Header, Icon, Input, Item} from 'native-base';
 import React from 'react';
 import {
+  FlatList,
   Keyboard,
   Modal,
-  ScrollView,
+  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -19,6 +20,7 @@ import {translate} from '../locales';
 import AbstractComponent from './abstract-component';
 import {getItem} from './common/async-storage-helper';
 import {toast} from './common/helper-functions';
+import LoadingSpinner from './common/loading-spinner';
 import MainCard from './common/main-card';
 
 class Home extends AbstractComponent {
@@ -27,6 +29,9 @@ class Home extends AbstractComponent {
 
     this.state = {
       loading: true,
+      offset: 0,
+      limit: 5,
+      queryParams: '',
       coffeeShops: [],
       modalVisible: false,
       overallFilter: 0,
@@ -46,11 +51,16 @@ class Home extends AbstractComponent {
 
     this.setState({token: token});
     this.listShops();
-    this.setState({loading: false});
   }
 
   listShops = () => {
-    return fetch('http://10.0.2.2:3333/api/1.0.0/find', {
+    this.find();
+  };
+
+  find = () => {
+    const query = `?limit=${this.state.limit}&offset=${this.state.offset}${this.state.queryParams}`;
+
+    return fetch(`http://10.0.2.2:3333/api/1.0.0/find${query}`, {
       headers: {
         'x-Authorization': this.state.token,
       },
@@ -64,10 +74,15 @@ class Home extends AbstractComponent {
         return response.json();
       })
       .then((responseJson) => {
-        this.setState({coffeeShops: responseJson});
+        const existing = this.state.coffeeShops;
+        this.setState({
+          coffeeShops: existing.concat(responseJson),
+          loading: false,
+        });
       })
       .catch((error) => {
         console.log(error);
+        this.setState({loading: false});
       });
   };
 
@@ -77,6 +92,7 @@ class Home extends AbstractComponent {
       priceFilter: 0,
       qualFilter: 0,
       cleanFilter: 0,
+      queryParams: '',
     });
   };
 
@@ -98,197 +114,211 @@ class Home extends AbstractComponent {
     query = this.formatQuery('quality_rating', qual, query);
     query = this.formatQuery('clenliness_rating', clean, query);
 
-    this.setState({
-      modalVisible: false,
-      coffeeShops: [],
-      loading: true,
-    });
+    console.log(typeof query);
 
-    this.find(query);
+    this.setState(
+      {
+        modalVisible: false,
+        coffeeShops: [],
+        loading: true,
+        queryParams: query,
+      },
+      () => {
+        this.find();
+      },
+    );
   };
 
   formatQuery = (string, value, query = '') => {
     if (value) {
-      if (query) {
-        query += '&';
-      }
-      query += `${string}=${value}`;
+      query += `&${string}=${value}`;
     }
+
     return query;
   };
 
-  search = (text) => {
+  search = async (text) => {
     Keyboard.dismiss();
     console.log(text);
 
-    this.setState({loading: true});
-
-    if (!text) {
-      this.listShops();
-      return;
+    let query = '';
+    if (text) {
+      query = '&q=' + text;
     }
 
-    this.find('q=' + text);
+    this.setState(
+      {
+        loading: true,
+        queryParams: query,
+      },
+      () => {
+        this.find();
+      },
+    );
   };
 
-  find = (query) => {
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/find?${query}`, {
-      headers: {
-        'x-Authorization': this.state.token,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({
-          coffeeShops: responseJson,
-          loading: false,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        this.setState({loading: false});
-      });
+  renderItem = (shop) => {
+    return (
+      <MainCard
+        key={shop.item.location_id}
+        shopData={shop.item}
+        navigation={this.props.navigation}
+      />
+    );
+  };
+
+  renderNoData = () => {
+    return (
+      <View style={styles.loading_view}>
+        <Text style={styles.load_text}>{translate('no_results')}</Text>
+      </View>
+    );
+  };
+
+  handleLoadMore = (distanceFromEnd) => {
+    if (distanceFromEnd < 0) return;
+
+    const off = this.state.offset;
+    this.setState({offset: off + 5}, () => {
+      this.listShops();
+    });
   };
 
   render() {
-    return (
-      <Container style={styles.container}>
-        <Header searchBar rounded style={styles.header}>
-          <Item rounded style={styles.srch}>
-            <Icon name="ios-search" />
-            <Input
-              placeholder="Search"
-              onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
-            />
-          </Item>
-          <TouchableOpacity
-            style={styles.filter}
-            onPress={() => this.setState({modalVisible: true})}>
-            <FontAwesomeIcon
-              icon={faFilter}
-              style={styles.filter_icon}
-              size={20}
-            />
-          </TouchableOpacity>
-        </Header>
-
-        {this.state.modalVisible && (
-          <View style={styles.centered_view}>
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={this.state.modalVisible}
-              onRequestClose={() => {
-                Alert.alert('Modal has been closed.');
-              }}>
-              <View style={styles.centered_view}>
-                <View style={styles.modal}>
-                  <View style={styles.modal_header}>
-                    <View style={styles.modal_header_left}>
-                      <TouchableOpacity onPress={() => this.clearFilters()}>
-                        <Text style={styles.header_left_text}>
-                          Clear Filters
-                        </Text>
-                      </TouchableOpacity>
+    if (this.state.loading) {
+      return <LoadingSpinner style={{fontSize: 50, color: 'grey'}} size={50} />;
+    } else {
+      return (
+        <Container style={styles.container}>
+          <Header searchBar rounded style={styles.header}>
+            <Item rounded style={styles.srch}>
+              <Icon name="ios-search" />
+              <Input
+                placeholder="Search"
+                onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
+              />
+            </Item>
+            <TouchableOpacity
+              style={styles.filter}
+              onPress={() => this.setState({modalVisible: true})}>
+              <FontAwesomeIcon
+                icon={faFilter}
+                style={styles.filter_icon}
+                size={20}
+              />
+            </TouchableOpacity>
+          </Header>
+          {this.state.modalVisible && (
+            <View style={styles.centered_view}>
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={this.state.modalVisible}
+                onRequestClose={() => {
+                  Alert.alert('Modal has been closed.');
+                }}>
+                <View style={styles.centered_view}>
+                  <View style={styles.modal}>
+                    <View style={styles.modal_header}>
+                      <View style={styles.modal_header_left}>
+                        <TouchableOpacity onPress={() => this.clearFilters()}>
+                          <Text style={styles.header_left_text}>
+                            Clear Filters
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      <View style={styles.modal_header_right}>
+                        <TouchableOpacity
+                          onPress={() => this.setState({modalVisible: false})}>
+                          <FontAwesomeIcon
+                            icon={faTimes}
+                            style={styles.close_modal_icon}
+                            size={20}
+                          />
+                        </TouchableOpacity>
+                      </View>
                     </View>
-                    <View style={styles.modal_header_right}>
+                    <View style={styles.modal_body}>
+                      <Text style={styles.modal_header_text}>
+                        Filter results by rating
+                      </Text>
+                      <Text style={styles.modal_text}>Overall Rating</Text>
+                      <Stars
+                        default={this.state.overallFilter}
+                        update={(rating) =>
+                          this.setState({overallFilter: rating})
+                        }
+                        spacing={5}
+                        starSize={25}
+                        count={5}
+                        fullStar={Full}
+                        emptyStar={Empty}
+                      />
+
+                      <Text style={styles.modal_text}>Price Rating</Text>
+                      <Stars
+                        default={this.state.priceFilter}
+                        update={(rating) =>
+                          this.setState({priceFilter: rating})
+                        }
+                        spacing={5}
+                        starSize={25}
+                        count={5}
+                        fullStar={Full}
+                        emptyStar={Empty}
+                      />
+
+                      <Text style={styles.modal_text}>Quality Rating</Text>
+                      <Stars
+                        default={this.state.qualFilter}
+                        update={(rating) => this.setState({qualFilter: rating})}
+                        spacing={5}
+                        starSize={25}
+                        count={5}
+                        fullStar={Full}
+                        emptyStar={Empty}
+                      />
+
+                      <Text style={styles.modal_text}>Cleanliness Rating</Text>
+                      <Stars
+                        default={this.state.cleanFilter}
+                        update={(rating) =>
+                          this.setState({cleanFilter: rating})
+                        }
+                        spacing={5}
+                        starSize={25}
+                        count={5}
+                        fullStar={Full}
+                        emptyStar={Empty}
+                      />
+
                       <TouchableOpacity
-                        onPress={() => this.setState({modalVisible: false})}>
-                        <FontAwesomeIcon
-                          icon={faTimes}
-                          style={styles.close_modal_icon}
-                          size={20}
-                        />
+                        style={styles.button}
+                        onPress={() => this.filterResults()}>
+                        <Text style={styles.text_style}>Filter Results</Text>
                       </TouchableOpacity>
                     </View>
-                  </View>
-                  <View style={styles.modal_body}>
-                    <Text style={styles.modal_header_text}>
-                      Filter results by rating
-                    </Text>
-                    <Text style={styles.modal_text}>Overall Rating</Text>
-                    <Stars
-                      default={this.state.overallFilter}
-                      update={(rating) =>
-                        this.setState({overallFilter: rating})
-                      }
-                      spacing={5}
-                      starSize={25}
-                      count={5}
-                      fullStar={Full}
-                      emptyStar={Empty}
-                    />
-
-                    <Text style={styles.modal_text}>Price Rating</Text>
-                    <Stars
-                      default={this.state.priceFilter}
-                      update={(rating) => this.setState({priceFilter: rating})}
-                      spacing={5}
-                      starSize={25}
-                      count={5}
-                      fullStar={Full}
-                      emptyStar={Empty}
-                    />
-
-                    <Text style={styles.modal_text}>Quality Rating</Text>
-                    <Stars
-                      default={this.state.qualFilter}
-                      update={(rating) => this.setState({qualFilter: rating})}
-                      spacing={5}
-                      starSize={25}
-                      count={5}
-                      fullStar={Full}
-                      emptyStar={Empty}
-                    />
-
-                    <Text style={styles.modal_text}>Cleanliness Rating</Text>
-                    <Stars
-                      default={this.state.cleanFilter}
-                      update={(rating) => this.setState({cleanFilter: rating})}
-                      spacing={5}
-                      starSize={25}
-                      count={5}
-                      fullStar={Full}
-                      emptyStar={Empty}
-                    />
-
-                    <TouchableOpacity
-                      style={styles.button}
-                      onPress={() => this.filterResults()}>
-                      <Text style={styles.text_style}>Filter Results</Text>
-                    </TouchableOpacity>
                   </View>
                 </View>
-              </View>
-            </Modal>
-          </View>
-        )}
+              </Modal>
+            </View>
+          )}
 
-        {this.state.coffeeShops.length > 0 ? (
-          <Content>
-            <ScrollView>
-              {this.state.coffeeShops.map((shop) => {
-                return (
-                  <MainCard
-                    key={shop.location_id}
-                    shopData={shop}
-                    navigation={this.props.navigation}
-                  />
-                );
-              })}
-            </ScrollView>
-          </Content>
-        ) : (
-          <View style={styles.loading_view}>
-            <Text style={styles.load_text}>
-              {this.state.loading
-                ? translate('loading')
-                : translate('no_results')}
-            </Text>
-          </View>
-        )}
-      </Container>
-    );
+          <SafeAreaView style={styles.container}>
+            <FlatList
+              data={this.state.coffeeShops}
+              renderItem={(shop) => this.renderItem(shop)}
+              keyExtractor={(shop) => shop.location_id.toString()}
+              onEndReachedThreshold={0.01}
+              onEndReached={({distanceFromEnd}) =>
+                this.handleLoadMore(distanceFromEnd)
+              }
+              ListEmptyComponent={this.renderNoData()}
+            />
+          </SafeAreaView>
+        </Container>
+      );
+    }
   }
 }
 
@@ -323,7 +353,7 @@ const styles = StyleSheet.create({
   },
   loading_view: {
     flex: 1,
-    justifyContent: 'center',
+    marginTop: 20,
     alignItems: 'center',
   },
   load_text: {

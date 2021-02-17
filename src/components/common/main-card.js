@@ -1,8 +1,8 @@
-import {faMapMarkerAlt} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {Body, Card, CardItem, Left, Right} from 'native-base';
-import React, {Component} from 'react';
-import {Image, StyleSheet, Text} from 'react-native';
+import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Card, CardItem, Left, Right } from 'native-base';
+import React, { Component } from 'react';
+import { Image, StyleSheet, Text } from 'react-native';
 
 import ReviewIcon from '../common/review-icon';
 
@@ -26,7 +26,8 @@ class MainCard extends Component {
             </Body>
           </Left>
         </CardItem>
-        <CardItem cardBody button onPress={() => this.clicked()}>
+        {/* <CardItem cardBody button onPress={() => this.clicked()}> */}
+          <CardItem cardBody>
           <Image
             source={require('../../assets/lofi-coffee.png')} // change this
             style={{height: 200, width: 100, flex: 1}}
