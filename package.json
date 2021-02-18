@@ -14,7 +14,7 @@
         "lint": "eslint .",
         "audit": "npm audit --json | npm-audit-helper --prod-only",
         "pre-push": "npm run audit && npm run lint && npm run test",
-        "postinstall": "jetifier -r"
+        "postinstall": "jetifier -r && patch-package"
     },
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.34",
@@ -23,9 +23,11 @@
         "@fortawesome/react-native-fontawesome": "^0.2.6",
         "@react-native-async-storage/async-storage": "^1.13.4",
         "@react-native-community/masked-view": "^0.1.10",
+        "geolib": "^3.3.1",
         "i18n-js": "^3.8.0",
         "lodash.memoize": "^4.1.2",
         "native-base": "^2.15.2",
+        "patch-package": "^6.2.2",
         "react": "16.13.1",
         "react-native": "0.63.4",
         "react-native-appearance": "^0.3.4",
