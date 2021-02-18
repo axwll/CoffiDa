@@ -23,6 +23,7 @@ import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 
 import {translate} from '../locales';
 import {getItem} from './common/async-storage-helper';
+import LoadingSpinner from './common/loading-spinner';
 import ReviewCard from './common/review-card';
 import ReviewIcon from './common/review-icon';
 
@@ -158,11 +159,7 @@ class SelectedShop extends Component {
 
   render() {
     if (this.state.loading) {
-      return (
-        <View style={styles.loading_view}>
-          <Text style={styles.load_text}>Loading</Text>
-        </View>
-      );
+      return <LoadingSpinner size={50} />;
     } else {
       return (
         <Container style={styles.container} key={locationId}>
@@ -195,11 +192,12 @@ class SelectedShop extends Component {
           </Header>
 
           <Content style={styles.content} padder>
+            {/* Switch to flatlist */}
             <ScrollView>
               <Card>
                 <CardItem cardBody button>
                   <Image
-                    source={require('../assets/lofi-coffee.png')}
+                    source={{uri: this.state.shopData.photo_path}}
                     style={{height: 200, width: 100, flex: 1}}
                   />
                 </CardItem>

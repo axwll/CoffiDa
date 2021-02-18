@@ -17,19 +17,19 @@ class MainCard extends Component {
   };
 
   render() {
+    const shop = this.props.shopData;
     return (
       <Card>
         <CardItem button onPress={() => this.clicked()}>
           <Left>
             <Body>
-              <Text>{this.props.shopData.location_name}</Text>
+              <Text>{shop.location_name}</Text>
             </Body>
           </Left>
         </CardItem>
-        {/* <CardItem cardBody button onPress={() => this.clicked()}> */}
-          <CardItem cardBody>
+        <CardItem cardBody>
           <Image
-            source={require('../../assets/lofi-coffee.png')} // change this
+            source={{uri: shop.photo_path}}
             style={{height: 200, width: 100, flex: 1}}
           />
         </CardItem>
@@ -41,15 +41,12 @@ class MainCard extends Component {
               color={'#E0DFD5'}
               onPress={() => this.press()}
             />
-            <Text>{this.props.shopData.location_town}</Text>
+            <Text>{shop.location_town}</Text>
           </Left>
 
           <Right style={styles.right}>
-            <Text>({this.props.shopData.location_reviews.length})</Text>
-            <ReviewIcon
-              rating={this.props.shopData.avg_overall_rating}
-              primary={true}
-            />
+            <Text>({shop.location_reviews.length})</Text>
+            <ReviewIcon rating={shop.avg_overall_rating} primary={true} />
           </Right>
         </CardItem>
       </Card>

@@ -1,52 +1,78 @@
-import React, {Component} from 'react';
-import {ScrollView, StyleSheet, Text, View} from 'react-native';
-import {withNavigation} from 'react-navigation';
+import React, { Component } from 'react';
+import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { withNavigation } from 'react-navigation';
 
+import { translate } from '../../locales';
+import { getItem } from '../common/async-storage-helper';
+import LoadingSpinner from '../common/loading-spinner';
 import MainCard from '../common/main-card';
 
-/**
- * You can use the find endpoint for this page!
- * Use instead of user data in async storage
- */
 class FavoritesTab extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       loading: true,
-      loadingMessage: 'Loading data',
+      favorites: [],
     };
   }
 
   async componentDidMount() {
-    // this.setState({
-    // token: await getItem('AUTH_TOKEN'),
-    //   userInfo: JSON.parse(await getItem('USER_DATA')),
-    // });
+    this.setState({
+      token: await getItem('AUTH_TOKEN'),
+      userId: JSON.parse(await getItem('USER_ID')),
+    });
 
-    this.setState({loading: false});
+    this.findFavorites();
   }
+
+  findFavorites = () => {
+    return fetch(`http://10.0.2.2:3333/api/1.0.0/find?search_in=favourite`, {
+      headers: {
+        'x-Authorization': this.state.token,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({
+          favorites: responseJson,
+          loading: false,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        this.setState({loading: false});
+      });
+  };
+
+  renderNoData = () => {
+    return (
+      <View style={styles.loading_view}>
+        <Text style={styles.load_text}>{translate('no_results')}</Text>
+      </View>
+    );
+  };
 
   render() {
     if (this.state.loading) {
-      return (
-        <View style={styles.loading_view}>
-          <Text style={styles.load_text}>{this.state.loadingMessage}</Text>
-        </View>
-      );
+      return <LoadingSpinner size={50} />;
     } else {
       return (
-        <ScrollView>
-          {this.props.favorites.map((fav) => {
-            return (
-              <MainCard
-                key={fav.location_id}
-                shopData={fav}
-                navigation={this.props.navigation}
-              />
-            );
-          })}
-        </ScrollView>
+        <SafeAreaView style={styles.container}>
+          <FlatList
+            data={this.state.favorites}
+            renderItem={(fav) => {
+              return (
+                <MainCard
+                  shopData={fav.item}
+                  navigation={this.props.navigation}
+                />
+              );
+            }}
+            keyExtractor={(item) => item.location_id.toString()}
+            ListEmptyComponent={this.renderNoData()}
+          />
+        </SafeAreaView>
       );
     }
   }

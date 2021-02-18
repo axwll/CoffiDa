@@ -1,10 +1,12 @@
-import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Button, Card, CardItem, Left } from 'native-base';
-import React, { Component } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import {faHeart as faHeartSolid} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {Button, Card, CardItem, Left} from 'native-base';
+import React, {Component} from 'react';
+import {FlatList, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 
-import { getItem, setItem } from '../common/async-storage-helper';
+import {translate} from '../../locales';
+import {getItem} from '../common/async-storage-helper';
+import LoadingSpinner from '../common/loading-spinner';
 import ProfileReviewCard from '../common/profile-review-card';
 
 class Likes extends Component {
@@ -14,17 +16,40 @@ class Likes extends Component {
     this.state = {
       loading: true,
       loadingMessage: 'Loading data',
+      userInfo: [],
     };
   }
 
   async componentDidMount() {
     this.setState({
       token: await getItem('AUTH_TOKEN'),
-      userInfo: JSON.parse(await getItem('USER_DATA')),
+      userId: await getItem('USER_ID'),
     });
 
-    this.setState({loading: false});
+    this.getUserInfo();
   }
+
+  getUserInfo = () => {
+    const userId = this.state.userId;
+
+    return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
+      headers: {
+        'x-Authorization': this.state.token,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        console.log(responseJson);
+        this.setState({
+          userInfo: responseJson,
+          loading: false,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        this.setState({loading: false});
+      });
+  };
 
   unlikeReview = (locationId, reviewId) => {
     this.setState({
@@ -46,78 +71,74 @@ class Likes extends Component {
       });
   };
 
-  getUserInfo = () => {
-    const userId = this.state.userInfo.user_id;
+  renderItem = ({item}) => {
+    return (
+      <Card key={item.review.review_id}>
+        <ProfileReviewCard
+          title={item.location.location_name}
+          subHeading={item.location.location_town}
+          body={item.review.review_body}
+          overall_rate={item.review.overall_rating}
+          price_rate={item.review.price_rating}
+          clean_rate={item.review.clenliness_rating}
+          qual_rate={item.review.quality_rating}
+        />
+        <CardItem style={styles.last_item}>
+          <Left>
+            <Button transparent style={styles.light_text}>
+              <FontAwesomeIcon
+                icon={faHeartSolid}
+                size={15}
+                color={'#F06543'}
+                onPress={() =>
+                  this.unlikeReview(
+                    item.location.location_id,
+                    item.review.review_id,
+                  )
+                }
+              />
+            </Button>
+            <Text style={styles.like_count}>{item.review.likes}</Text>
+          </Left>
+        </CardItem>
+      </Card>
+    );
+  };
 
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
-      headers: {
-        'x-Authorization': this.state.token,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        setItem('USER_DATA', JSON.stringify(responseJson));
-        this.setState({
-          userInfo: responseJson,
-          loading: false,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  renderNoData = () => {
+    return (
+      <View style={styles.loading_view}>
+        <Text style={styles.load_text}>{translate('no_results')}</Text>
+      </View>
+    );
   };
 
   render() {
     if (this.state.loading) {
-      return (
-        <View style={styles.loading_view}>
-          <Text style={styles.load_text}>{this.state.loadingMessage}</Text>
-        </View>
-      );
+      return <LoadingSpinner size={50} />;
     } else {
       return (
-        <ScrollView>
-          {this.state.userInfo.liked_reviews.map((item) => {
-            const review = item.review;
-            return (
-              <Card key={item.review.review_id}>
-                <ProfileReviewCard
-                  title={item.location.location_name}
-                  subHeading={item.location.location_town}
-                  body={review.review_body}
-                  overall_rate={review.overall_rating}
-                  price_rate={review.price_rating}
-                  clean_rate={review.clenliness_rating}
-                  qual_rate={review.quality_rating}
-                />
-                <CardItem style={styles.last_item}>
-                  <Left>
-                    <Button transparent style={styles.light_text}>
-                      <FontAwesomeIcon
-                        icon={faHeartSolid}
-                        size={15}
-                        color={'#F06543'}
-                        onPress={() =>
-                          this.unlikeReview(
-                            item.location.location_id,
-                            item.review.review_id,
-                          )
-                        }
-                      />
-                    </Button>
-                    <Text style={styles.like_count}>{item.review.likes}</Text>
-                  </Left>
-                </CardItem>
-              </Card>
-            );
-          })}
-        </ScrollView>
+        <SafeAreaView style={styles.container}>
+          <FlatList
+            data={this.state.userInfo.liked_reviews}
+            renderItem={(item) => this.renderItem(item)}
+            keyExtractor={(item) => item.review.review_id.toString()}
+            // onEndReachedThreshold={0.01}
+            // onEndReached={({distanceFromEnd}) =>
+            //   this.handleLoadMore(distanceFromEnd)
+            // }
+            ListEmptyComponent={this.renderNoData()}
+          />
+        </SafeAreaView>
       );
     }
   }
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   light_text: {
     color: '#313638',
   },

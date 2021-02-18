@@ -1,11 +1,12 @@
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Content, Header, Left, Right, Segment, Title } from 'native-base';
+import { Body, Button, Container, Header, Left, Right, Segment, Title } from 'native-base';
 import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { translate } from '../../locales';
-import { getItem, setItem } from '../common/async-storage-helper';
+import { getItem } from '../common/async-storage-helper';
+import LoadingSpinner from '../common/loading-spinner';
 import FavoritesTab from './favorites';
 import LikesTab from './likes';
 import ReviewsTab from './reviews';
@@ -15,6 +16,7 @@ class Profile extends Component {
     super(props);
 
     this.state = {
+      loading: true,
       activePage: 1,
       userInfo: [],
       tab: 'review',
@@ -24,14 +26,14 @@ class Profile extends Component {
   async componentDidMount() {
     this.setState({
       token: await getItem('AUTH_TOKEN'),
-      userInfo: JSON.parse(await getItem('USER_DATA')),
+      userId: await getItem('USER_ID'),
     });
 
     this.getUserInfo();
   }
 
   getUserInfo = () => {
-    const userId = this.state.userInfo.user_id;
+    const userId = this.state.userId;
 
     return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
       headers: {
@@ -40,11 +42,14 @@ class Profile extends Component {
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        setItem('USER_DATA', JSON.stringify(responseJson));
-        this.setState({userInfo: responseJson});
+        this.setState({
+          userInfo: responseJson,
+          loading: false,
+        });
       })
       .catch((error) => {
         console.log(error);
+        this.setState({loading: false});
       });
   };
 
@@ -67,83 +72,81 @@ class Profile extends Component {
   };
 
   render() {
-    return (
-      <Container style={styles.container}>
-        <Header style={styles.header}>
-          <Left style={styles.header_left}>
-            <Button transparent>
-            </Button>
-          </Left>
+    if (this.state.loading) {
+      return <LoadingSpinner size={50} />;
+    } else {
+      return (
+        <Container style={styles.container}>
+          <Header style={styles.header}>
+            <Left style={styles.header_left}>
+              <Button transparent></Button>
+            </Left>
 
-          <Body style={styles.header_body}>
-            <Title style={styles.title}>Profile</Title>
-          </Body>
+            <Body style={styles.header_body}>
+              <Title style={styles.title}>Profile</Title>
+            </Body>
 
-          <Right style={styles.header_right}>
-            <FontAwesomeIcon
-              icon={faCog}
-              size={20}
-              color={'#F06543'}
-              onPress={() => this.openSettings()}
-            />
-          </Right>
-        </Header>
+            <Right style={styles.header_right}>
+              <FontAwesomeIcon
+                icon={faCog}
+                size={20}
+                color={'#F06543'}
+                onPress={() => this.openSettings()}
+              />
+            </Right>
+          </Header>
 
-        <Content style={styles.content}>
-          <View>
-            <Text>Max Johnson</Text>
+          <View style={styles.content}>
+            <View>
+              <Text>
+                {this.state.userInfo.first_name} {this.state.userInfo.last_name}
+              </Text>
+            </View>
+            <View style={styles.segment_view}>
+              <Segment style={styles.segment}>
+                <Button
+                  style={[
+                    this.state.activePage === 1
+                      ? styles.active_segment
+                      : styles.segment_btn,
+                  ]}
+                  active={this.state.activePage === 1}
+                  onPress={this.selectComponent(1)}>
+                  <Text>{translate('reviews')}</Text>
+                </Button>
+                <Button
+                  style={[
+                    this.state.activePage === 2
+                      ? styles.active_segment
+                      : styles.segment_btn,
+                  ]}
+                  active={this.state.activePage === 2}
+                  onPress={this.selectComponent(2)}>
+                  <Text>{translate('favorites')}</Text>
+                </Button>
+                <Button
+                  style={[
+                    this.state.activePage === 3
+                      ? styles.active_segment
+                      : styles.segment_btn,
+                  ]}
+                  active={this.state.activePage === 3}
+                  onPress={this.selectComponent(3)}>
+                  <Text>{translate('likes')}</Text>
+                </Button>
+              </Segment>
+            </View>
+            <View style={styles.segment_content}>
+              {this._renderComponent()}
+            </View>
           </View>
-          <View style={styles.segment_view}>
-            <Segment style={styles.segment}>
-              <Button
-                style={[
-                  this.state.activePage === 1
-                    ? styles.active_segment
-                    : styles.segment_btn,
-                ]}
-                active={this.state.activePage === 1}
-                onPress={this.selectComponent(1)}>
-                <Text>{translate('reviews')}</Text>
-              </Button>
-              <Button
-                style={[
-                  this.state.activePage === 2
-                    ? styles.active_segment
-                    : styles.segment_btn,
-                ]}
-                active={this.state.activePage === 2}
-                onPress={this.selectComponent(2)}>
-                <Text>{translate('favorites')}</Text>
-              </Button>
-              <Button
-                style={[
-                  this.state.activePage === 3
-                    ? styles.active_segment
-                    : styles.segment_btn,
-                ]}
-                active={this.state.activePage === 3}
-                onPress={this.selectComponent(3)}>
-                <Text>{translate('likes')}</Text>
-              </Button>
-            </Segment>
-          </View>
-          <View style={styles.segment_content}>
-            {this.state.userInfo.length === 0 ? (
-              <Text>Loading</Text>
-            ) : (
-              <View>{this._renderComponent()}</View>
-            )}
-          </View>
-        </Content>
-      </Container>
-    );
+        </Container>
+      );
+    }
   }
 }
 
 const styles = StyleSheet.create({
-  test: {
-    backgroundColor: 'tomato',
-  },
   container: {
     flex: 1,
     flexDirection: 'column',
@@ -170,7 +173,9 @@ const styles = StyleSheet.create({
   icon: {
     fontSize: 20,
   },
-  content: {},
+  content: {
+    flex: 1,
+  },
   segment: {
     flex: 1,
     flexDirection: 'row',
@@ -179,6 +184,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8E9EB',
   },
   segment_view: {
+    height: 50,
     backgroundColor: '#E8E9EB',
   },
   segment_btn: {
@@ -196,7 +202,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8E9EB',
     borderColor: '#E8E9EB',
   },
-
   segment_content: {
     flex: 1,
   },

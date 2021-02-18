@@ -1,27 +1,16 @@
-import {faTrashAlt} from '@fortawesome/free-regular-svg-icons';
-import {faChevronLeft, faPencilAlt} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Body,
-  Button,
-  Container,
-  Content,
-  Form,
-  Header,
-  Left,
-  Right,
-  Textarea,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { faTrashAlt } from '@fortawesome/free-regular-svg-icons';
+import { faChevronLeft, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Container, Content, Form, Header, Left, Right, Textarea, Title } from 'native-base';
+import React, { Component } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
-import {translate} from '../locales';
-import {getItem} from './common/async-storage-helper';
-import {profanityFilter, toast} from './common/helper-functions';
+import { translate } from '../locales';
+import { getItem } from './common/async-storage-helper';
+import { profanityFilter, toast } from './common/helper-functions';
 import LoadingSpinner from './common/loading-spinner';
 
 class UpdateReview extends Component {
@@ -170,7 +159,7 @@ class UpdateReview extends Component {
 
   render() {
     if (this.state.loading) {
-      return <LoadingSpinner style={{fontSize: 50, color: 'grey'}} size={50} />;
+      return <LoadingSpinner size={50} />;
     } else {
       return (
         <Container style={styles.container}>

@@ -1,7 +1,7 @@
-import {faCog} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import React, {Component} from 'react';
-import {Animated, Easing, View} from 'react-native';
+import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import React, { Component } from 'react';
+import { Animated, Easing, View } from 'react-native';
 
 class LoadingSpinner extends Component {
   spinValue = new Animated.Value(0);
@@ -31,7 +31,7 @@ class LoadingSpinner extends Component {
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <Animated.View style={{transform: [{rotate}]}}>
-          <FontAwesomeIcon icon={faCog} size={size} style={style} />
+          <FontAwesomeIcon icon={faCog} size={size} style={{color: 'grey'}} />
         </Animated.View>
       </View>
     );

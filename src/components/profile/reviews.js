@@ -3,10 +3,12 @@ import { faHeart as faHeartSolid, faPencilAlt } from '@fortawesome/free-solid-sv
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Button, Card, CardItem, Left, Right } from 'native-base';
 import React, { Component } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { withNavigation } from 'react-navigation';
 
-import { getItem, setItem } from '../common/async-storage-helper';
+import { translate } from '../../locales';
+import { getItem } from '../common/async-storage-helper';
+import LoadingSpinner from '../common/loading-spinner';
 import ProfileReviewCard from '../common/profile-review-card';
 
 class Reviews extends Component {
@@ -23,11 +25,32 @@ class Reviews extends Component {
   async componentDidMount() {
     this.setState({
       token: await getItem('AUTH_TOKEN'),
-      userInfo: JSON.parse(await getItem('USER_DATA')),
+      userId: await getItem('USER_ID'),
     });
 
-    this.setState({loading: false});
+    this.getUserInfo();
   }
+
+  getUserInfo = () => {
+    const userId = this.state.userId;
+
+    return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
+      headers: {
+        'x-Authorization': this.state.token,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({
+          userInfo: responseJson,
+          loading: false,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        this.setState({loading: false});
+      });
+  };
 
   deleteReview = (locationId, reviewId) => {
     this.setState({
@@ -42,7 +65,7 @@ class Reviews extends Component {
       },
     )
       .then(() => {
-        this.getUserInfo();
+        this.findReviews();
       })
       .catch((error) => {
         console.log(error);
@@ -56,99 +79,92 @@ class Reviews extends Component {
     });
   };
 
-  getUserInfo = () => {
-    const userId = this.state.userInfo.user_id;
+  renderItem = ({item}) => {
+    return (
+      <Card>
+        <ProfileReviewCard
+          title={item.location.location_name}
+          body={item.review.review_body}
+          overall_rate={item.review.overall_rating}
+          price_rate={item.review.price_rating}
+          clean_rate={item.review.clenliness_rating}
+          qual_rate={item.review.quality_rating}
+        />
+        <CardItem style={styles.last_item}>
+          <Left>
+            <Button transparent style={styles.light_text}>
+              <FontAwesomeIcon
+                icon={this.state.liked ? faHeartSolid : faHeartRegular}
+                size={15}
+                color={'#818181'}
+              />
+            </Button>
+            <Text style={styles.like_count}>{item.review.likes}</Text>
+          </Left>
 
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
-      headers: {
-        'x-Authorization': this.state.token,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        setItem('USER_DATA', JSON.stringify(responseJson));
-        this.setState({
-          userInfo: responseJson,
-          loading: false,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+          <Right style={styles.footer_right}>
+            <Button transparent style={styles.pencil_btn}>
+              <FontAwesomeIcon
+                icon={faPencilAlt}
+                size={15}
+                color={'#F06543'}
+                onPress={() => this.editReview(item)}
+              />
+            </Button>
+
+            <Button transparent style={styles.trash_btn}>
+              <FontAwesomeIcon
+                icon={faTrashAlt}
+                size={15}
+                color={'#F06543'}
+                onPress={() =>
+                  this.deleteReview(
+                    item.location.location_id,
+                    item.review.review_id,
+                  )
+                }
+              />
+            </Button>
+          </Right>
+        </CardItem>
+      </Card>
+    );
+  };
+
+  renderNoData = () => {
+    return (
+      <View style={styles.loading_view}>
+        <Text style={styles.load_text}>{translate('no_results')}</Text>
+      </View>
+    );
   };
 
   render() {
     if (this.state.loading) {
-      return (
-        <View style={styles.loading_view}>
-          <Text style={styles.load_text}>{this.state.loadingMessage}</Text>
-        </View>
-      );
+      return <LoadingSpinner size={50} />;
     } else {
       return (
-        <ScrollView>
-          {this.state.userInfo.reviews.map((item) => {
-            const review = item.review;
-            return (
-              <Card key={review.review_id}>
-                <ProfileReviewCard
-                  title={item.location.location_name}
-                  body={review.review_body}
-                  overall_rate={review.overall_rating}
-                  price_rate={review.price_rating}
-                  clean_rate={review.clenliness_rating}
-                  qual_rate={review.quality_rating}
-                />
-                <CardItem style={styles.last_item}>
-                  <Left>
-                    <Button transparent style={styles.light_text}>
-                      <FontAwesomeIcon
-                        icon={this.state.liked ? faHeartSolid : faHeartRegular}
-                        size={15}
-                        color={'#818181'}
-                        // onPress={() =>
-                        //   this.likeButtonPressed(locationId, review.review_id)
-                        // }
-                      />
-                    </Button>
-                    <Text style={styles.like_count}>{item.review.likes}</Text>
-                  </Left>
-
-                  <Right style={styles.footer_right}>
-                    <Button transparent style={styles.pencil_btn}>
-                      <FontAwesomeIcon
-                        icon={faPencilAlt}
-                        size={15}
-                        color={'#F06543'}
-                        onPress={() => this.editReview(item)}
-                      />
-                    </Button>
-
-                    <Button transparent style={styles.trash_btn}>
-                      <FontAwesomeIcon
-                        icon={faTrashAlt}
-                        size={15}
-                        color={'#F06543'}
-                        onPress={() =>
-                          this.deleteReview(
-                            item.location.location_id,
-                            item.review.review_id,
-                          )
-                        }
-                      />
-                    </Button>
-                  </Right>
-                </CardItem>
-              </Card>
-            );
-          })}
-        </ScrollView>
+        <SafeAreaView style={styles.container}>
+          <FlatList
+            data={this.state.userInfo.reviews}
+            renderItem={(item) => this.renderItem(item)}
+            keyExtractor={(item) => item.review.review_id.toString()}
+            // onEndReachedThreshold={0.01}
+            // onEndReached={({distanceFromEnd}) =>
+            //   this.handleLoadMore(distanceFromEnd)
+            // }
+            ListEmptyComponent={this.renderNoData()}
+          />
+        </SafeAreaView>
       );
     }
   }
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   light_text: {
     color: '#313638',
   },
@@ -163,7 +179,7 @@ const styles = StyleSheet.create({
   trash_btn: {},
   loading_view: {
     flex: 1,
-    justifyContent: 'center',
+    marginTop: 20,
     alignItems: 'center',
   },
   load_text: {
