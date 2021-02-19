@@ -1,8 +1,8 @@
-import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Card, CardItem, Left, Right } from 'native-base';
-import React, { Component } from 'react';
-import { Image, StyleSheet, Text } from 'react-native';
+import {faMapMarkerAlt} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {Body, Card, CardItem, Left, Right} from 'native-base';
+import React, {Component} from 'react';
+import {Image, StyleSheet, Text} from 'react-native';
 
 import ReviewIcon from '../common/review-icon';
 
@@ -45,8 +45,8 @@ class MainCard extends Component {
           </Left>
 
           <Right style={styles.right}>
-            <Text>({shop.location_reviews.length})</Text>
             <ReviewIcon rating={shop.avg_overall_rating} primary={true} />
+            <Text>({shop.location_reviews.length})</Text>
           </Right>
         </CardItem>
       </Card>

@@ -77,6 +77,7 @@ class Home extends AbstractComponent {
         return response.json();
       })
       .then((responseJson) => {
+        // console.log(responseJson);
         const existing = this.state.coffeeShops;
         this.setState({
           coffeeShops: existing.concat(responseJson),

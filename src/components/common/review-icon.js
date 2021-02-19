@@ -19,7 +19,7 @@ class ReviewIcon extends Component {
             {
               transform: this.props.rotate
                 ? [{rotate: '270deg'}]
-                : [{rotate: '180deg'}],
+                : [{rotate: '0deg'}],
             },
           ]}>
           <Stars
@@ -44,7 +44,6 @@ class ReviewIcon extends Component {
 
 const styles = StyleSheet.create({
   color: {
-    color: 'yellow',
     backgroundColor: 'transparent',
     textShadowColor: 'black',
     textShadowOffset: {width: 1, height: 1},
