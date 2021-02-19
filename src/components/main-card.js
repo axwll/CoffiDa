@@ -1,10 +1,10 @@
-import {faMapMarkerAlt} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {Body, Card, CardItem, Left, Right} from 'native-base';
-import React, {Component} from 'react';
-import {Image, StyleSheet, Text} from 'react-native';
+import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Card, CardItem, Left, Right } from 'native-base';
+import React, { Component } from 'react';
+import { Image, StyleSheet, Text } from 'react-native';
 
-import ReviewIcon from '../common/review-icon';
+import ReviewIcon from './review-icon';
 
 class MainCard extends Component {
   constructor(props) {

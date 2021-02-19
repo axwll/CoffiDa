@@ -4,16 +4,16 @@ import React, { Component } from 'react';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
-import AddReviewScreen from '../components/add-review-component';
-import ExploreScreen from '../components/explore-component';
-import HomeScreen from '../components/home-component';
-import PhotoDecisionScreen from '../components/photo-decision-component';
-import ProfileScreen from '../components/profile/profile-component';
-import EditProfileScreen from '../components/profile/settings/edit-profile';
-import SettingsScreen from '../components/profile/settings/settings-component';
-import SelectedShopScreen from '../components/selected-shop-component';
-import TakePhotoScreen from '../components/take-photo-component';
-import UpdateReviewScreen from '../components/update-review-component';
+import AddReviewScreen from '../screens/add-review-screen';
+import EditProfileScreen from '../screens/edit-profile-screen';
+import ExploreScreen from '../screens/explore-screen';
+import HomeScreen from '../screens/home-screen';
+import PhotoDecisionScreen from '../screens/photo-decision-screen';
+import ProfileScreen from '../screens/profile/profile-screen';
+import SelectedShopScreen from '../screens/selected-shop-screen';
+import SettingsScreen from '../screens/settings-screen';
+import TakePhotoScreen from '../screens/take-photo-screen';
+import UpdateReviewScreen from '../screens/update-review-screen';
 
 /**
  * The Profile stack has a nested Settings stack navigator

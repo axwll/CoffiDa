@@ -1,31 +1,15 @@
-import {faStar as faStarRegular} from '@fortawesome/free-regular-svg-icons';
-import {
-  faChevronLeft,
-  faDirections,
-  faPlus,
-  faStar as faStarSolid,
-} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Body,
-  Button,
-  Card,
-  CardItem,
-  Container,
-  Content,
-  Header,
-  Left,
-  Right,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
+import { faStar as faStarRegular } from '@fortawesome/free-regular-svg-icons';
+import { faChevronLeft, faDirections, faPlus, faStar as faStarSolid } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Card, CardItem, Container, Content, Header, Left, Right, Title } from 'native-base';
+import React, { Component } from 'react';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import {translate} from '../locales';
-import {getItem} from './common/async-storage-helper';
-import LoadingSpinner from './common/loading-spinner';
-import ReviewCard from './common/review-card';
-import ReviewIcon from './common/review-icon';
+import { getItem } from '../components/async-storage';
+import LoadingSpinner from '../components/loading-spinner';
+import ReviewCard from '../components/review-card';
+import ReviewIcon from '../components/review-icon';
+import { translate } from '../locales';
 
 let locationId = null;
 

@@ -1,25 +1,16 @@
-import {faSearchLocation} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {getDistance} from 'geolib';
-import {Container, Icon, Input, Item} from 'native-base';
-import React, {Component} from 'react';
-import {
-  Animated,
-  Dimensions,
-  Image,
-  PermissionsAndroid,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { faSearchLocation } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { getDistance } from 'geolib';
+import { Container, Icon, Input, Item } from 'native-base';
+import React, { Component } from 'react';
+import { Animated, Dimensions, Image, PermissionsAndroid, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
-import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import {getItem} from './common/async-storage-helper';
-import {toast} from './common/helper-functions';
-import LoadingSpinner from './common/loading-spinner';
-import ReviewIcon from './common/review-icon';
+import { getItem } from '../components/async-storage';
+import { toast } from '../components/helper-functions';
+import LoadingSpinner from '../components/loading-spinner';
+import ReviewIcon from '../components/review-icon';
 
 // import {mapDarkStyle} from '../styles/map-style';
 async function requestPermssion(params) {

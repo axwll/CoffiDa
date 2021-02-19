@@ -7,9 +7,10 @@ import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
+import { getItem } from '../components/async-storage';
+import { toast } from '../components/helper-functions';
+import { profanityFilter } from '../components/validator';
 import { translate } from '../locales';
-import { getItem } from './common/async-storage-helper';
-import { profanityFilter, toast } from './common/helper-functions';
 
 class AddReview extends Component {
   constructor(props) {

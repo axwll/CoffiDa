@@ -4,9 +4,9 @@ import { Body, Button, Container, Form, Header, Input, Item, Left, Title } from 
 import React, { Component } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { setItem } from '../components/async-storage';
+import { validateEmail, validateName, validatePassword, validatePasswordMatch } from '../components/validator';
 import { translate } from '../locales';
-import { setItem } from './common/async-storage-helper';
-import { validateEmail, validateName, validatePassword, validatePasswordMatch } from './common/validator';
 
 class Signup extends Component {
   constructor(props) {

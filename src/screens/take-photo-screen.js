@@ -1,11 +1,11 @@
-import {faCamera} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import React, {Component} from 'react';
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import {RNCamera} from 'react-native-camera';
+import { faCamera } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import React, { Component } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { RNCamera } from 'react-native-camera';
 
-import {getItem} from './common/async-storage-helper';
-import {toast} from './common/helper-functions';
+import { getItem } from '../components/async-storage';
+import { toast } from '../components/helper-functions';
 
 class TakePhoto extends Component {
   constructor(props) {

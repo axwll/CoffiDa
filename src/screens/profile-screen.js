@@ -5,11 +5,11 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { translate } from '../../locales';
-import { getItem } from '../common/async-storage-helper';
-import LoadingSpinner from '../common/loading-spinner';
-import FavoritesTab from './favorites';
-import LikesTab from './likes';
-import ReviewsTab from './reviews';
+import { getItem } from '../components/async-storage';
+import LoadingSpinner from '../components/loading-spinner';
+import FavoritesTab from './profile-tabs/favorites';
+import LikesTab from './profile-tabs/likes';
+import ReviewsTab from './profile-tabs/reviews';
 
 class Profile extends Component {
   constructor(props) {

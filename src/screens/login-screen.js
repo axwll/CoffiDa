@@ -1,22 +1,12 @@
-import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Body,
-  Button,
-  Container,
-  Form,
-  Header,
-  Input,
-  Item,
-  Left,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Container, Form, Header, Input, Item, Left, Title } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import {translate} from '../locales';
-import {setItem} from './common/async-storage-helper';
-import {validateEmail, validatePassword} from './common/validator';
+import { setItem } from '../components/async-storage';
+import { validateEmail, validatePassword } from '../components/validator';
+import { translate } from '../locales';
 
 class Login extends Component {
   constructor(props) {

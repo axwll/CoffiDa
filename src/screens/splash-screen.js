@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { getItem } from '../components/common/async-storage-helper';
+import { getItem } from '../components/async-storage';
 
 class SplashScreen extends Component {
   constructor() {

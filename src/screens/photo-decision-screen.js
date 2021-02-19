@@ -1,9 +1,9 @@
-import {Container} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { Container } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import {toast} from '../components/common/helper-functions';
-import {getItem} from './common/async-storage-helper';
+import { getItem } from '../components/async-storage';
+import { toast } from '../components/helper-functions';
 
 class PhotoDecision extends Component {
   constructor(props) {

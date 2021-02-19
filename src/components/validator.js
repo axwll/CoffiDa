@@ -1,3 +1,25 @@
+import ILLEGAL_WORDS from '../../assets/profanity-filter.json';
+
+export const profanityFilter = (sampleText) => {
+  ILLEGAL_WORDS.forEach((word) => {
+    // Makes a capitalised string of each illegal word
+    const capitalised = word.charAt(0).toUpperCase() + word.slice(1);
+
+    const toCheck = [word, capitalised];
+
+    toCheck.forEach((check) => {
+      if (sampleText.includes(check)) {
+        sampleText = sampleText.replace(check, 'non related coffee item');
+        toast(
+          'Please try to keep your reviews clean. I have had to remove all profanity from your review.',
+        );
+      }
+    });
+  });
+
+  return sampleText;
+};
+
 export const validateEmail = (email) => {
   const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 

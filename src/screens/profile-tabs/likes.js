@@ -1,13 +1,13 @@
-import {faHeart as faHeartSolid} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {Button, Card, CardItem, Left} from 'native-base';
-import React, {Component} from 'react';
-import {FlatList, SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Button, Card, CardItem, Left } from 'native-base';
+import React, { Component } from 'react';
+import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
-import {translate} from '../../locales';
-import {getItem} from '../common/async-storage-helper';
-import LoadingSpinner from '../common/loading-spinner';
-import ProfileReviewCard from '../common/profile-review-card';
+import { getItem } from '../../components/async-storage';
+import LoadingSpinner from '../../components/loading-spinner';
+import ProfileReviewCard from '../../components/profile-review-card';
+import { translate } from '../../locales';
 
 class Likes extends Component {
   constructor(props) {

@@ -6,8 +6,8 @@ import React, { Component } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
 import { translate } from '../../locales';
-import { getItem } from '../common/async-storage-helper';
-import ReviewIcon from '../common/review-icon';
+import { getItem } from '../components/async-storage';
+import ReviewIcon from '../components/review-icon';
 
 class ReviewCard extends Component {
   constructor(props) {
@@ -116,7 +116,7 @@ class ReviewCard extends Component {
 
       return (
         <Card>
-        {/* <CardItem style={styles.first_item}>
+          {/* <CardItem style={styles.first_item}>
             <Left>
               <Text style={styles.user}>
                 {translate('user')}: {this.state.reviewUser.first_name}{' '}
