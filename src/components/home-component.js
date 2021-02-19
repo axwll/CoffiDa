@@ -1,16 +1,25 @@
-import { faFilter, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Container, Header, Icon, Input, Item } from 'native-base';
+import {faFilter, faTimes} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {Container, Header, Icon, Input, Item} from 'native-base';
 import React from 'react';
-import { FlatList, Keyboard, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  FlatList,
+  Keyboard,
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
-import { translate } from '../locales';
+import {translate} from '../locales';
 import AbstractComponent from './abstract-component';
-import { getItem } from './common/async-storage-helper';
-import { toast } from './common/helper-functions';
+import {getItem} from './common/async-storage-helper';
+import {toast} from './common/helper-functions';
 import LoadingSpinner from './common/loading-spinner';
 import MainCard from './common/main-card';
 
@@ -33,6 +42,9 @@ class Home extends AbstractComponent {
   }
 
   async componentDidMount() {
+    // this.props.navigation.navigate('Auth');
+    // return;
+
     const token = await getItem('AUTH_TOKEN');
 
     if (!token) {

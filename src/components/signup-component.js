@@ -1,76 +1,173 @@
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Button, CheckBox, Container, Content, Form, Header, Input, Item, Left, Text } from 'native-base';
+import { Body, Button, Container, Form, Header, Input, Item, Left, Title } from 'native-base';
 import React, { Component } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { translate } from '../locales';
 import { setItem } from './common/async-storage-helper';
+import { validateEmail, validateName, validatePassword, validatePasswordMatch } from './common/validator';
 
 class Signup extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      submitted: false,
       email: '',
+      validEmail: false,
       firstName: '',
+      validFirstName: false,
       lastName: '',
+      validLastName: false,
       password: '',
-      allowLogin: false,
+      validPassword: false,
+      confirmPassword: '',
+      validConfirmPassword: false,
     };
   }
 
-  handleEmailInput = (email) => {
-    // Validate email
-    this.setState({email: email});
+  handleEmailInput = async (email) => {
+    const response = validateEmail(email);
+
+    await this.stateSetter(
+      response,
+      'email',
+      email,
+      'validEmail',
+      'emailErrorText',
+    );
   };
 
-  handleFirstNameInput = (firstName) => {
-    // Validate email
-    this.setState({firstName: firstName});
+  handleFirstNameInput = async (firstName) => {
+    const response = validateName('First Name', firstName);
+
+    await this.stateSetter(
+      response,
+      'firstName',
+      firstName,
+      'validFirstName',
+      'firstNameErrorText',
+    );
   };
 
-  handleLastNameInput = (lastName) => {
-    // Validate email
-    this.setState({lastName: lastName});
+  handleLastNameInput = async (lastName) => {
+    const response = validateName('Last Name', lastName);
+
+    await this.stateSetter(
+      response,
+      'lastName',
+      lastName,
+      'validLastName',
+      'lastNameErrorText',
+    );
   };
 
-  handlePasswordlInput = (password) => {
-    // Validate password
-    this.setState({password: password});
+  handlePasswordInput = async (password) => {
+    const response = validatePassword(password);
+
+    await this.stateSetter(
+      response,
+      'password',
+      password,
+      'validPassword',
+      'passwordErrorText',
+    );
+  };
+
+  handlePasswordConfirmlInput = async (confirmPassword) => {
+    const password = this.state.password;
+
+    if (!password) {
+      // need to have a password before i can check they match
+      return;
+    }
+    const response = validatePasswordMatch(password, confirmPassword);
+
+    await this.stateSetter(
+      response,
+      'confirmPassword',
+      confirmPassword,
+      'validConfirmPassword',
+      'confirmPasswordErrorText',
+    );
+  };
+
+  stateSetter = (response, key, value, booleanKey, errorKey) => {
+    if (!response.status) {
+      this.setState({
+        [booleanKey]: false,
+        [errorKey]: response.error,
+        [key]: value,
+      });
+    } else {
+      this.setState({
+        [booleanKey]: true,
+        [key]: value,
+      });
+    }
   };
 
   signUpEvent = async () => {
-    await this.signUp();
-    if (this.state.user_id) {
-      await this.logIn();
-      await this.getUserInfo();
+    this.setState({submitted: true});
+
+    const email = this.state.email;
+    const firstName = this.state.firstName;
+    const lastName = this.state.lastName;
+    const password = this.state.password;
+    const confirmPassword = this.state.confirmPassword;
+
+    if (!email || !firstName || !lastName || !password || !confirmPassword) {
+      this.handleEmailInput(email);
+      this.handleFirstNameInput(firstName);
+      this.handleLastNameInput(lastName);
+      this.handlePasswordInput(password);
+      this.handlePasswordConfirmlInput(confirmPassword);
     }
-    this.props.navigation.navigate('App');
+
+    if (
+      !this.state.validEmail ||
+      !this.state.validFirstName ||
+      !this.state.validLastName ||
+      !this.state.validPassword ||
+      !this.state.validConfirmPassword
+    ) {
+      return;
+    }
+
+    console.log('success');
+
+    // await this.signUp();
+
+    // await this.logIn();
+
+    // this.props.navigation.navigate('App');
   };
 
   signUp = async () => {
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        first_name: this.state.firstName,
-        last_name: this.state.lastName,
-        email: this.state.email,
-        password: this.state.password,
-      }),
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({
-          userId: responseJson.user_id,
-        });
+    return (
+      fetch('http://10.0.2.2:3333/api/1.0.0/user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          first_name: this.state.firstName,
+          last_name: this.state.lastName,
+          email: this.state.email,
+          password: this.state.password,
+        }),
       })
-      .catch((error) => {
-        console.log(error);
-      });
+        .then((response) => response.json())
+        //   .then((responseJson) => {
+        //     this.setState({
+        //       userId: responseJson.user_id,
+        //     });
+        //   })
+        .catch((error) => {
+          console.log(error);
+        })
+    );
   };
 
   logIn = async () => {
@@ -86,34 +183,10 @@ class Signup extends Component {
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        this.setState({
-          data: responseJson,
-        });
         setItem('AUTH_TOKEN', responseJson.token);
         setItem('USER_ID', responseJson.id.toString());
       })
       .catch((error) => {
-        console.log(error.status);
-        // response.status
-        console.log('err');
-        console.log(error);
-      });
-  };
-
-  getUserInfo = async (userId) => {
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + this.state.data.id, {
-      headers: {
-        'x-Authorization': this.state.data.token,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        setItem('USER_DATA', JSON.stringify(responseJson));
-      })
-      .catch((error) => {
-        console.log(error.status);
-        // response.status
-        console.log('err');
         console.log(error);
       });
   };
@@ -123,8 +196,8 @@ class Signup extends Component {
 
     return (
       <Container style={styles.container}>
-        <Header style={styles.container}>
-          <Left>
+        <Header style={styles.header}>
+          <Left style={styles.header_left}>
             <Button transparent>
               <FontAwesomeIcon
                 icon={faChevronLeft}
@@ -134,17 +207,28 @@ class Signup extends Component {
               />
             </Button>
           </Left>
+          <Body style={styles.header_body}>
+            <Title style={styles.title}>Sign Up</Title>
+          </Body>
         </Header>
 
-        <Content style={styles.content}>
-          <Form>
-            <Item style={styles.item} last>
+        <ScrollView
+          contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}>
+          <Form style={styles.form}>
+            <Item style={styles.item}>
               <Input
                 style={styles.input}
                 placeholder="Email"
                 onChangeText={this.handleEmailInput}
               />
             </Item>
+            {!this.state.validEmail && this.state.submitted && (
+              <View>
+                <Text style={styles.error_text}>
+                  {this.state.emailErrorText}
+                </Text>
+              </View>
+            )}
 
             <Item style={styles.item}>
               <Input
@@ -153,35 +237,73 @@ class Signup extends Component {
                 onChangeText={this.handleFirstNameInput}
               />
             </Item>
+            {!this.state.validFirstName && this.state.submitted && (
+              <View>
+                <Text style={styles.error_text}>
+                  {this.state.firstNameErrorText}
+                </Text>
+              </View>
+            )}
 
-            <Item style={styles.item} last>
+            <Item style={styles.item}>
               <Input
                 style={styles.input}
                 placeholder="Last Name"
                 onChangeText={this.handleLastNameInput}
               />
             </Item>
+            {!this.state.validLastName && this.state.submitted && (
+              <View>
+                <Text style={styles.error_text}>
+                  {this.state.lastNameErrorText}
+                </Text>
+              </View>
+            )}
 
-            <Item style={styles.item} last>
+            <Item style={styles.item}>
               <Input
                 style={styles.input}
                 placeholder="Password"
-                onChangeText={this.handlePasswordlInput}
+                onChangeText={this.handlePasswordInput}
+                secureTextEntry={true}
               />
             </Item>
+            {!this.state.validPassword && this.state.submitted && (
+              <View>
+                <Text style={styles.error_text}>
+                  {this.state.passwordErrorText}
+                </Text>
+              </View>
+            )}
 
-            <Text style={styles.checkbox}>
-              {translate('terms_conditions')}
-              <CheckBox checked={true} />
-            </Text>
+            <Item style={styles.item}>
+              <Input
+                style={styles.input}
+                placeholder="Confirm Password"
+                onChangeText={this.handlePasswordConfirmlInput}
+                secureTextEntry={true}
+              />
+            </Item>
+            {!this.state.validConfirmPassword && this.state.submitted && (
+              <View>
+                <Text style={styles.error_text}>
+                  {this.state.confirmPasswordErrorText}
+                </Text>
+              </View>
+            )}
+            {/* 
+          <Text style={styles.checkbox}>
+            {translate('terms_conditions')}
+            <CheckBox checked={true} />
+          </Text> */}
 
             <TouchableOpacity
-              style={styles.btn_primary}
+              style={[styles.button, styles.btn_primary]}
               onPress={() => this.signUpEvent()}>
               <Text style={styles.btn_text}>{translate('signup')}</Text>
             </TouchableOpacity>
           </Form>
-        </Content>
+        </ScrollView>
       </Container>
     );
   }
@@ -192,18 +314,36 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0DFD5',
   },
   header: {
-    backgroundColor: '#E0DFD5',
     height: 50,
     borderBottomWidth: 0.5,
+    backgroundColor: '#E0DFD5',
   },
-  header_left: {},
-  item: {
-    borderBottomWidth: 0,
+  header_left: {
+    position: 'absolute',
+    left: 10,
+  },
+  header_body: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  title: {
+    color: '#313638',
+  },
+  content: {
+    // flex: 1,
+    // justifyContent: 'center',
+    flexGrow: 1,
+    justifyContent: 'center',
+    borderColor: 'red',
+    borderWidth: 3,
+  },
+  form: {
+    // flex: 1,
+    // justifyContent: 'center',
   },
   input: {
-    width: '75%',
     margin: 10,
-    padding: 10,
+    marginLeft: 0,
     paddingLeft: 20,
     borderWidth: 0.5,
     borderRadius: 5,
@@ -213,12 +353,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  btn_primary: {
+  error_text: {
+    color: 'tomato',
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  button: {
     alignItems: 'center',
     borderWidth: 1,
+    borderRadius: 5,
+    margin: 10,
+    marginRight: 5,
+  },
+  btn_primary: {
     borderColor: '#F06543',
     backgroundColor: '#F06543',
-    borderRadius: 5,
   },
   btn_text: {
     padding: 10,
