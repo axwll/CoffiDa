@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { API_URL } from 'react-native-dotenv';
 
 class APIRequests extends Component {
   constructor(props) {
@@ -34,7 +33,7 @@ class APIRequests extends Component {
   };
 
   get = (url) => {
-    return fetch(${API_URL} + url, {
+    return fetch(API_URL + url, {
       method: 'GET',
       headers: {'x-Authorization': this.state.token},
     })

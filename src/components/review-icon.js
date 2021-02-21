@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Stars from 'react-native-stars';
 
-import Empty from '../../assets/ratings/rating-empty-light.png';
-import PrimaryEmpty from '../../assets/ratings/rating-empty-primary.png';
-import Full from '../../assets/ratings/rating-full-light.png';
-import PrimaryFull from '../../assets/ratings/rating-full-primary.png';
-import Half from '../../assets/ratings/rating-half-light.png';
-import PrimaryHalf from '../../assets/ratings/rating-half-primary.png';
+import Empty from '../assets/ratings/rating-empty-light.png';
+import PrimaryEmpty from '../assets/ratings/rating-empty-primary.png';
+import Full from '../assets/ratings/rating-full-light.png';
+import PrimaryFull from '../assets/ratings/rating-full-primary.png';
+import Half from '../assets/ratings/rating-half-light.png';
+import PrimaryHalf from '../assets/ratings/rating-half-primary.png';
 
 class ReviewIcon extends Component {
   render() {

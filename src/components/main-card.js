@@ -55,23 +55,8 @@ class MainCard extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#E8E9EB',
-  },
-  header: {
-    height: 50,
-    borderBottomWidth: 0.5,
-    backgroundColor: 'white',
-    alignItems: 'center',
-  },
   srch: {
     flex: 1,
-  },
-  subHeading: {
-    height: 50,
-    backgroundColor: 'grey',
   },
   right: {
     flex: 1,

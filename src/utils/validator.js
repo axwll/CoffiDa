@@ -1,4 +1,4 @@
-import ILLEGAL_WORDS from '../../assets/data/profanity-filter.json';
+import ILLEGAL_WORDS from '../assets/data/profanity-filter.json';
 
 interface Response {
   status: Boolean;
@@ -23,11 +23,14 @@ class FormValidator extends Component<Response> {
     const containNumbers = /\d/.test(password);
 
     if (password.length === 0) {
-      return new Response(false, 'Password is required');Password is required
+      return new Response(false, 'Password is required');
     } else if (password.length < 7) {
       return new Response(false, 'Password must be seven or more characters');
     } else if (!containsLetters || !containNumbers) {
-      return new Response(false, 'Password must contain both letters and numbers');
+      return new Response(
+        false,
+        'Password must contain both letters and numbers',
+      );
     } else {
       return new Response(true);
     }

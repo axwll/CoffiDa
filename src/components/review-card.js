@@ -5,8 +5,9 @@ import { Button, Card, CardItem, Left, Right } from 'native-base';
 import React, { Component } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
-import { translate } from '../../locales';
+import LoadingSpinner from '../components/loading-spinner';
 import ReviewIcon from '../components/review-icon';
+import { translate } from '../locales';
 import APIRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 
@@ -90,7 +91,7 @@ class ReviewCard extends Component {
 
   render() {
     if (this.state.loading) {
-      return <Text>Waiting for data</Text>;
+      return <LoadingSpinner size={50} />;
     } else {
       const review = this.props.shopReview;
       const locationId = this.props.locationId;

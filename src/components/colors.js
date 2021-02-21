@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useColorScheme } from 'react-native-appearance';
 
 import React } from 'react';
@@ -28,3 +28,21 @@ const Screen = () => {
     </View>
   );
 };
+
+export default StyleSheet.create({
+  primaryColor: {
+    color: '#F06543',
+  },
+  secondaryColor: {
+    color: '#F09D51',
+  },
+  textLight: {
+    color: '#F09D51',
+  },
+  textDark: {
+    color: '#F09D51',
+  },
+  backgroundColor: {
+    backgroundColor: '#E0DFD5',
+  },
+});

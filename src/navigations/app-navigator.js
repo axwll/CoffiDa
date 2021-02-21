@@ -9,7 +9,7 @@ import EditAccountScreen from '../screens/edit-account-screen';
 import ExploreScreen from '../screens/explore-screen';
 import HomeScreen from '../screens/home-screen';
 import PhotoDecisionScreen from '../screens/photo-decision-screen';
-import ProfileScreen from '../screens/profile/profile-screen';
+import ProfileScreen from '../screens/profile-screen';
 import SelectedShopScreen from '../screens/selected-shop-screen';
 import SettingsScreen from '../screens/settings-screen';
 import TakePhotoScreen from '../screens/take-photo-screen';
