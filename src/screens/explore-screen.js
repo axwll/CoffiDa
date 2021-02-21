@@ -1,3 +1,4 @@
+import { METER_FEET_CONVERSION_R, METER_MILES_CONVERSION_R } from '@env';
 import { faSearchLocation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { getDistance } from 'geolib';
@@ -109,10 +110,10 @@ class Explore extends Component {
         let conversion = 1;
         let suffix = 'm';
         if (distance < 1000) {
-          conversion = 3.2808; // ENV VAR
+          conversion = METER_FEET_CONVERSION_R;
           suffix = 'ft';
         } else {
-          conversion = 0.000621371192; // ENV VAR
+          conversion = METER_MILES_CONVERSION_R;
           suffix = 'miles';
         }
 
