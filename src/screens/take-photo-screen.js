@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
-import { getItem } from '../utils/async-storage';
+import ApiRequests from '../utils/api-requests';
 import { toast } from '../utils/toast';
 
 class TakePhoto extends Component {
@@ -12,49 +12,33 @@ class TakePhoto extends Component {
     super(props);
   }
 
-  async componentDidMount() {
-    this.setState({token: await getItem('AUTH_TOKEN')});
-  }
-
   takePicture = async () => {
     if (this.camera) {
       const options = {quality: 0.5, base64: true};
       const data = await this.camera.takePictureAsync(options);
 
-      console.log(data.uri);
       const locationId = this.props.navigation.getParam('locationId');
       const reviewId = this.props.navigation.getParam('reviewId');
 
-      return fetch(
-        `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/review/${reviewId}/photo`,
-        {
-          method: 'POST',
-          headers: {
-            'x-Authorization': this.state.token,
-            'Content-Type': 'image/jpeg',
-          },
-          body: data,
-        },
-      )
-        .then((response) => {
-          if (response.status === 200) {
-            toast('Picture Added');
-          } else {
-            toast('Error adding picture');
-          }
+      const response = ApiRequests.post(
+        `/location/${locationId}/review/${reviewId}/photo`,
+        data,
+        false,
+        'image/jpeg',
+      );
 
-          if (this.props.navigation.getParam('update')) {
-            this.props.navigation.navigate('Profile');
-            return;
-          }
+      if (response === 'OK') {
+        toast('Picture Added');
 
-          this.props.navigation.navigate('SelectedShop', {
-            locationId: locationId,
-          });
-        })
-        .catch((error) => {
-          console.log(error);
+        if (this.props.navigation.getParam('update')) {
+          this.props.navigation.navigate('Profile');
+          return;
+        }
+
+        this.props.navigation.navigate('SelectedShop', {
+          locationId: locationId,
         });
+      }
     }
   };
 

@@ -5,6 +5,7 @@ import { withNavigation } from 'react-navigation';
 import LoadingSpinner from '../../components/loading-spinner';
 import MainCard from '../../components/main-card';
 import { translate } from '../../locales';
+import ApiRequests from '../../utils/api-requests';
 import { getItem } from '../../utils/async-storage';
 
 class FavoritesTab extends Component {
@@ -27,22 +28,13 @@ class FavoritesTab extends Component {
   }
 
   findFavorites = () => {
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/find?search_in=favourite`, {
-      headers: {
-        'x-Authorization': this.state.token,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({
-          favorites: responseJson,
-          loading: false,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        this.setState({loading: false});
-      });
+    const response = ApiRequests.get('/find?search_in=favourite');
+
+    if (response) {
+      this.setState({favorites: responseJson});
+    }
+
+    this.setState({loading: false});
   };
 
   renderNoData = () => {

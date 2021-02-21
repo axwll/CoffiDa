@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { translate } from '../../../locales';
+import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 
 let editType = null;
@@ -14,6 +15,7 @@ class EditAccount extends Component {
   constructor(props) {
     super(props);
 
+    // TODO: put this into state props
     editType = this.props.navigation.getParam('type');
     userInfo = this.props.navigation.getParam('userInfo');
 
@@ -73,21 +75,12 @@ class EditAccount extends Component {
     this.setState({submitted: true});
 
     const userId = userInfo.user_id;
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-Authorization': this.state.token,
-      },
-      body: JSON.stringify(data),
-    })
-      .then(() => {
-        this.props.navigation.state.params.onGoBack();
-        this.props.navigation.goBack();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const response = ApiRequests.patch(`/user/${userId}`);
+
+    if (response === 'OK') {
+      this.props.navigation.state.params.onGoBack();
+      this.props.navigation.goBack();
+    }
   };
 
   render() {

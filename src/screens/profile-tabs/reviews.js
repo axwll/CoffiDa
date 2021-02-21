@@ -17,7 +17,6 @@ class Reviews extends Component {
 
     this.state = {
       loading: true,
-      loadingMessage: 'Loading data',
       userInfo: [],
     };
   }
@@ -34,42 +33,25 @@ class Reviews extends Component {
   getUserInfo = () => {
     const userId = this.state.userId;
 
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
-      headers: {
-        'x-Authorization': this.state.token,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({
-          userInfo: responseJson,
-          loading: false,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        this.setState({loading: false});
-      });
+    const response = ApiRequests.get(`/user/${userId}`);
+
+    if (response) {
+      this.setState({userInfo: responseJson});
+    }
+
+    this.setState({loading: false});
   };
 
   deleteReview = (locationId, reviewId) => {
-    this.setState({
-      loading: true,
-      loadingMessage: 'Deleting review',
-    });
-    return fetch(
-      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/review/${reviewId}`,
-      {
-        method: 'DELETE',
-        headers: {'x-Authorization': this.state.token},
-      },
-    )
-      .then(() => {
-        this.findReviews();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const response = ApiRequests.delete(
+      `/location/${locationId}/review/${reviewId}`,
+    );
+
+    if (response) {
+      this.setState({loading: true});
+
+      this.getUserInfo();
+    }
   };
 
   editReview = (data) => {

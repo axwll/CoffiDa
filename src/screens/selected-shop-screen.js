@@ -9,6 +9,7 @@ import LoadingSpinner from '../components/loading-spinner';
 import ReviewCard from '../components/review-card';
 import ReviewIcon from '../components/review-icon';
 import { translate } from '../locales';
+import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 
 let locationId = null;
@@ -20,17 +21,13 @@ class SelectedShop extends Component {
     this.state = {
       loading: true,
       favorite: false,
+      locationId: this.props.navigation.getParam('locationId'),
       shopData: null,
     };
-
-    locationId = this.props.navigation.getParam('locationId');
   }
 
   async componentDidMount() {
-    this.setState({
-      token: await getItem('AUTH_TOKEN'),
-      userId: await getItem('USER_ID'),
-    });
+    this.setState({userId: await getItem('USER_ID')});
 
     this._onFocusListener = this.props.navigation.addListener(
       'didFocus',
@@ -47,24 +44,19 @@ class SelectedShop extends Component {
   }
 
   getLocation = () => {
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/location/${locationId}`, {
-      method: 'GET',
-      headers: {'x-Authorization': this.state.token},
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({shopData: responseJson});
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const locationId = this.state.locationId;
+    const response = ApiRequests.get(`/location/${locationId}`);
+
+    if (response) {
+      this.setState({shopData: response});
+    }
   };
 
   checkIfAlreadyFavorited = () => {
     const fav_locations = this.state.currentUser.favourite_locations;
     if (fav_locations.length !== 0) {
       fav_locations.forEach((favs) => {
-        if (favs.location_id === locationId) {
+        if (favs.location_id === this.state.locationId) {
           // User has already favorited the location
           this.setState({favorite: true});
           return;
@@ -74,61 +66,39 @@ class SelectedShop extends Component {
   };
 
   getUserInfo = (userId) => {
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
-      headers: {
-        'x-Authorization': this.state.token,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({currentUser: responseJson});
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const response = ApiRequests.get(`/user/${userId}`);
+
+    if (response) {
+      this.setState({currentUser: response});
+    }
   };
 
   favButtonPressed = () => {
     if (this.state.favorite) {
-      this.unFavLocation(locationId);
+      this.unFavLocation();
       return;
     }
 
-    this.favLocation(locationId);
+    this.favLocation();
   };
 
-  favLocation = (locationId) => {
-    return fetch(
-      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/favourite`,
-      {
-        method: 'POST',
-        headers: {'x-Authorization': this.state.token},
-      },
-    )
-      .then((response) => {
-        console.log(response.status);
-        this.setState({favorite: true});
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  favLocation = () => {
+    const locationId = this.state.locationId;
+    const response = ApiRequests.get(`/location/${locationId}/favourite`);
+
+    if (response) {
+      this.setState({favorite: true});
+    }
   };
 
-  unFavLocation = (locationId) => {
-    return fetch(
-      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/favorite`,
-      {
-        method: 'DELETE',
-        headers: {'x-Authorization': this.state.token},
-      },
-    )
-      .then(() => {
-        this.setState({favorite: false});
-        console.log('unfavorited');
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  unFavLocation = () => {
+    const locationId = this.state.locationId;
+
+    const response = ApiRequests.delete(`/location/${locationId}/favourite`);
+
+    if (response === 'OK') {
+      this.setState({favorite: false});
+    }
   };
 
   getDirections = () => {
@@ -146,7 +116,7 @@ class SelectedShop extends Component {
       return <LoadingSpinner size={50} />;
     } else {
       return (
-        <Container style={styles.container} key={locationId}>
+        <Container style={styles.container} key={this.state.locationId}>
           <Header style={styles.header}>
             <Left style={styles.header_left}>
               <Button transparent>

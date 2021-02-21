@@ -8,7 +8,7 @@ import Stars from 'react-native-stars';
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
 import { translate } from '../locales';
-import { getItem } from '../utils/async-storage';
+import ApiRequests from '../utils/api-requests';
 import { toast } from '../utils/toast';
 import { profanityFilter } from '../utils/validator';
 
@@ -25,14 +25,8 @@ class AddReview extends Component {
     };
   }
 
-  async componentDidMount() {
-    this.setState({
-      token: await getItem('AUTH_TOKEN'),
-    });
-
-    const updateReview = this.props.navigation.getParam('update');
-
-    if (updateReview) {
+  componentDidMount() {
+    if (this.props.navigation.getParam('update')) {
       const reviewData = this.props.navigation.getParam('reviewData');
       this.setState({
         reviewId: reviewData.review_id,
@@ -81,9 +75,24 @@ class AddReview extends Component {
       return;
     }
 
-    this.modifyReview('POST', 'Review created!', locationId);
+    const postBody = JSON.stringify({
+      overall_rating: this.state.overallRating,
+      price_rating: this.state.priceRating,
+      quality_rating: this.state.qualRating,
+      clenliness_rating: this.state.cleanRating,
+      review_body: this.state.reviewBody,
+    });
 
-    this.findReview(locationId);
+    const response = ApiRequests.post(
+      `/location/${locationId}/review`,
+      postBody,
+    );
+
+    if (response) {
+      toast('Review created!');
+      // TODO: should this line go inside or out of the IF
+      this.findReview(locationId);
+    }
   };
 
   updateReview = (locationId) => {
@@ -91,70 +100,43 @@ class AddReview extends Component {
       return;
     }
 
-    this.modifyReview(
-      'PATCH',
-      'Review updated!',
-      locationId,
-      this.state.reviewId,
-    );
-  };
-
-  modifyReview = (method, successText, locationId, reviewId = '') => {
-    return fetch(
-      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/review/${reviewId}`,
+    const response = ApiRequests.patch(
+      `/location/${locationId}/review/${reviewId}`,
       {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-Authorization': this.state.token,
-        },
-        body: JSON.stringify({
-          overall_rating: this.state.overallRating,
-          price_rating: this.state.priceRating,
-          quality_rating: this.state.qualRating,
-          clenliness_rating: this.state.cleanRating,
-          review_body: this.state.reviewBody,
-        }),
+        overall_rating: this.state.overallRating,
+        price_rating: this.state.priceRating,
+        quality_rating: this.state.qualRating,
+        clenliness_rating: this.state.cleanRating,
+        review_body: this.state.reviewBody,
       },
-    )
-      .then((response) => {
-        toast(successText);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    );
+
+    if (response) {
+      toast('Review updated!');
+    }
   };
 
   findReview = (locationId) => {
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/find?search_in=reviewed`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-Authorization': this.state.token,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        const location = responseJson.find(
-          (loc) => loc.location_id === locationId,
-        );
+    const response = ApiRequests.get('/find?search_in=reviewed');
 
-        if (location.length === 0) {
-          // location has no reviews? it should do. Something must have gone wrong.
-          return;
-        }
+    if (response) {
+      const location = responseJson.find(
+        (loc) => loc.location_id === locationId,
+      );
 
-        this.extractId(location);
-        if (this.state.reviewId) {
-          this.props.navigation.navigate('AddPhoto', {
-            locationId: locationId,
-            reviewId: this.state.reviewId,
-          });
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      if (location.length === 0) {
+        // location has no reviews? it should do. Something must have gone wrong.
+        return;
+      }
+
+      this.extractId(location);
+      if (this.state.reviewId) {
+        this.props.navigation.navigate('AddPhoto', {
+          locationId: locationId,
+          reviewId: this.state.reviewId,
+        });
+      }
+    }
   };
 
   extractId = (location) => {
@@ -213,8 +195,7 @@ class AddReview extends Component {
           {this.checkImage() && (
             <View>
               <Image
-                //   source={require('../assets/lofi-coffee.png')} // change this
-                source={{uri: shopData.photo_path}} // change this
+                source={{uri: shopData.photo_path}}
                 style={{height: 200, width: 'auto', flex: 1}}
               />
             </View>

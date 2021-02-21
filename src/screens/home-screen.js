@@ -11,6 +11,7 @@ import AbstractComponent from '../components/abstract-component';
 import LoadingSpinner from '../components/loading-spinner';
 import MainCard from '../components/main-card';
 import { translate } from '../locales';
+import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 import { toast } from '../utils/toast';
 
@@ -33,52 +34,26 @@ class Home extends AbstractComponent {
   }
 
   async componentDidMount() {
-    // this.props.navigation.navigate('Auth');
-    // return;
-
-    const token = await getItem('AUTH_TOKEN');
-
-    if (!token) {
+    if (!(await getItem('AUTH_TOKEN'))) {
       this.props.navigation.navigate('Auth');
       return;
     }
 
-    this.setState({token: token});
-    this.listShops();
-  }
-
-  listShops = () => {
+    // lists all shops
     this.find();
-  };
+  }
 
   find = () => {
     const query = `?limit=${this.state.limit}&offset=${this.state.offset}${this.state.queryParams}`;
 
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/find${query}`, {
-      headers: {
-        'x-Authorization': this.state.token,
-      },
-    })
-      .then((response) => {
-        if (response.status === 401) {
-          // Unauthorized
-          this.props.navigation.navigate('Auth');
-          return;
-        }
-        return response.json();
-      })
-      .then((responseJson) => {
-        // console.log(responseJson);
-        const existing = this.state.coffeeShops;
-        this.setState({
-          coffeeShops: existing.concat(responseJson),
-          loading: false,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        this.setState({loading: false});
-      });
+    const response = ApiRequests.get(`find${query}`);
+
+    if (response) {
+      const existing = this.state.coffeeShops;
+      this.setState({coffeeShops: existing.concat(responseJson)});
+    }
+
+    this.setState({loading: false});
   };
 
   clearFilters = () => {

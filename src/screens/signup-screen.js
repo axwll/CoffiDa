@@ -5,8 +5,9 @@ import React, { Component } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { translate } from '../locales';
+import ApiRequests from '../utils/api-requests';
 import { setItem } from '../utils/async-storage';
-import { validateEmail, validateName, validatePassword, validatePasswordMatch } from '../utils/validator';
+import Validator from '../utils/validator';
 
 class Signup extends Component {
   constructor(props) {
@@ -28,7 +29,7 @@ class Signup extends Component {
   }
 
   handleEmailInput = async (email) => {
-    const response = validateEmail(email);
+    const response = Validator.validateEmail(email);
 
     await this.stateSetter(
       response,
@@ -40,7 +41,7 @@ class Signup extends Component {
   };
 
   handleFirstNameInput = async (firstName) => {
-    const response = validateName('First Name', firstName);
+    const response = Validator.validateName('First Name', firstName);
 
     await this.stateSetter(
       response,
@@ -52,7 +53,7 @@ class Signup extends Component {
   };
 
   handleLastNameInput = async (lastName) => {
-    const response = validateName('Last Name', lastName);
+    const response = Validator.validateName('Last Name', lastName);
 
     await this.stateSetter(
       response,
@@ -64,7 +65,7 @@ class Signup extends Component {
   };
 
   handlePasswordInput = async (password) => {
-    const response = validatePassword(password);
+    const response = Validator.validatePassword(password);
 
     await this.stateSetter(
       response,
@@ -82,7 +83,7 @@ class Signup extends Component {
       // need to have a password before i can check they match
       return;
     }
-    const response = validatePasswordMatch(password, confirmPassword);
+    const response = Validator.validatePasswordMatch(password, confirmPassword);
 
     await this.stateSetter(
       response,
@@ -97,7 +98,7 @@ class Signup extends Component {
     if (!response.status) {
       this.setState({
         [booleanKey]: false,
-        [errorKey]: response.error,
+        [errorKey]: response.message,
         [key]: value,
       });
     } else {
@@ -135,60 +136,34 @@ class Signup extends Component {
       return;
     }
 
-    console.log('success');
-
-    // await this.signUp();
-
-    // await this.logIn();
-
-    // this.props.navigation.navigate('App');
+    await this.signUp();
+    await this.logIn();
   };
 
   signUp = async () => {
-    return (
-      fetch('http://10.0.2.2:3333/api/1.0.0/user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          first_name: this.state.firstName,
-          last_name: this.state.lastName,
-          email: this.state.email,
-          password: this.state.password,
-        }),
-      })
-        .then((response) => response.json())
-        //   .then((responseJson) => {
-        //     this.setState({
-        //       userId: responseJson.user_id,
-        //     });
-        //   })
-        .catch((error) => {
-          console.log(error);
-        })
-    );
+    const postBody = JSON.stringify({
+      first_name: this.state.firstName,
+      last_name: this.state.lastName,
+      email: this.state.email,
+      password: this.state.password,
+    });
+
+    ApiRequests.post('/user', postBody);
   };
 
   logIn = async () => {
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: this.state.email,
-        password: this.state.password,
-      }),
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        setItem('AUTH_TOKEN', responseJson.token);
-        setItem('USER_ID', responseJson.id.toString());
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const postBody = JSON.stringify({
+      email: this.state.email,
+      password: this.state.password,
+    };
+
+    const response = ApiRequests.post('/user/login', postBody, true);
+
+    if (response) {
+      setItem('AUTH_TOKEN', response.token);
+      setItem('USER_ID', response.id.toString());
+      this.props.navigation.navigate('App');
+    }
   };
 
   render() {
@@ -214,7 +189,7 @@ class Signup extends Component {
 
         <ScrollView
           contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}>
-          <Form style={styles.form}>
+          <Form>
             <Item style={styles.item}>
               <Input
                 style={styles.input}
@@ -291,11 +266,6 @@ class Signup extends Component {
                 </Text>
               </View>
             )}
-            {/* 
-          <Text style={styles.checkbox}>
-            {translate('terms_conditions')}
-            <CheckBox checked={true} />
-          </Text> */}
 
             <TouchableOpacity
               style={[styles.button, styles.btn_primary]}
@@ -328,18 +298,6 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#313638',
-  },
-  content: {
-    // flex: 1,
-    // justifyContent: 'center',
-    flexGrow: 1,
-    justifyContent: 'center',
-    borderColor: 'red',
-    borderWidth: 3,
-  },
-  form: {
-    // flex: 1,
-    // justifyContent: 'center',
   },
   input: {
     margin: 10,

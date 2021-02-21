@@ -1,0 +1,22 @@
+[
+    {
+        "code": 400,
+        "message": "Bad Request"
+    },
+    {
+        "code": 401,
+        "message": "Unauthorised"
+    },
+    {
+        "code": 403,
+        "message": "Forbidden"
+    },
+    {
+        "code": 404,
+        "message": "Not Found"
+    },
+    {
+        "code": 500,
+        "message": "Server Error"
+    }
+]

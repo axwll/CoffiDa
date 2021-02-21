@@ -10,7 +10,7 @@ import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
 import LoadingSpinner from '../components/loading-spinner';
 import { translate } from '../locales';
-import { getItem } from '../utils/async-storage';
+import ApiRequests from '../utils/api-requests';
 import { toast } from '../utils/toast';
 import { profanityFilter } from '../utils/validator';
 
@@ -33,8 +33,6 @@ class UpdateReview extends Component {
 
   async componentDidMount() {
     this.setState({
-      token: await getItem('AUTH_TOKEN'),
-      userId: await getItem('USER_ID'),
       shopData: this.props.navigation.getParam('shopData'),
     });
 
@@ -45,35 +43,25 @@ class UpdateReview extends Component {
         this.setState({loading: false});
       },
     );
-
-    // this.setState({loading: false});
   }
 
   checkForImage = () => {
     const locationId = this.state.shopData.location_id;
     const reviewId = this.state.reviewId;
 
-    return fetch(
-      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/review/${reviewId}/photo`,
-      {
-        headers: {'x-Authorization': this.state.token},
-      },
-    )
-      .then((response) => {
-        if (response.status === 404) {
-          this.setState({imageExists: false});
-          return;
-        }
+    const response = ApiRequests.get(
+      `/location/${locationId}/review/${reviewId}/photo`,
+    );
 
-        this.setState({
-          imageExists: true,
-          imageUrl: response.url,
-          //   imageUrl: response.url + '&timestamp=' + new Date(),
-        });
-      })
-      .catch((error) => {
-        console.log(error);
+    if (response) {
+      this.setState({
+        imageExists: true,
+        imageUrl: response.url,
+        //   imageUrl: response.url + '&timestamp=' + new Date(),
       });
+    } else {
+      this.setState({imageExists: false});
+    }
   };
 
   calculateOverall = () => {
@@ -133,29 +121,22 @@ class UpdateReview extends Component {
     const locationId = this.state.shopData.location_id;
     const reviewId = this.state.reviewId;
 
-    return fetch(
-      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/review/${reviewId}`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-Authorization': this.state.token,
-        },
-        body: JSON.stringify({
-          overall_rating: this.state.overallRating,
-          price_rating: this.state.priceRating,
-          quality_rating: this.state.qualRating,
-          clenliness_rating: this.state.cleanRating,
-          review_body: this.state.reviewBody,
-        }),
-      },
-    )
-      .then((response) => {
-        toast('Review updated!');
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const patchBody = JSON.stringify({
+      overall_rating: this.state.overallRating,
+      price_rating: this.state.priceRating,
+      quality_rating: this.state.qualRating,
+      clenliness_rating: this.state.cleanRating,
+      review_body: this.state.reviewBody,
+    });
+
+    const response = ApiRequests.patch(
+      `/location/${locationId}/review/${reviewId}`,
+      patchBody,
+    );
+
+    if (response === 'OK') {
+      toast('Review updated!');
+    }
   };
 
   render() {

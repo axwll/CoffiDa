@@ -5,49 +5,44 @@ import React, { Component } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 
 import { translate } from '../../../locales';
-import { clear, getItem, setItem } from '../utils/async-storage';
+import LoadingSpinner from '../components/loading-spinner';
+import ApiRequests from '../utils/api-requests';
+import { clear, getItem } from '../utils/async-storage';
 
 class Settings extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      loading: true,
       userInfo: [],
     };
   }
 
   async componentDidMount() {
-    this.setState({
-      token: await getItem('AUTH_TOKEN'),
-      userInfo: JSON.parse(await getItem('USER_DATA')),
-    });
+    this.setState({userId: JSON.parse(await getItem('USER_ID'))});
+
+    this.getUserInfo();
   }
 
   openEditProfile = async (type) => {
     this.props.navigation.navigate('EditAccount', {
       type: type,
-      userInfo: this.state.userInfo,
       onGoBack: () => this.getUserInfo(),
     });
   };
 
   getUserInfo = () => {
-    console.log('goback');
-    const userId = this.state.userInfo.user_id;
+    this.setState({loading: true});
 
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
-      headers: {
-        'x-Authorization': this.state.token,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        setItem('USER_DATA', JSON.stringify(responseJson));
-        this.setState({userInfo: responseJson});
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const userId = this.state.userId;
+    const response = ApiRequests.get(`/user/${userId}`);
+
+    if (response) {
+      this.setState({userInfo: response});
+    }
+
+    this.setState({loading: false});
   };
 
   signOut = async () => {
@@ -56,70 +51,75 @@ class Settings extends Component {
   };
 
   render() {
-    const navigation = this.props.navigation;
+    if (this.state.loading) {
+      return <LoadingSpinner size={50} />;
+    } else {
+      const navigation = this.props.navigation;
 
-    return (
-      <Container style={styles.container}>
-        <Header style={styles.header}>
-          <Left style={styles.header_left}>
-            <Button transparent>
-              <FontAwesomeIcon
-                icon={faChevronLeft}
-                size={20}
-                color={'#F06543'}
-                onPress={() => navigation.navigate('Profile')}
-              />
+      return (
+        <Container style={styles.container}>
+          <Header style={styles.header}>
+            <Left style={styles.header_left}>
+              <Button transparent>
+                <FontAwesomeIcon
+                  icon={faChevronLeft}
+                  size={20}
+                  color={'#F06543'}
+                  onPress={() => navigation.navigate('Profile')}
+                />
+              </Button>
+            </Left>
+
+            <Body style={styles.header_body}>
+              <Title style={styles.title}>{translate('settings')}</Title>
+            </Body>
+          </Header>
+
+          <Content padder style={styles.content}>
+            <Text>
+              {translate('account')}: {this.state.userInfo.email}
+            </Text>
+            <Card transparent>
+              <TouchableOpacity onPress={() => this.openEditProfile('email')}>
+                <CardItem>
+                  <Body>
+                    <Text>{translate('change_email')}</Text>
+                  </Body>
+                </CardItem>
+              </TouchableOpacity>
+            </Card>
+            <Card transparent>
+              <TouchableOpacity
+                onPress={() => this.openEditProfile('password')}>
+                <CardItem>
+                  <Body>
+                    <Text>{translate('reset_password')}</Text>
+                  </Body>
+                </CardItem>
+              </TouchableOpacity>
+            </Card>
+            <Text>{translate('preferences')}</Text>
+            <Card transparent>
+              <CardItem>
+                <Body>
+                  <Text>{translate('permissions')}</Text>
+                </Body>
+              </CardItem>
+            </Card>
+            <Card transparent>
+              <CardItem>
+                <Body>
+                  <Text>{translate('accessibility')}</Text>
+                </Body>
+              </CardItem>
+            </Card>
+            <Button block>
+              <Text onPress={() => this.signOut()}>{translate('signout')}</Text>
             </Button>
-          </Left>
-
-          <Body style={styles.header_body}>
-            <Title style={styles.title}>{translate('settings')}</Title>
-          </Body>
-        </Header>
-
-        <Content padder style={styles.content}>
-          <Text>
-            {translate('account')}: {this.state.userInfo.email}
-          </Text>
-          <Card transparent>
-            <TouchableOpacity onPress={() => this.openEditProfile('email')}>
-              <CardItem>
-                <Body>
-                  <Text>{translate('change_email')}</Text>
-                </Body>
-              </CardItem>
-            </TouchableOpacity>
-          </Card>
-          <Card transparent>
-            <TouchableOpacity onPress={() => this.openEditProfile('password')}>
-              <CardItem>
-                <Body>
-                  <Text>{translate('reset_password')}</Text>
-                </Body>
-              </CardItem>
-            </TouchableOpacity>
-          </Card>
-          <Text>{translate('preferences')}</Text>
-          <Card transparent>
-            <CardItem>
-              <Body>
-                <Text>{translate('permissions')}</Text>
-              </Body>
-            </CardItem>
-          </Card>
-          <Card transparent>
-            <CardItem>
-              <Body>
-                <Text>{translate('accessibility')}</Text>
-              </Body>
-            </CardItem>
-          </Card>
-          <Button block>
-            <Text onPress={() => this.signOut()}>{translate('signout')}</Text>
-          </Button>
-        </Content>
-      </Container>
-    );
+          </Content>
+        </Container>
+      );
+    }
   }
 }
 

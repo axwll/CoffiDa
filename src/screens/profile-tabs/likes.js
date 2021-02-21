@@ -7,6 +7,7 @@ import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import LoadingSpinner from '../../components/loading-spinner';
 import ProfileReviewCard from '../../components/profile-review-card';
 import { translate } from '../../locales';
+import ApiRequests from '../../utils/api-requests';
 import { getItem } from '../../utils/async-storage';
 
 class Likes extends Component {
@@ -15,7 +16,6 @@ class Likes extends Component {
 
     this.state = {
       loading: true,
-      loadingMessage: 'Loading data',
       userInfo: [],
     };
   }
@@ -32,43 +32,27 @@ class Likes extends Component {
   getUserInfo = () => {
     const userId = this.state.userId;
 
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
-      headers: {
-        'x-Authorization': this.state.token,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        console.log(responseJson);
-        this.setState({
-          userInfo: responseJson,
-          loading: false,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        this.setState({loading: false});
-      });
+    const response = ApiRequests.get(`/user/${userId}`);
+
+    if (response) {
+      this.setState({userInfo: responseJson});
+    }
+
+    this.setState({loading: false});
   };
 
   unlikeReview = (locationId, reviewId) => {
-    this.setState({
-      loading: true,
-      loadingMessage: 'Removing like from reviw',
-    });
-    return fetch(
-      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/review/${reviewId}/like`,
-      {
-        method: 'DELETE',
-        headers: {'x-Authorization': this.state.token},
-      },
-    )
-      .then(() => {
-        this.getUserInfo();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    this.setState({loading: true});
+
+    const response = ApiRequests.delete(
+      `/location/${locationId}/review/${reviewId}/like`,
+    );
+
+    if (response === 'OK') {
+      this.getUserInfo();
+    }
+
+    this.setState({loading: false});
   };
 
   renderItem = ({item}) => {

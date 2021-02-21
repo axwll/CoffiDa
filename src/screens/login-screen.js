@@ -5,8 +5,9 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { translate } from '../locales';
+import ApiRequests from '../utils/api-requests';
 import { setItem } from '../utils/async-storage';
-import { validateEmail, validatePassword } from '../utils/validator';
+import Validator from '../utils/validator';
 
 class Login extends Component {
   constructor(props) {
@@ -22,13 +23,13 @@ class Login extends Component {
   }
 
   handleEmailInput = (email) => {
-    const response = validateEmail(email);
+    const response = Validator.validateEmail(email);
     console.log(response);
 
     if (!response.status) {
       this.setState({
         validEmail: false,
-        emailErrorText: response.error,
+        emailErrorText: response.message,
         email: email,
       });
     } else {
@@ -40,12 +41,12 @@ class Login extends Component {
   };
 
   handlePasswordlInput = (password) => {
-    const response = validatePassword(password);
+    const response = Validator.validatePassword(password);
 
     if (!response.status) {
       this.setState({
         validPassword: false,
-        passwordErrorText: response.error,
+        passwordErrorText: response.message,
         password: password,
       });
     } else {
@@ -58,7 +59,6 @@ class Login extends Component {
 
   logInEvent = async () => {
     this.setState({submitted: true});
-    console.log(this.state.email);
 
     if (!this.state.email || !this.state.password) {
       this.handleEmailInput(this.state.email);
@@ -70,33 +70,22 @@ class Login extends Component {
       return;
     }
 
-    await this.logIn();
-
-    this.props.navigation.navigate('App');
+    this.logIn();
   };
 
   logIn = async () => {
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: this.state.email,
-        password: this.state.password,
-      }),
-    })
-      .then((response) => {
-        console.log(response.status);
-        return response.json();
-      })
-      .then((responseJson) => {
-        setItem('AUTH_TOKEN', responseJson.token);
-        setItem('USER_ID', responseJson.id.toString());
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const postBody = JSON.stringify({
+      email: this.state.email,
+      password: this.state.password,
+    });
+
+    const response = ApiRequests.post('/user/login', postBody, true);
+
+    if (response) {
+      setItem('AUTH_TOKEN', response.token);
+      setItem('USER_ID', response.id.toString());
+      this.props.navigation.navigate('App');
+    }
   };
 
   render() {

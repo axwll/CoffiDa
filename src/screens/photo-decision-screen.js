@@ -2,23 +2,20 @@ import { Container } from 'native-base';
 import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { getItem } from '../utils/async-storage';
+import ApiRequests from '../utils/api-requests';
 import { toast } from '../utils/toast';
 
 class PhotoDecision extends Component {
   constructor(props) {
     super(props);
 
-    console.log(this.props.navigation.getParam('displayText'));
-
     this.state = {
       yesPressed: false,
     };
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     this.setState({
-      token: await getItem('AUTH_TOKEN'),
       locationId: this.props.navigation.getParam('locationId'),
       reviewId: this.props.navigation.getParam('reviewId'),
       displayText: this.props.navigation.getParam('displayText'),
@@ -28,12 +25,8 @@ class PhotoDecision extends Component {
   }
 
   yesClicked = () => {
-    console.log('yes');
     const locationId = this.state.locationId;
     const reviewId = this.state.reviewId;
-
-    console.log(this.state.locationId);
-    console.log(this.state.reviewId);
 
     if (!this.state.deleteReview) {
       this.props.navigation.navigate('TakePhoto', {
@@ -44,26 +37,14 @@ class PhotoDecision extends Component {
       return;
     }
 
-    return fetch(
-      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/review/${reviewId}/photo`,
-      {
-        method: 'DELETE',
-        headers: {'x-Authorization': this.state.token},
-      },
-    )
-      .then((response) => {
-        console.log(response.status);
-        if (response.status === 200) {
-          toast('Review photo deleted');
-        } else {
-          toast('Failed to delete review photo');
-        }
+    const response = ApiRequests.delete(
+      `/location${locationId}/review/${reviewId}/photo`,
+    );
 
-        this.props.navigation.navigate('Profile');
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    if (response === 'OK') {
+      toast('Review photo deleted');
+      this.props.navigation.navigate('Profile');
+    }
   };
 
   noClicked = () => {

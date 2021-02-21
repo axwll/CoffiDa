@@ -9,6 +9,7 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 import LoadingSpinner from '../components/loading-spinner';
 import ReviewIcon from '../components/review-icon';
+import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 import { toast } from '../utils/toast';
 
@@ -94,48 +95,33 @@ class Explore extends Component {
   };
 
   getNearbyLocations = () => {
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/find`, {
-      headers: {
-        'x-Authorization': this.state.token,
-      },
-    })
-      .then((response) => {
-        if (response.status === 401) {
-          // Unauthorized
-          this.props.navigation.navigate('Auth');
-          return;
+    const response = ApiRequests.get('/find');
+
+    if (response) {
+      const myLat = this.state.location.latitude;
+      const myLong = this.state.location.longitude;
+      response.forEach((location) => {
+        const distance = getDistance(
+          {latitude: myLat, longitude: myLong},
+          {latitude: location.latitude, longitude: location.longitude},
+        );
+
+        let conversion = 1;
+        let suffix = 'm';
+        if (distance < 1000) {
+          conversion = 3.2808; // ENV VAR
+          suffix = 'ft';
+        } else {
+          conversion = 0.000621371192; // ENV VAR
+          suffix = 'miles';
         }
-        return response.json();
-      })
-      .then((responseJson) => {
-        const myLat = this.state.location.latitude;
-        const myLong = this.state.location.longitude;
-        responseJson.forEach((location) => {
-          const distance = getDistance(
-            {latitude: myLat, longitude: myLong},
-            {latitude: location.latitude, longitude: location.longitude},
-          );
 
-          let conversion = 1;
-          let suffix = 'm';
-          if (distance < 1000) {
-            conversion = 3.2808; // ENV VAR
-            suffix = 'ft';
-          } else {
-            conversion = 0.000621371192; // ENV VAR
-            suffix = 'miles';
-          }
+        const calculated = Math.round(distance * conversion);
+        location.distance_from_me = `${calculated} ${suffix}`;
 
-          const calculated = Math.round(distance * conversion);
-          location.distance_from_me = `${calculated} ${suffix}`;
-
-          console.log(location.distance_from_me);
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        this.setState({loading: false});
+        console.log(location.distance_from_me);
       });
+    }
   };
 
   calculateDistance = (lat, long) => {};

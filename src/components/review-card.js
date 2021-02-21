@@ -7,6 +7,7 @@ import { StyleSheet, Text } from 'react-native';
 
 import { translate } from '../../locales';
 import ReviewIcon from '../components/review-icon';
+import APIRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 
 class ReviewCard extends Component {
@@ -33,18 +34,11 @@ class ReviewCard extends Component {
 
   // Not being used as i dont have review_user_id in the /location/{id} endpoint :((
   getReviewUserFromId = (userId) => {
-    return fetch('http://10.0.2.2:3333/api/1.0.0/user/' + userId, {
-      headers: {
-        'x-Authorization': this.state.token,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({reviewUser: responseJson});
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const response = APIRequests.get(`/user/${userId}`);
+
+    if (response) {
+      this.setState({reviewUser: response});
+    }
   };
 
   checkIfAlreadyLiked = () => {
@@ -74,37 +68,24 @@ class ReviewCard extends Component {
   };
 
   likeReview = (locationId, reviewId) => {
-    return fetch(
-      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/review/${reviewId}/like`,
-      {
-        method: 'POST',
-        headers: {'x-Authorization': this.state.token},
-      },
-    )
-      .then(() => {
-        this.setState({liked: true});
-        console.log('liked');
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const response = APIRequests.post(
+      `location/${locationId}/review/${reviewId}/like`,
+      {}, // This request doesnt need a request body
+    );
+
+    if (response) {
+      this.setState({liked: true});
+    }
   };
 
   unlikeReview = (locationId, reviewId) => {
-    return fetch(
-      `http://10.0.2.2:3333/api/1.0.0/location/${locationId}/review/${reviewId}/like`,
-      {
-        method: 'DELETE',
-        headers: {'x-Authorization': this.state.token},
-      },
-    )
-      .then(() => {
-        this.setState({liked: false});
-        console.log('unliked');
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const response = APIRequests.delete(
+      `location/${locationId}/review/${reviewId}/like`,
+    );
+
+    if (response) {
+      this.setState({liked: false});
+    }
   };
 
   render() {

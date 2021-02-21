@@ -6,6 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { translate } from '../../locales';
 import LoadingSpinner from '../components/loading-spinner';
+import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 import FavoritesTab from './profile-tabs/favorites';
 import LikesTab from './profile-tabs/likes';
@@ -24,10 +25,7 @@ class Profile extends Component {
   }
 
   async componentDidMount() {
-    this.setState({
-      token: await getItem('AUTH_TOKEN'),
-      userId: await getItem('USER_ID'),
-    });
+    this.setState({userId: await getItem('USER_ID')});
 
     this.getUserInfo();
   }
@@ -35,22 +33,13 @@ class Profile extends Component {
   getUserInfo = () => {
     const userId = this.state.userId;
 
-    return fetch(`http://10.0.2.2:3333/api/1.0.0/user/${userId}`, {
-      headers: {
-        'x-Authorization': this.state.token,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({
-          userInfo: responseJson,
-          loading: false,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        this.setState({loading: false});
-      });
+    const response = ApiRequests.get(`/user/${userId}`);
+
+    if (response) {
+      this.setState({userInfo: response});
+    }
+
+    this.setState({loading: false});
   };
 
   openSettings = () => {
