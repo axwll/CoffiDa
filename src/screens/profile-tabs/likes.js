@@ -4,10 +4,10 @@ import { Button, Card, CardItem, Left } from 'native-base';
 import React, { Component } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
-import { getItem } from '../../components/async-storage';
 import LoadingSpinner from '../../components/loading-spinner';
 import ProfileReviewCard from '../../components/profile-review-card';
 import { translate } from '../../locales';
+import { getItem } from '../../utils/async-storage';
 
 class Likes extends Component {
   constructor(props) {

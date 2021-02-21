@@ -6,10 +6,10 @@ import React, { Component } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { withNavigation } from 'react-navigation';
 
-import { getItem } from '../../components/async-storage';
 import LoadingSpinner from '../../components/loading-spinner';
 import ProfileReviewCard from '../../components/profile-review-card';
 import { translate } from '../../locales';
+import { getItem } from '../../utils/async-storage';
 
 class Reviews extends Component {
   constructor(props) {

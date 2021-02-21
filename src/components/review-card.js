@@ -6,8 +6,8 @@ import React, { Component } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
 import { translate } from '../../locales';
-import { getItem } from '../components/async-storage';
 import ReviewIcon from '../components/review-icon';
+import { getItem } from '../utils/async-storage';
 
 class ReviewCard extends Component {
   constructor(props) {

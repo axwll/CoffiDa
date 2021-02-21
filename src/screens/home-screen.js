@@ -8,11 +8,11 @@ import Stars from 'react-native-stars';
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
 import AbstractComponent from '../components/abstract-component';
-import { getItem } from '../components/async-storage';
-import { toast } from '../components/helper-functions';
 import LoadingSpinner from '../components/loading-spinner';
 import MainCard from '../components/main-card';
 import { translate } from '../locales';
+import { getItem } from '../utils/async-storage';
+import { toast } from '../utils/toast';
 
 class Home extends AbstractComponent {
   constructor(props) {

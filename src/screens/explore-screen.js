@@ -7,10 +7,10 @@ import { Animated, Dimensions, Image, PermissionsAndroid, StyleSheet, Text, Touc
 import Geolocation from 'react-native-geolocation-service';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { getItem } from '../components/async-storage';
-import { toast } from '../components/helper-functions';
 import LoadingSpinner from '../components/loading-spinner';
 import ReviewIcon from '../components/review-icon';
+import { getItem } from '../utils/async-storage';
+import { toast } from '../utils/toast';
 
 // import {mapDarkStyle} from '../styles/map-style';
 async function requestPermssion(params) {

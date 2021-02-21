@@ -5,8 +5,8 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { translate } from '../../locales';
-import { getItem } from '../components/async-storage';
 import LoadingSpinner from '../components/loading-spinner';
+import { getItem } from '../utils/async-storage';
 import FavoritesTab from './profile-tabs/favorites';
 import LikesTab from './profile-tabs/likes';
 import ReviewsTab from './profile-tabs/reviews';

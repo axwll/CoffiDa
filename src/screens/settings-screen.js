@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 
 import { translate } from '../../../locales';
-import { clear, getItem, setItem } from '../components/async-storage';
+import { clear, getItem, setItem } from '../utils/async-storage';
 
 class Settings extends Component {
   constructor(props) {

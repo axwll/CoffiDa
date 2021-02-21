@@ -8,11 +8,11 @@ import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
-import { getItem } from '../components/async-storage';
-import { toast } from '../components/helper-functions';
 import LoadingSpinner from '../components/loading-spinner';
-import { profanityFilter } from '../components/validator';
 import { translate } from '../locales';
+import { getItem } from '../utils/async-storage';
+import { toast } from '../utils/toast';
+import { profanityFilter } from '../utils/validator';
 
 class UpdateReview extends Component {
   constructor(props) {

@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { withNavigation } from 'react-navigation';
 
-import { getItem } from '../../components/async-storage';
 import LoadingSpinner from '../../components/loading-spinner';
 import MainCard from '../../components/main-card';
 import { translate } from '../../locales';
+import { getItem } from '../../utils/async-storage';
 
 class FavoritesTab extends Component {
   constructor(props) {

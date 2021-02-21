@@ -4,8 +4,8 @@ import React, { Component } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
-import { getItem } from '../components/async-storage';
-import { toast } from '../components/helper-functions';
+import { getItem } from '../utils/async-storage';
+import { toast } from '../utils/toast';
 
 class TakePhoto extends Component {
   constructor(props) {

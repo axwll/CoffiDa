@@ -5,11 +5,11 @@ import { Body, Button, Card, CardItem, Container, Content, Header, Left, Right, 
 import React, { Component } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { getItem } from '../components/async-storage';
 import LoadingSpinner from '../components/loading-spinner';
 import ReviewCard from '../components/review-card';
 import ReviewIcon from '../components/review-icon';
 import { translate } from '../locales';
+import { getItem } from '../utils/async-storage';
 
 let locationId = null;
 

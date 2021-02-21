@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { translate } from '../../../locales';
-import { getItem } from '../components/async-storage';
+import { getItem } from '../utils/async-storage';
 
 let editType = null;
 let userInfo = null;
