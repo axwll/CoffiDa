@@ -5,7 +5,7 @@ import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
 import AddReviewScreen from '../screens/add-review-screen';
-import EditProfileScreen from '../screens/edit-profile-screen';
+import EditAccountScreen from '../screens/edit-account-screen';
 import ExploreScreen from '../screens/explore-screen';
 import HomeScreen from '../screens/home-screen';
 import PhotoDecisionScreen from '../screens/photo-decision-screen';
@@ -21,7 +21,7 @@ import UpdateReviewScreen from '../screens/update-review-screen';
 const SettingsStack = createStackNavigator(
   {
     Settings: SettingsScreen,
-    EditAccount: EditProfileScreen,
+    EditAccount: EditAccountScreen,
   },
   {
     initialRouteName: 'Settings',
