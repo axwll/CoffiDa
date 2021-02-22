@@ -89,8 +89,6 @@ class Home extends AbstractComponent {
     query = this.formatQuery('quality_rating', qual, query);
     query = this.formatQuery('clenliness_rating', clean, query);
 
-    console.log(typeof query);
-
     this.setState(
       {
         modalVisible: false,
@@ -114,7 +112,6 @@ class Home extends AbstractComponent {
 
   search = async (text) => {
     Keyboard.dismiss();
-    console.log(text);
 
     let query = '';
     if (text) {

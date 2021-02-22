@@ -70,7 +70,6 @@ class Explore extends Component {
 
     Geolocation.getCurrentPosition(
       (position) => {
-        console.log(position);
         this.setState({
           //   location: position.coords,
           location: {

@@ -1,87 +1,304 @@
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Content, Form, Header, Input, Item, Left, Title } from 'native-base';
+import { Body, Button, Container, Form, Header, Input, Item, Left, Title } from 'native-base';
 import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
+import Validator from '../utils/validator';
 
-let editType = null;
-let userInfo = null;
 let apiRequests = null;
 
 class EditAccount extends Component {
   constructor(props) {
     super(props);
 
-    // TODO: put this into state props
-    editType = this.props.navigation.getParam('type');
-    userInfo = this.props.navigation.getParam('userInfo');
+    const type = this.props.navigation.getParam('type');
 
     this.state = {
-      email: userInfo.email,
-      emailError: false,
+      type: type,
+      submitted: false,
+      email: '',
+      validEmail: true,
+      firstName: '',
+      validFirstName: true,
+      lastName: '',
+      validLastName: true,
       password: '',
       passwordError: false,
-      submitted: false,
+      confirmPassword: '',
+      validConfirmPassword: false,
     };
   }
 
   async componentDidMount() {
     apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+
+    const userInfo = this.props.navigation.getParam('userInfo');
+    this.setState({
+      userId: await getItem('USER_ID'),
+      email: userInfo.email,
+      firstName: userInfo.first_name,
+      lastName: userInfo.last_name,
+    });
   }
 
-  handleEmailInput = (email) => {
-    // Validation
-    this.setState({email: email});
+  handleEmailInput = async (email) => {
+    const response = Validator.validateEmail(email);
+
+    await this.stateSetter(
+      response,
+      'email',
+      email,
+      'validEmail',
+      'emailErrorText',
+    );
   };
 
-  handlePasswordlInput = (password) => {
-    if (password.length < 5) {
-      this.setState({passwordError: true});
-      return;
-    }
+  handleFirstNameInput = async (firstName) => {
+    const response = Validator.validateName('First Name', firstName);
 
-    this.setState({password: password});
+    await this.stateSetter(
+      response,
+      'firstName',
+      firstName,
+      'validFirstName',
+      'firstNameErrorText',
+    );
   };
 
-  handlePasswordlConformation = (password) => {
-    if (password !== this.state.password) {
-      this.setState({passwordError: true});
+  handleLastNameInput = async (lastName) => {
+    const response = Validator.validateName('Last Name', lastName);
+
+    await this.stateSetter(
+      response,
+      'lastName',
+      lastName,
+      'validLastName',
+      'lastNameErrorText',
+    );
+  };
+
+  handlePasswordInput = async (password) => {
+    const response = Validator.validatePassword(password);
+
+    await this.stateSetter(
+      response,
+      'password',
+      password,
+      'validPassword',
+      'passwordErrorText',
+    );
+  };
+
+  handlePasswordConfirmlInput = async (confirmPassword) => {
+    const password = this.state.password;
+
+    if (!password) {
+      // Set this to true so the confirm password error doesnt show beofre a password is entered
+      this.setState({validConfirmPassword: true});
       return;
     }
+    const response = Validator.validatePasswordMatch(password, confirmPassword);
 
-    this.setState({passwordError: false});
+    await this.stateSetter(
+      response,
+      'confirmPassword',
+      confirmPassword,
+      'validConfirmPassword',
+      'confirmPasswordErrorText',
+    );
+  };
+
+  stateSetter = (response, key, value, booleanKey, errorKey) => {
+    if (!response.status) {
+      this.setState({
+        [booleanKey]: false,
+        [errorKey]: response.message,
+        [key]: value,
+      });
+    } else {
+      this.setState({
+        [booleanKey]: true,
+        [key]: value,
+      });
+    }
   };
 
   updateEmail = () => {
-    if (this.state.emailError) {
+    this.setState({submitted: true});
+
+    if (!this.state.validEmail) {
       return;
     }
 
-    this.updateUserInfo({email: this.state.email});
+    this.updateUserInfo({email: email});
+  };
+
+  updateName = () => {
+    this.setState({submitted: true});
+
+    if (!this.state.validFirstName || !this.state.validLastName) {
+      return;
+    }
+
+    this.updateUserInfo({
+      first_name: this.state.firstName,
+      last_name: this.state.lastName,
+    });
   };
 
   resetPassword = () => {
-    if (this.state.passwordError) {
+    this.setState({submitted: true});
+
+    const password = this.state.password;
+    const confirmPassword = this.state.confirmPassword;
+
+    if (!password || !confirmPassword) {
+      this.handlePasswordInput(password);
+      this.handlePasswordConfirmlInput(confirmPassword);
+    }
+
+    if (!this.state.validPassword || !this.state.validConfirmPassword) {
       return;
     }
 
-    this.updateUserInfo({password: this.state.password});
+    this.updateUserInfo({password: password});
   };
 
   updateUserInfo = async (data) => {
     this.setState({submitted: true});
 
-    const userId = userInfo.user_id;
-    const response = await apiRequests.patch(`/user/${userId}`);
+    const response = await apiRequests.patch(
+      '/user/' + this.state.userId,
+      JSON.stringify(data),
+    );
 
     if (response === 'OK') {
       this.props.navigation.state.params.onGoBack();
       this.props.navigation.goBack();
     }
+  };
+
+  _renderComponent = () => {
+    if (this.state.type === 'email') {
+      return this.emailForm();
+    } else if (this.state.type === 'password') {
+      return this.passwordForm();
+    } else {
+      return this.nameForm();
+    }
+  };
+
+  emailForm = () => {
+    return (
+      <Form style={styles.form_view}>
+        <Item style={styles.item}>
+          <Input
+            style={styles.input}
+            value={this.state.email}
+            onChangeText={this.handleEmailInput}
+          />
+        </Item>
+        {!this.state.validEmail && this.state.submitted && (
+          <View>
+            <Text style={styles.error_text}>{this.state.emailErrorText}</Text>
+          </View>
+        )}
+
+        <TouchableOpacity
+          style={styles.btn_primary}
+          onPress={() => this.updateEmail()}>
+          <Text style={styles.btn_text}>{translate('update_email')}</Text>
+        </TouchableOpacity>
+      </Form>
+    );
+  };
+
+  nameForm = () => {
+    return (
+      <Form style={styles.form_view}>
+        <Item style={styles.item}>
+          <Input
+            style={styles.input}
+            value={this.state.firstName}
+            onChangeText={this.handleFirstNameInput}
+          />
+        </Item>
+        {!this.state.validFirstName && this.state.submitted && (
+          <View>
+            <Text style={styles.error_text}>
+              {this.state.firstNameErrorText}
+            </Text>
+          </View>
+        )}
+
+        <Item style={styles.item}>
+          <Input
+            style={styles.input}
+            value={this.state.lastName}
+            onChangeText={this.handleLastNameInput}
+          />
+        </Item>
+        {!this.state.validLastName && this.state.submitted && (
+          <View>
+            <Text style={styles.error_text}>
+              {this.state.lastNameErrorText}
+            </Text>
+          </View>
+        )}
+
+        <TouchableOpacity
+          style={styles.btn_primary}
+          onPress={() => this.updateName()}>
+          <Text style={styles.btn_text}>Update Name</Text>
+        </TouchableOpacity>
+      </Form>
+    );
+  };
+
+  passwordForm = () => {
+    return (
+      <Form style={styles.form_view}>
+        <Item style={styles.item}>
+          <Input
+            style={styles.input}
+            placeholder="Password"
+            onChangeText={this.handlePasswordInput}
+          />
+        </Item>
+        {!this.state.validPassword && this.state.submitted && (
+          <View>
+            <Text style={styles.error_text}>
+              {this.state.passwordErrorText}
+            </Text>
+          </View>
+        )}
+
+        <Item style={styles.item}>
+          <Input
+            style={styles.input}
+            placeholder="Confirm Password"
+            onChangeText={this.handlePasswordConfirmlInput}
+          />
+        </Item>
+        {!this.state.validConfirmPassword && this.state.submitted && (
+          <View>
+            <Text style={styles.error_text}>
+              {this.state.confirmPasswordErrorText}
+            </Text>
+          </View>
+        )}
+
+        <TouchableOpacity
+          style={styles.btn_primary}
+          onPress={() => this.resetPassword()}>
+          <Text style={styles.btn_text}>{translate('reset_password')}</Text>
+        </TouchableOpacity>
+      </Form>
+    );
   };
 
   render() {
@@ -106,60 +323,7 @@ class EditAccount extends Component {
           </Body>
         </Header>
 
-        <Content padder style={styles.content}>
-          <Text>{this.state.emailError}</Text>
-          <Text>{this.state.passwordError}</Text>
-          <Text>{this.state.submitted}</Text>
-          {editType === 'email' ? (
-            <Form>
-              <Item style={styles.item} last>
-                <Input
-                  style={styles.input}
-                  value={this.state.email}
-                  onChangeText={this.handleEmailInput}
-                />
-              </Item>
-
-              <TouchableOpacity
-                style={styles.btn_primary}
-                onPress={() => this.updateEmail()}>
-                <Text style={styles.btn_text}>{translate('update_email')}</Text>
-              </TouchableOpacity>
-            </Form>
-          ) : (
-            <Form>
-              <Item style={styles.item}>
-                <Input
-                  style={styles.input}
-                  placeholder="Password"
-                  onChangeText={this.handlePasswordlInput}
-                />
-              </Item>
-
-              <Item style={styles.item} last>
-                <Input
-                  style={styles.input}
-                  placeholder="Confirm Password"
-                  onChangeText={this.handlePasswordlConformation}
-                />
-              </Item>
-
-              {this.state.passwordError && (
-                <View style={styles.error_text}>
-                  <Text>Passwords do not match</Text>
-                </View>
-              )}
-
-              <TouchableOpacity
-                style={styles.btn_primary}
-                onPress={() => this.resetPassword()}>
-                <Text style={styles.btn_text}>
-                  {translate('reset_password')}
-                </Text>
-              </TouchableOpacity>
-            </Form>
-          )}
-        </Content>
+        {this._renderComponent()}
       </Container>
     );
   }
@@ -177,34 +341,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8E9EB',
   },
   header_left: {
-    flex: 1,
+    position: 'absolute',
+    left: 10,
   },
   header_body: {
-    flex: 4,
+    flex: 1,
     alignItems: 'center',
   },
   title: {
-    color: 'black',
+    color: '#313638',
   },
-  header_right: {
+  form_view: {
     flex: 1,
-  },
-  icon: {
-    fontSize: 20,
-  },
-  content: {
-    flex: 12,
+    justifyContent: 'center',
   },
   item: {
     borderBottomWidth: 0,
   },
   input: {
-    width: '75%',
     margin: 10,
-    padding: 10,
+    marginLeft: 0,
     paddingLeft: 20,
     borderWidth: 0.5,
     borderRadius: 5,
+  },
+  error_text: {
+    color: 'tomato',
+    textAlign: 'center',
+    fontSize: 16,
   },
   btn_primary: {
     alignItems: 'center',
@@ -212,6 +376,7 @@ const styles = StyleSheet.create({
     borderColor: '#F06543',
     backgroundColor: '#F06543',
     borderRadius: 5,
+    margin: 10,
   },
   btn_text: {
     padding: 10,

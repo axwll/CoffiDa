@@ -86,9 +86,6 @@ class Login extends Component {
 
     const response = await apiRequests.post('/user/login', postBody, true);
 
-    console.log('login response');
-    console.log(response);
-
     if (response) {
       setItem('AUTH_TOKEN', response.token);
       setItem('USER_ID', response.id.toString());
@@ -117,7 +114,7 @@ class Login extends Component {
         </Header>
 
         <Form style={styles.form}>
-          <Item>
+          <Item style={styles.item}>
             <Input
               style={styles.input}
               placeholder="Email"
@@ -130,7 +127,7 @@ class Login extends Component {
             </View>
           )}
 
-          <Item>
+          <Item style={styles.item}>
             <Input
               style={styles.input}
               placeholder="Password"
@@ -180,6 +177,9 @@ const styles = StyleSheet.create({
   form: {
     flex: 1,
     justifyContent: 'center',
+  },
+  item: {
+    borderBottomWidth: 0,
   },
   input: {
     margin: 10,

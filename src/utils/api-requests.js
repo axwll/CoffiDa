@@ -61,38 +61,11 @@ class ApiRequests extends Component {
         },
         body: body,
       })
-        .then((response) => this.checkStatus(response.status, responseExpected))
+        .then((response) => this.checkStatus(response, responseExpected))
         // .then((responseJson) => this.responseCheck(responseJson))
         .catch((error) => ErrorHandler.apiError(error))
     );
   };
-
-  //   post = (
-  //     url,
-  //     body,
-  //     responseExpected = false,
-  //     contentType = 'application/json',
-  //   ) => {
-  //     return fetch(API_URL + url, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': contentType,
-  //         'x-Authorization': this.state.token,
-  //       },
-  //       body: body,
-  //     })
-  //       .then((response) => {
-  //         console.log('then1');
-  //         console.log(response.status);
-  //         return response.json();
-  //       })
-  //       .then((responseJson) => {
-  //         console.log('then2');
-  //         console.log(responseJson);
-  //         return responseJson;
-  //       })
-  //       .catch((error) => ErrorHandler.apiError(error));
-  //   };
 
   patch = (url, body, contentType = 'application/json') => {
     return fetch(API_URL + url, {
@@ -101,9 +74,9 @@ class ApiRequests extends Component {
         'Content-Type': contentType,
         'x-Authorization': this.state.token,
       },
-      body: JSON.stringify(body),
+      body: body,
     })
-      .then((response) => this.checkStatus(response.status))
+      .then((response) => this.checkStatus(response))
       .catch((error) => ErrorHandler.apiError(error));
   };
 
@@ -115,7 +88,7 @@ class ApiRequests extends Component {
         'x-Authorization': this.state.token,
       },
     })
-      .then((response) => this.checkStatus(response.status))
+      .then((response) => this.checkStatus(response))
       .catch((error) => ErrorHandler.apiError(error));
   };
 }

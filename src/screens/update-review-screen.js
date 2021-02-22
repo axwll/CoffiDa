@@ -324,20 +324,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8E9EB',
   },
   header_left: {
-    flex: 1,
+    position: 'absolute',
+    left: 10,
   },
   header_body: {
-    flex: 99,
+    flex: 1,
     alignItems: 'center',
   },
-  header_right: {
-    flex: 1,
-  },
-  content: {},
   title_view: {
     flexDirection: 'row',
   },
-  title_left: {},
   title: {
     color: '#313638',
     fontSize: 20,

@@ -314,20 +314,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8E9EB',
   },
   header_left: {
-    flex: 1,
+    position: 'absolute',
+    left: 10,
   },
   header_body: {
-    flex: 99,
+    flex: 1,
     alignItems: 'center',
   },
   title: {
     color: '#313638',
     fontSize: 20,
   },
-  header_right: {
-    flex: 1,
-  },
-  content: {},
   review_container: {
     marginTop: 20,
     height: 150,

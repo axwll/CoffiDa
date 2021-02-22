@@ -14,7 +14,6 @@ export const setItem = async (key, value) => {
     return await AsyncStorage.setItem(key, value);
   } catch (error) {
     console.log(`Unable to store key: ${key} in Async storage`);
-    console.log(error);
     return null;
   }
 };

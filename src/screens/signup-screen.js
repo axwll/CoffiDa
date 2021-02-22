@@ -305,6 +305,9 @@ const styles = StyleSheet.create({
   title: {
     color: '#313638',
   },
+  item: {
+    borderBottomWidth: 0,
+  },
   input: {
     margin: 10,
     marginLeft: 0,

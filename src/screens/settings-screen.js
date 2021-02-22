@@ -32,6 +32,7 @@ class Settings extends Component {
   openEditProfile = async (type) => {
     this.props.navigation.navigate('EditAccount', {
       type: type,
+      userInfo: this.state.userInfo,
       onGoBack: () => this.getUserInfo(),
     });
   };
@@ -83,11 +84,24 @@ class Settings extends Component {
             <Text>
               {translate('account')}: {this.state.userInfo.email}
             </Text>
+            <Text>
+              Name: {this.state.userInfo.first_name}{' '}
+              {this.state.userInfo.last_name}
+            </Text>
             <Card transparent>
               <TouchableOpacity onPress={() => this.openEditProfile('email')}>
                 <CardItem>
                   <Body>
                     <Text>{translate('change_email')}</Text>
+                  </Body>
+                </CardItem>
+              </TouchableOpacity>
+            </Card>
+            <Card transparent>
+              <TouchableOpacity onPress={() => this.openEditProfile('name')}>
+                <CardItem>
+                  <Body>
+                    <Text>Change Name</Text>
                   </Body>
                 </CardItem>
               </TouchableOpacity>
@@ -139,23 +153,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8E9EB',
   },
   header_left: {
-    flex: 1,
+    position: 'absolute',
+    left: 10,
   },
   header_body: {
-    flex: 4,
+    flex: 1,
     alignItems: 'center',
   },
   title: {
-    color: 'black',
-  },
-  header_right: {
-    flex: 1,
-  },
-  icon: {
-    fontSize: 20,
-  },
-  content: {
-    flex: 12,
+    color: '#313638',
   },
 });
 

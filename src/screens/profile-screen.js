@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    color: 'black',
+    color: '#313638',
   },
   header_right: {
     flex: 1,
