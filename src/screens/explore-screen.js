@@ -1,5 +1,5 @@
 import { METER_FEET_CONVERSION_R, METER_MILES_CONVERSION_R } from '@env';
-import { faSearchLocation } from '@fortawesome/free-solid-svg-icons';
+import { faMugHot, faSearchLocation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { getDistance } from 'geolib';
 import { Container, Icon, Input, Item } from 'native-base';
@@ -41,6 +41,7 @@ async function requestPermssion(params) {
 }
 
 let apiRequests = null;
+let mapRef = null;
 const {width, height} = Dimensions.get('window');
 const CARD_WIDTH = width - 40;
 class Explore extends Component {
@@ -52,7 +53,11 @@ class Explore extends Component {
       locationPermission: false,
       loading: true,
       clicked: false,
+      showCards: false,
+      locationsList: [],
     };
+
+    this.getNearbyLocations = this.getNearbyLocations.bind(this);
   }
 
   async componentDidMount() {
@@ -97,33 +102,68 @@ class Explore extends Component {
     const response = await apiRequests.get('/find');
 
     if (response) {
-      const myLat = this.state.location.latitude;
-      const myLong = this.state.location.longitude;
+      const myLocation = this.state.location;
       response.forEach((location) => {
-        const distance = getDistance(
-          {latitude: myLat, longitude: myLong},
+        location.distance_from_me = getDistance(
+          {latitude: myLocation.latitude, longitude: myLocation.longitude},
           {latitude: location.latitude, longitude: location.longitude},
         );
+      });
 
-        let conversion = 1;
-        let suffix = 'm';
-        if (distance < 1000) {
-          conversion = METER_FEET_CONVERSION_R;
-          suffix = 'ft';
-        } else {
-          conversion = METER_MILES_CONVERSION_R;
-          suffix = 'miles';
-        }
+      const sortedLocations = response.sort(function (a, b) {
+        return a.distance_from_me - b.distance_from_me;
+      });
 
-        const calculated = Math.round(distance * conversion);
-        location.distance_from_me = `${calculated} ${suffix}`;
-
-        console.log(location.distance_from_me);
+      this.setState({
+        showCards: true,
+        locationsList: sortedLocations.slice(0, 9),
       });
     }
   };
 
-  calculateDistance = (lat, long) => {};
+  parseDistanceValue = (distance) => {
+    console.log(distance);
+    if (distance < 160) {
+      // 160 meters is 0.1 mile - any less than this show in feet
+      const distanceInFeet = Math.round(distance * METER_FEET_CONVERSION_R);
+      return distanceInFeet + ' ft';
+    }
+
+    const distanceInMiles = distance * METER_MILES_CONVERSION_R;
+    return distanceInMiles.toFixed(1) + ' miles';
+  };
+
+  moveToMyLocation = () => {
+    console.log('click');
+    const myLocation = this.state.location;
+
+    this.setState({location: myLocation});
+  };
+
+  shouldShow = () => {
+    if (this.state.showCards && this.state.locationsList.length > 0) {
+      return true;
+    }
+
+    return false;
+  };
+
+  fitToMarkers = () => {
+    const markers = React.Children.map(
+      this.props.children,
+      (child) => child.props.coordinate,
+    );
+    const options = {
+      edgePadding: {
+        top: 500,
+        right: 500,
+        bottom: 500,
+        left: 1500,
+      },
+      animated: false, // optional
+    };
+    mapRef.fitToCoordinates(markers, options);
+  };
 
   render() {
     if (!this.state.location) {
@@ -137,28 +177,40 @@ class Explore extends Component {
     } else {
       return (
         <Container style={styles.map_container}>
-          <View searchBar rounded style={styles.header}>
-            <View style={styles.header2}>
-              <Item rounded style={styles.srch}>
-                <Icon name="ios-search" />
-                <Input
-                  placeholder="Search"
-                  onSubmitEditing={(event) =>
-                    this.search(event.nativeEvent.text)
-                  }
-                />
-              </Item>
-              <TouchableOpacity
-                style={styles.search_location_icon}
-                onPress={() => this.getNearbyLocations()}>
-                <FontAwesomeIcon
-                  icon={faSearchLocation}
-                  style={{color: 'tomato'}}
-                  size={25}
-                />
-              </TouchableOpacity>
-            </View>
+          <View style={styles.header}>
+            <Item rounded style={styles.srch}>
+              <Icon name="ios-search" />
+              <Input
+                placeholder="Search"
+                onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
+              />
+            </Item>
           </View>
+          <View style={styles.button_view}>
+            <TouchableOpacity
+              style={[styles.text_button, styles.near_me_btn]}
+              onPress={() => this.getNearbyLocations()}>
+              <FontAwesomeIcon
+                // style={{margin: 5}}
+                icon={faMugHot}
+                size={20}
+                color={'#F06543'}
+              />
+              <Text style={styles.btn_text}>Find Coffee Shops</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.text_button, styles.find_me_btn]}
+              onPress={() => this.moveToMyLocation()}>
+              <FontAwesomeIcon
+                icon={faSearchLocation}
+                size={20}
+                color={'#F06543'}
+              />
+              <Text style={styles.btn_text}>Find Me</Text>
+            </TouchableOpacity>
+          </View>
+
           <MapView
             provider={PROVIDER_GOOGLE}
             style={styles.map}
@@ -166,89 +218,78 @@ class Explore extends Component {
             region={{
               latitude: this.state.location.latitude,
               longitude: this.state.location.longitude,
-              latitudeDelta: 0.005,
-              longitudeDelta: 0.005,
+              latitudeDelta: 0.05,
+              longitudeDelta: 0.05,
+            }}
+            ref={(ref) => {
+              mapRef = ref;
+            }}
+            // onLayout={this.fitToMarkers()}>
+            onMapReady={() => {
+              mapRef.fitToSuppliedMarkers([], {
+                edgePadding: {
+                  top: 500,
+                  right: 100,
+                  bottom: 100,
+                  left: 100,
+                },
+              });
             }}>
-            <Marker
-              // Look ath Callout to edit the marker
-              coordinate={this.state.location}
-              title="My Location"
-              description="Here I am"
-            />
-          </MapView>
-          <Animated.ScrollView
-            horizontal
-            pagingEnabled
-            scrollEventThrottle={1}
-            showHorizontalScrollIndicator={false}
-            snapToAlignment="center"
-            style={styles.scroll_view}>
-            {data.map((location, index) => {
-              return (
-                // <Card style={styles.card} key={index}>
-                //   <CardItem cardBody>
-                //     <Image
-                //       source={{uri: location.photo_path}}
-                //       style={{height: 200, width: 100, flex: 1}}
-                //     />
-                //   </CardItem>
-                //   <CardItem>
-                //     <Left>
-                //       <FontAwesomeIcon
-                //         icon={faMapMarkerAlt}
-                //         size={20}
-                //         color={'#E0DFD5'}
-                //         onPress={() => this.press()}
-                //       />
-                //       <Text>{location.location_town}</Text>
-                //     </Left>
-
-                //     <Right style={styles.right}>
-                //       <Text>({location.location_reviews.length})</Text>
-                //       <ReviewIcon
-                //         rating={location.avg_overall_rating}
-                //         primary={true}
-                //       />
-                //     </Right>
-                //   </CardItem>
-                // </Card>
-                <View style={styles.card} key={index}>
-                  <Image
-                    source={{uri: location.photo_path}}
-                    style={styles.cardImage}
-                    resizeMode="cover"
+            {this.shouldShow() &&
+              this.state.locationsList.map((location, index) => {
+                return (
+                  <Marker
+                    key={location.location_id}
+                    coordinate={{
+                      latitude: location.latitude,
+                      longitude: location.longitude,
+                    }}
+                    title={location.location_name}
+                    description={this.parseDistanceValue(
+                      location.distance_from_me,
+                    )}
                   />
-                  <View style={styles.textContent}>
-                    <Text>{location.location_name}</Text>
-                    {/* <View>
-                      <FontAwesomeIcon
-                        icon={faMapMarkerAlt}
-                        size={20}
-                        color={'#E0DFD5'}
-                        onPress={() => this.press()}
-                      />
-                      <Text>{location.location_town}</Text>
-                    </View> */}
+                );
+              })}
+            {/* , )} */}
+          </MapView>
+          {this.shouldShow() && (
+            <Animated.ScrollView
+              horizontal
+              pagingEnabled
+              scrollEventThrottle={1}
+              showHorizontalScrollIndicator={false}
+              snapToAlignment="center"
+              style={styles.scroll_view}>
+              {this.state.locationsList.map((location, index) => {
+                return (
+                  <View style={styles.card} key={index}>
+                    <Image
+                      source={{uri: location.photo_path}}
+                      style={styles.cardImage}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.textContent}>
+                      <Text>{location.location_name}</Text>
+                      <View style={styles.review}>
+                        <View style={styles.review_icon}>
+                          <ReviewIcon
+                            rating={location.avg_overall_rating}
+                            primary={true}
+                          />
+                        </View>
 
-                    <View style={styles.review}>
-                      <View style={styles.review_icon}>
-                        <ReviewIcon
-                          rating={location.avg_overall_rating}
-                          primary={true}
-                          style={{borderColor: 'red', borderWidth: 3}}
-                        />
+                        <Text>({location.location_reviews.length})</Text>
                       </View>
-
-                      <Text>({location.location_reviews.length})</Text>
+                      <TouchableOpacity style={styles.btn}>
+                        <Text style={styles.btn_text}>More info</Text>
+                      </TouchableOpacity>
                     </View>
-                    <TouchableOpacity style={styles.btn}>
-                      <Text style={styles.btn_text}>More info</Text>
-                    </TouchableOpacity>
                   </View>
-                </View>
-              );
-            })}
-          </Animated.ScrollView>
+                );
+              })}
+            </Animated.ScrollView>
+          )}
         </Container>
       );
     }
@@ -296,16 +337,15 @@ const styles = StyleSheet.create({
   },
   header: {
     zIndex: 1,
-    marginTop: 5,
-    marginLeft: 10,
-    height: 45,
+    margin: 10,
+    height: 50,
     position: 'absolute',
     alignItems: 'flex-end',
     left: 0,
     top: 0,
     right: 0,
   },
-  header2: {
+  search_bar_header: {
     flex: 1,
     flexDirection: 'row',
   },
@@ -320,6 +360,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  button_view: {
+    zIndex: 1,
+    position: 'absolute',
+    top: 60, // height of the search bar + margin
+    flexDirection: 'row',
+  },
+  text_button: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    color: 'tomato',
+    backgroundColor: 'white',
+    margin: 10,
+    paddingLeft: 10,
+    borderRadius: 20,
+  },
+  find_me_btn: {},
+  near_me_btn: {},
   map: {
     position: 'absolute',
     top: 0,
