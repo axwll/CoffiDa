@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
 
-class APIRequests extends Component {
-  constructor(props) {
+import ErrorHandler from './error-handler';
+
+const API_URL = 'http://10.0.2.2:3333/api/1.0.0';
+
+class ApiRequests extends Component {
+  constructor(props, authToken) {
     super(props);
+
+    this.state = {token: authToken};
   }
 
-  async componentDidMount() {
-    this.setState({token: await getItem('AUTH_TOKEN')});
-  }
-
-  checkStatus = (code, parse) => {
-    const res = ErrorHandler.checkStatusCode(code);
+  checkStatus = (response, parse) => {
+    const res = ErrorHandler.checkStatusCode(response.status);
     if (res.status === 'success') {
       if (parse) {
         return response.json();
@@ -19,7 +21,7 @@ class APIRequests extends Component {
       }
     }
 
-    return res.message;
+    return null;
   };
 
   responseCheck = (responseJson) => {
@@ -33,13 +35,15 @@ class APIRequests extends Component {
   };
 
   get = (url) => {
-    return fetch(API_URL + url, {
-      method: 'GET',
-      headers: {'x-Authorization': this.state.token},
-    })
-      .then((response) => this.checkStatus(response.status))
-      .then((responseJson) => this.responseCheck(responseJson))
-      .catch((error) => ErrorHandler.apiError(error));
+    return (
+      fetch(API_URL + url, {
+        method: 'GET',
+        headers: {'x-Authorization': this.state.token},
+      })
+        .then((response) => this.checkStatus(response, true))
+        //   .then((responseJson) => this.responseCheck(responseJson ))
+        .catch((error) => ErrorHandler.apiError(error))
+    );
   };
 
   post = (
@@ -48,18 +52,47 @@ class APIRequests extends Component {
     responseExpected = false,
     contentType = 'application/json',
   ) => {
-    return fetch(API_URL + url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': contentType,
-        'x-Authorization': this.state.token,
-      },
-      body: body,
-    })
-      .then((response) => this.checkStatus(response.status, responseExpected))
-      .then((responseJson) => this.responseCheck(responseJson))
-      .catch((error) => ErrorHandler.apiError(error));
+    return (
+      fetch(API_URL + url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': contentType,
+          'x-Authorization': this.state.token,
+        },
+        body: body,
+      })
+        .then((response) => this.checkStatus(response.status, responseExpected))
+        // .then((responseJson) => this.responseCheck(responseJson))
+        .catch((error) => ErrorHandler.apiError(error))
+    );
   };
+
+  //   post = (
+  //     url,
+  //     body,
+  //     responseExpected = false,
+  //     contentType = 'application/json',
+  //   ) => {
+  //     return fetch(API_URL + url, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': contentType,
+  //         'x-Authorization': this.state.token,
+  //       },
+  //       body: body,
+  //     })
+  //       .then((response) => {
+  //         console.log('then1');
+  //         console.log(response.status);
+  //         return response.json();
+  //       })
+  //       .then((responseJson) => {
+  //         console.log('then2');
+  //         console.log(responseJson);
+  //         return responseJson;
+  //       })
+  //       .catch((error) => ErrorHandler.apiError(error));
+  //   };
 
   patch = (url, body, contentType = 'application/json') => {
     return fetch(API_URL + url, {
@@ -87,5 +120,4 @@ class APIRequests extends Component {
   };
 }
 
-const ApiRequests = new APIRequests();
 export default ApiRequests;

@@ -1,20 +1,18 @@
+import React, { Component } from 'react';
+
 import ILLEGAL_WORDS from '../assets/data/profanity-filter.json';
+import ValidatorResponse from '../models/validation-response';
 
-interface Response {
-  status: Boolean;
-  message?: string;
-}
-
-class FormValidator extends Component<Response> {
+class FormValidator extends Component {
   validateEmail = (email) => {
     const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
     if (email.length === 0) {
-      return new Response(false, 'Email is required');
+      return new ValidatorResponse(false, 'Email is required');
     } else if (!regex.test(email)) {
-      return new Response(false, 'Email is an invalid format');
+      return new ValidatorResponse(false, 'Email is an invalid format');
     } else {
-      return new Response(true);
+      return new ValidatorResponse(true);
     }
   };
 
@@ -23,16 +21,19 @@ class FormValidator extends Component<Response> {
     const containNumbers = /\d/.test(password);
 
     if (password.length === 0) {
-      return new Response(false, 'Password is required');
+      return new ValidatorResponse(false, 'Password is required');
     } else if (password.length < 7) {
-      return new Response(false, 'Password must be seven or more characters');
+      return new ValidatorResponse(
+        false,
+        'Password must be seven or more characters',
+      );
     } else if (!containsLetters || !containNumbers) {
-      return new Response(
+      return new ValidatorResponse(
         false,
         'Password must contain both letters and numbers',
       );
     } else {
-      return new Response(true);
+      return new ValidatorResponse(true);
     }
   };
 
@@ -40,24 +41,24 @@ class FormValidator extends Component<Response> {
     const lettersCheck = /[a-zA-Z]/g.test(value);
 
     if (value.length === 0) {
-      return new Response(false, `${key} is required`);
+      return new ValidatorResponse(false, `${key} is required`);
     } else if (value.length > 50) {
-      return new Response(
+      return new ValidatorResponse(
         false,
         `${key} must be no longer than fifty characters`,
       );
     } else if (!lettersCheck) {
-      return new Response(false, `${key} must only contain letters`);
+      return new ValidatorResponse(false, `${key} must only contain letters`);
     } else {
-      return new Response(true);
+      return new ValidatorResponse(true);
     }
   };
 
   validatePasswordMatch = (password, conformation) => {
     if (password !== conformation) {
-      return new Response(false, 'Passwords do no match');
+      return new ValidatorResponse(false, 'Passwords do no match');
     } else {
-      return new Response(true);
+      return new ValidatorResponse(true);
     }
   };
 

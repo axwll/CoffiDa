@@ -3,7 +3,10 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import ApiRequests from '../utils/api-requests';
+import { getItem } from '../utils/async-storage';
 import { toast } from '../utils/toast';
+
+let apiRequests = null;
 
 class PhotoDecision extends Component {
   constructor(props) {
@@ -14,7 +17,9 @@ class PhotoDecision extends Component {
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+
     this.setState({
       locationId: this.props.navigation.getParam('locationId'),
       reviewId: this.props.navigation.getParam('reviewId'),
@@ -24,7 +29,7 @@ class PhotoDecision extends Component {
     });
   }
 
-  yesClicked = () => {
+  yesClicked = async () => {
     const locationId = this.state.locationId;
     const reviewId = this.state.reviewId;
 
@@ -37,7 +42,7 @@ class PhotoDecision extends Component {
       return;
     }
 
-    const response = ApiRequests.delete(
+    const response = await apiRequests.delete(
       `/location${locationId}/review/${reviewId}/photo`,
     );
 

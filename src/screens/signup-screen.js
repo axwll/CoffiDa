@@ -9,6 +9,8 @@ import ApiRequests from '../utils/api-requests';
 import { setItem } from '../utils/async-storage';
 import Validator from '../utils/validator';
 
+let apiRequests = null;
+
 class Signup extends Component {
   constructor(props) {
     super(props);
@@ -26,6 +28,10 @@ class Signup extends Component {
       confirmPassword: '',
       validConfirmPassword: false,
     };
+  }
+
+  componentDidMount() {
+    apiRequests = new ApiRequests(this.props, null);
   }
 
   handleEmailInput = async (email) => {
@@ -148,16 +154,16 @@ class Signup extends Component {
       password: this.state.password,
     });
 
-    ApiRequests.post('/user', postBody);
+    await apiRequests.post('/user', postBody);
   };
 
   logIn = async () => {
     const postBody = JSON.stringify({
       email: this.state.email,
       password: this.state.password,
-    };
+    });
 
-    const response = ApiRequests.post('/user/login', postBody, true);
+    const response = await apiRequests.post('/user/login', postBody, true);
 
     if (response) {
       setItem('AUTH_TOKEN', response.token);

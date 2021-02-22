@@ -3,7 +3,7 @@ import { faChevronLeft, faDirections, faPlus, faStar as faStarSolid } from '@for
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Body, Button, Card, CardItem, Container, Content, Header, Left, Right, Title } from 'native-base';
 import React, { Component } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import LoadingSpinner from '../components/loading-spinner';
 import ReviewCard from '../components/review-card';
@@ -13,6 +13,7 @@ import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 
 let locationId = null;
+let apiRequests = null;
 
 class SelectedShop extends Component {
   constructor(props) {
@@ -27,6 +28,8 @@ class SelectedShop extends Component {
   }
 
   async componentDidMount() {
+    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+
     this.setState({userId: await getItem('USER_ID')});
 
     this._onFocusListener = this.props.navigation.addListener(
@@ -43,9 +46,17 @@ class SelectedShop extends Component {
     );
   }
 
-  getLocation = () => {
+  getUserInfo = async (userId) => {
+    const response = await apiRequests.get(`/user/${userId}`);
+
+    if (response) {
+      this.setState({currentUser: response});
+    }
+  };
+
+  getLocation = async () => {
     const locationId = this.state.locationId;
-    const response = ApiRequests.get(`/location/${locationId}`);
+    const response = await apiRequests.get(`/location/${locationId}`);
 
     if (response) {
       this.setState({shopData: response});
@@ -65,14 +76,6 @@ class SelectedShop extends Component {
     }
   };
 
-  getUserInfo = (userId) => {
-    const response = ApiRequests.get(`/user/${userId}`);
-
-    if (response) {
-      this.setState({currentUser: response});
-    }
-  };
-
   favButtonPressed = () => {
     if (this.state.favorite) {
       this.unFavLocation();
@@ -82,19 +85,21 @@ class SelectedShop extends Component {
     this.favLocation();
   };
 
-  favLocation = () => {
+  favLocation = async () => {
     const locationId = this.state.locationId;
-    const response = ApiRequests.get(`/location/${locationId}/favourite`);
+    const response = await apiRequests.get(`/location/${locationId}/favourite`);
 
     if (response) {
       this.setState({favorite: true});
     }
   };
 
-  unFavLocation = () => {
+  unFavLocation = async () => {
     const locationId = this.state.locationId;
 
-    const response = ApiRequests.delete(`/location/${locationId}/favourite`);
+    const response = await apiRequests.delete(
+      `/location/${locationId}/favourite`,
+    );
 
     if (response === 'OK') {
       this.setState({favorite: false});
@@ -206,15 +211,25 @@ class SelectedShop extends Component {
                 </Title>
               </View>
 
-              {this.state.shopData.location_reviews.map((review) => {
-                return (
-                  <ReviewCard
-                    key={review.review_id}
-                    shopReview={review}
-                    locationId={this.state.shopData.location_id}
-                  />
-                );
-              })}
+              {this.state.shopData.location_reviews.length === 0 ? (
+                <View style={styles.btn_view}>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => this.addReview()}>
+                    <Text style={styles.btn_text}>Add a Review</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                this.state.shopData.location_reviews.map((review) => {
+                  return (
+                    <ReviewCard
+                      key={review.review_id}
+                      shopReview={review}
+                      locationId={this.state.shopData.location_id}
+                    />
+                  );
+                })
+              )}
             </ScrollView>
           </Content>
         </Container>
@@ -254,7 +269,6 @@ const styles = StyleSheet.create({
   header_right: {
     flex: 1,
   },
-  content: {},
   carditem_two: {
     flex: 1,
     flexDirection: 'row',
@@ -273,6 +287,19 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
+  },
+  btn_view: {
+    alignItems: 'center',
+  },
+  button: {
+    width: '50%',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 5,
+    margin: 10,
+    padding: 10,
+    marginRight: 5,
+    borderColor: '#F06543',
   },
 });
 

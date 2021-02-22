@@ -9,7 +9,10 @@ import { withNavigation } from 'react-navigation';
 import LoadingSpinner from '../../components/loading-spinner';
 import ProfileReviewCard from '../../components/profile-review-card';
 import { translate } from '../../locales';
+import ApiRequests from '../../utils/api-requests';
 import { getItem } from '../../utils/async-storage';
+
+let apiRequests = null;
 
 class Reviews extends Component {
   constructor(props) {
@@ -22,28 +25,27 @@ class Reviews extends Component {
   }
 
   async componentDidMount() {
-    this.setState({
-      token: await getItem('AUTH_TOKEN'),
-      userId: await getItem('USER_ID'),
-    });
+    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+
+    this.setState({userId: await getItem('USER_ID')});
 
     this.getUserInfo();
   }
 
-  getUserInfo = () => {
+  getUserInfo = async () => {
     const userId = this.state.userId;
 
-    const response = ApiRequests.get(`/user/${userId}`);
+    const response = await apiRequests.get(`/user/${userId}`);
 
     if (response) {
-      this.setState({userInfo: responseJson});
+      this.setState({userInfo: response});
     }
 
     this.setState({loading: false});
   };
 
-  deleteReview = (locationId, reviewId) => {
-    const response = ApiRequests.delete(
+  deleteReview = async (locationId, reviewId) => {
+    const response = await apiRequests.delete(
       `/location/${locationId}/review/${reviewId}`,
     );
 

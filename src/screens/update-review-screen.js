@@ -11,8 +11,11 @@ import Full from '../assets/ratings/rating-full-primary.png';
 import LoadingSpinner from '../components/loading-spinner';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
+import { getItem } from '../utils/async-storage';
 import { toast } from '../utils/toast';
 import { profanityFilter } from '../utils/validator';
+
+let apiRequests = null;
 
 class UpdateReview extends Component {
   constructor(props) {
@@ -32,6 +35,8 @@ class UpdateReview extends Component {
   }
 
   async componentDidMount() {
+    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+
     this.setState({
       shopData: this.props.navigation.getParam('shopData'),
     });
@@ -45,11 +50,11 @@ class UpdateReview extends Component {
     );
   }
 
-  checkForImage = () => {
+  checkForImage = async () => {
     const locationId = this.state.shopData.location_id;
     const reviewId = this.state.reviewId;
 
-    const response = ApiRequests.get(
+    const response = await apiRequests.get(
       `/location/${locationId}/review/${reviewId}/photo`,
     );
 
@@ -113,7 +118,7 @@ class UpdateReview extends Component {
     });
   };
 
-  updateReview = () => {
+  updateReview = async () => {
     if (!this.validateReview(this.state.reviewBody)) {
       return;
     }
@@ -129,7 +134,7 @@ class UpdateReview extends Component {
       review_body: this.state.reviewBody,
     });
 
-    const response = ApiRequests.patch(
+    const response = await apiRequests.patch(
       `/location/${locationId}/review/${reviewId}`,
       patchBody,
     );

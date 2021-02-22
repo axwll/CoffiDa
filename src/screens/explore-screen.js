@@ -40,9 +40,9 @@ async function requestPermssion(params) {
   }
 }
 
+let apiRequests = null;
 const {width, height} = Dimensions.get('window');
 const CARD_WIDTH = width - 40;
-const SPACING_FOR_CARD_INSET = width * 0.1 - 10;
 class Explore extends Component {
   constructor(props) {
     super(props);
@@ -56,12 +56,11 @@ class Explore extends Component {
   }
 
   async componentDidMount() {
+    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+
     this.findCoordinates();
 
-    this.setState({
-      token: await getItem('AUTH_TOKEN'),
-      loading: false,
-    });
+    this.setState({loading: false});
   }
 
   findCoordinates = async () => {
@@ -95,8 +94,8 @@ class Explore extends Component {
     );
   };
 
-  getNearbyLocations = () => {
-    const response = ApiRequests.get('/find');
+  getNearbyLocations = async () => {
+    const response = await apiRequests.get('/find');
 
     if (response) {
       const myLat = this.state.location.latitude;

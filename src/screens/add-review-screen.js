@@ -9,8 +9,11 @@ import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
+import { getItem } from '../utils/async-storage';
 import { toast } from '../utils/toast';
 import { profanityFilter } from '../utils/validator';
+
+let apiRequests = null;
 
 class AddReview extends Component {
   constructor(props) {
@@ -25,7 +28,9 @@ class AddReview extends Component {
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+
     if (this.props.navigation.getParam('update')) {
       const reviewData = this.props.navigation.getParam('reviewData');
       this.setState({
@@ -70,7 +75,7 @@ class AddReview extends Component {
     return profanityFilter(text);
   };
 
-  createReview = (locationId) => {
+  createReview = async (locationId) => {
     if (!this.validateReview(this.state.reviewBody, locationId)) {
       return;
     }
@@ -83,7 +88,7 @@ class AddReview extends Component {
       review_body: this.state.reviewBody,
     });
 
-    const response = ApiRequests.post(
+    const response = await apiRequests.post(
       `/location/${locationId}/review`,
       postBody,
     );
@@ -95,12 +100,12 @@ class AddReview extends Component {
     }
   };
 
-  updateReview = (locationId) => {
+  updateReview = async (locationId) => {
     if (!this.validateReview(this.state.reviewBody)) {
       return;
     }
 
-    const response = ApiRequests.patch(
+    const response = await apiRequests.patch(
       `/location/${locationId}/review/${reviewId}`,
       {
         overall_rating: this.state.overallRating,
@@ -116,8 +121,8 @@ class AddReview extends Component {
     }
   };
 
-  findReview = (locationId) => {
-    const response = ApiRequests.get('/find?search_in=reviewed');
+  findReview = async (locationId) => {
+    const response = await apiRequests.get('/find?search_in=reviewed');
 
     if (response) {
       const location = responseJson.find(

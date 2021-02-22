@@ -15,6 +15,8 @@ import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 import { toast } from '../utils/toast';
 
+let apiRequests = null;
+
 class Home extends AbstractComponent {
   constructor(props) {
     super(props);
@@ -34,23 +36,26 @@ class Home extends AbstractComponent {
   }
 
   async componentDidMount() {
-    if (!(await getItem('AUTH_TOKEN'))) {
+    const token = await getItem('AUTH_TOKEN');
+    if (!token) {
       this.props.navigation.navigate('Auth');
       return;
     }
+
+    apiRequests = new ApiRequests(this.props, token);
 
     // lists all shops
     this.find();
   }
 
-  find = () => {
+  find = async () => {
     const query = `?limit=${this.state.limit}&offset=${this.state.offset}${this.state.queryParams}`;
 
-    const response = ApiRequests.get(`find${query}`);
+    const response = await apiRequests.get(`/find${query}`);
 
     if (response) {
       const existing = this.state.coffeeShops;
-      this.setState({coffeeShops: existing.concat(responseJson)});
+      this.setState({coffeeShops: existing.concat(response)});
     }
 
     this.setState({loading: false});
@@ -150,7 +155,7 @@ class Home extends AbstractComponent {
 
     const off = this.state.offset;
     this.setState({offset: off + 5}, () => {
-      this.listShops();
+      this.find();
     });
   };
 

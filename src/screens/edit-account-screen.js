@@ -4,12 +4,13 @@ import { Body, Button, Container, Content, Form, Header, Input, Item, Left, Titl
 import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { translate } from '../../../locales';
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 
 let editType = null;
 let userInfo = null;
+let apiRequests = null;
 
 class EditAccount extends Component {
   constructor(props) {
@@ -29,7 +30,7 @@ class EditAccount extends Component {
   }
 
   async componentDidMount() {
-    this.setState({token: await getItem('AUTH_TOKEN')});
+    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
   }
 
   handleEmailInput = (email) => {
@@ -71,11 +72,11 @@ class EditAccount extends Component {
     this.updateUserInfo({password: this.state.password});
   };
 
-  updateUserInfo = (data) => {
+  updateUserInfo = async (data) => {
     this.setState({submitted: true});
 
     const userId = userInfo.user_id;
-    const response = ApiRequests.patch(`/user/${userId}`);
+    const response = await apiRequests.patch(`/user/${userId}`);
 
     if (response === 'OK') {
       this.props.navigation.state.params.onGoBack();

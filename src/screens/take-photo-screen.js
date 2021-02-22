@@ -5,11 +5,18 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
 import ApiRequests from '../utils/api-requests';
+import { getItem } from '../utils/async-storage';
 import { toast } from '../utils/toast';
+
+let apiRequests = null;
 
 class TakePhoto extends Component {
   constructor(props) {
     super(props);
+  }
+
+  async componentDidMount() {
+    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
   }
 
   takePicture = async () => {
@@ -20,7 +27,7 @@ class TakePhoto extends Component {
       const locationId = this.props.navigation.getParam('locationId');
       const reviewId = this.props.navigation.getParam('reviewId');
 
-      const response = ApiRequests.post(
+      const response = await apiRequests.post(
         `/location/${locationId}/review/${reviewId}/photo`,
         data,
         false,

@@ -10,6 +10,8 @@ import { translate } from '../../locales';
 import ApiRequests from '../../utils/api-requests';
 import { getItem } from '../../utils/async-storage';
 
+let apiRequests = null;
+
 class Likes extends Component {
   constructor(props) {
     super(props);
@@ -21,30 +23,29 @@ class Likes extends Component {
   }
 
   async componentDidMount() {
-    this.setState({
-      token: await getItem('AUTH_TOKEN'),
-      userId: await getItem('USER_ID'),
-    });
+    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+
+    this.setState({userId: await getItem('USER_ID')});
 
     this.getUserInfo();
   }
 
-  getUserInfo = () => {
+  getUserInfo = async () => {
     const userId = this.state.userId;
 
-    const response = ApiRequests.get(`/user/${userId}`);
+    const response = await apiRequests.get(`/user/${userId}`);
 
     if (response) {
-      this.setState({userInfo: responseJson});
+      this.setState({userInfo: response});
     }
 
     this.setState({loading: false});
   };
 
-  unlikeReview = (locationId, reviewId) => {
+  unlikeReview = async (locationId, reviewId) => {
     this.setState({loading: true});
 
-    const response = ApiRequests.delete(
+    const response = await apiRequests.delete(
       `/location/${locationId}/review/${reviewId}/like`,
     );
 

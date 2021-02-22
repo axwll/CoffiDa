@@ -6,8 +6,10 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
-import { setItem } from '../utils/async-storage';
+import { getItem, setItem } from '../utils/async-storage';
 import Validator from '../utils/validator';
+
+let apiRequests = null;
 
 class Login extends Component {
   constructor(props) {
@@ -22,9 +24,12 @@ class Login extends Component {
     };
   }
 
+  async componentDidMount() {
+    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+  }
+
   handleEmailInput = (email) => {
     const response = Validator.validateEmail(email);
-    console.log(response);
 
     if (!response.status) {
       this.setState({
@@ -79,7 +84,10 @@ class Login extends Component {
       password: this.state.password,
     });
 
-    const response = ApiRequests.post('/user/login', postBody, true);
+    const response = await apiRequests.post('/user/login', postBody, true);
+
+    console.log('login response');
+    console.log(response);
 
     if (response) {
       setItem('AUTH_TOKEN', response.token);

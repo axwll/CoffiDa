@@ -4,10 +4,12 @@ import { Body, Button, Card, CardItem, Container, Content, Header, Left, Text, T
 import React, { Component } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 
-import { translate } from '../../../locales';
 import LoadingSpinner from '../components/loading-spinner';
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { clear, getItem } from '../utils/async-storage';
+
+let apiRequest = null;
 
 class Settings extends Component {
   constructor(props) {
@@ -20,7 +22,9 @@ class Settings extends Component {
   }
 
   async componentDidMount() {
-    this.setState({userId: JSON.parse(await getItem('USER_ID'))});
+    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+
+    this.setState({userId: await getItem('USER_ID')});
 
     this.getUserInfo();
   }
@@ -32,11 +36,11 @@ class Settings extends Component {
     });
   };
 
-  getUserInfo = () => {
+  getUserInfo = async () => {
     this.setState({loading: true});
 
     const userId = this.state.userId;
-    const response = ApiRequests.get(`/user/${userId}`);
+    const response = await apiRequests.get(`/user/${userId}`);
 
     if (response) {
       this.setState({userInfo: response});

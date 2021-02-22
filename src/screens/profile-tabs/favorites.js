@@ -8,6 +8,8 @@ import { translate } from '../../locales';
 import ApiRequests from '../../utils/api-requests';
 import { getItem } from '../../utils/async-storage';
 
+let apiRequests = null;
+
 class FavoritesTab extends Component {
   constructor(props) {
     super(props);
@@ -19,19 +21,20 @@ class FavoritesTab extends Component {
   }
 
   async componentDidMount() {
+    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+
     this.setState({
-      token: await getItem('AUTH_TOKEN'),
       userId: JSON.parse(await getItem('USER_ID')),
     });
 
     this.findFavorites();
   }
 
-  findFavorites = () => {
-    const response = ApiRequests.get('/find?search_in=favourite');
+  findFavorites = async () => {
+    const response = await apiRequests.get('/find?search_in=favourite');
 
     if (response) {
-      this.setState({favorites: responseJson});
+      this.setState({favorites: response});
     }
 
     this.setState({loading: false});

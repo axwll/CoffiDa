@@ -4,13 +4,15 @@ import { Body, Button, Container, Header, Left, Right, Segment, Title } from 'na
 import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { translate } from '../../locales';
 import LoadingSpinner from '../components/loading-spinner';
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 import FavoritesTab from './profile-tabs/favorites';
 import LikesTab from './profile-tabs/likes';
 import ReviewsTab from './profile-tabs/reviews';
+
+let apiRequests = null;
 
 class Profile extends Component {
   constructor(props) {
@@ -25,15 +27,17 @@ class Profile extends Component {
   }
 
   async componentDidMount() {
+    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+
     this.setState({userId: await getItem('USER_ID')});
 
     this.getUserInfo();
   }
 
-  getUserInfo = () => {
+  getUserInfo = async () => {
     const userId = this.state.userId;
 
-    const response = ApiRequests.get(`/user/${userId}`);
+    const response = await apiRequests.get(`/user/${userId}`);
 
     if (response) {
       this.setState({userInfo: response});
