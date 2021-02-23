@@ -5,7 +5,7 @@ import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 import { setI18nConfig } from './src/locales';
 import AppNav from './src/navigations/app-navigator';
 import AuthNav from './src/navigations/auth-navigator';
-import SplashScreen from './src/navigations/splash-screen';
+import SplashScreen from './src/screens/splash-screen';
 
 const AppContainer = createAppContainer(
   createSwitchNavigator(

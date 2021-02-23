@@ -24,6 +24,8 @@ target 'coffida_ui' do
 
   pod 'RNLocalize', :path => '../node_modules/react-native-localize'
 
+  pod 'react-native-camera', :path => '../node_modules/react-native-camera'
+
   target 'coffida_uiTests' do
     inherit! :complete
     # Pods for testing
