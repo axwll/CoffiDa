@@ -75,10 +75,6 @@ class TakePhoto extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#E0DFD5',
-  },
   preview: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -95,7 +91,7 @@ const styles = StyleSheet.create({
     margin: 10,
     width: 50,
     height: 50,
-    backgroundColor: '#E0DFD5',
+    backgroundColor: '#E8E9EB',
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',

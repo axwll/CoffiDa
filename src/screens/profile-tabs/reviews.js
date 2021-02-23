@@ -91,7 +91,7 @@ class Reviews extends Component {
               <FontAwesomeIcon
                 icon={this.state.liked ? faHeartSolid : faHeartRegular}
                 size={15}
-                color={'#818181'}
+                color={'#808080'}
               />
             </Button>
             <Text style={styles.like_count}>{item.review.likes}</Text>
