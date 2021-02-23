@@ -31,7 +31,11 @@ class LoadingSpinner extends Component {
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <Animated.View style={{transform: [{rotate}]}}>
-          <FontAwesomeIcon icon={faCog} size={size} style={{color: 'grey'}} />
+          <FontAwesomeIcon
+            icon={faCog}
+            size={size}
+            style={{color: '#808080'}}
+          />
         </Animated.View>
       </View>
     );

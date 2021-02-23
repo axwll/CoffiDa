@@ -1,6 +1,6 @@
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Header, Left, Right, Segment, Title } from 'native-base';
+import { Body, Button, Container, Header, Right, Segment, Title } from 'native-base';
 import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -54,13 +54,23 @@ class Profile extends Component {
 
   _renderComponent = () => {
     if (this.state.activePage === 1) {
-      return <ReviewsTab reviews={this.state.userInfo.reviews} />;
+      return (
+        <ReviewsTab
+          navigation={this.props.navigation}
+          reviews={this.state.userInfo.reviews}
+        />
+      );
     } else if (this.state.activePage === 2) {
       return (
         <FavoritesTab favorites={this.state.userInfo.favourite_locations} />
       );
     } else {
-      return <LikesTab likes={this.state.userInfo.liked_reviews} />;
+      return (
+        <LikesTab
+          navigation={this.props.navigation}
+          likes={this.state.userInfo.liked_reviews}
+        />
+      );
     }
   };
 
@@ -71,12 +81,8 @@ class Profile extends Component {
       return (
         <Container style={styles.container}>
           <Header style={styles.header}>
-            <Left style={styles.header_left}>
-              <Button transparent></Button>
-            </Left>
-
             <Body style={styles.header_body}>
-              <Title style={styles.title}>Profile</Title>
+              <Title style={styles.title}>{translate('profile')}</Title>
             </Body>
 
             <Right style={styles.header_right}>
@@ -91,7 +97,7 @@ class Profile extends Component {
 
           <View style={styles.content}>
             <View>
-              <Text>
+              <Text style={styles.username}>
                 {this.state.userInfo.first_name} {this.state.userInfo.last_name}
               </Text>
             </View>
@@ -150,24 +156,27 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     backgroundColor: '#E8E9EB',
   },
-  header_left: {
-    flex: 1,
-  },
   header_body: {
-    flex: 4,
+    flex: 1,
     alignItems: 'center',
   },
   title: {
     color: '#313638',
   },
   header_right: {
-    flex: 1,
+    position: 'absolute',
+    right: 10,
   },
   icon: {
     fontSize: 20,
   },
   content: {
     flex: 1,
+  },
+  username: {
+    paddingTop: 10,
+    fontSize: 20,
+    textAlign: 'center',
   },
   segment: {
     flex: 1,
@@ -191,7 +200,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     borderBottomWidth: 3,
-    borderBottomColor: 'tomato',
+    borderBottomColor: '#F06543',
     backgroundColor: '#E8E9EB',
     borderColor: '#E8E9EB',
   },

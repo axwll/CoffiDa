@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
 
 import ILLEGAL_WORDS from '../assets/data/profanity-filter.json';
+import { translate } from '../locales';
 import ValidatorResponse from '../models/validation-response';
+import { toast } from './toast';
 
 class FormValidator extends Component {
   validateEmail = (email) => {
     const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
     if (email.length === 0) {
-      return new ValidatorResponse(false, 'Email is required');
+      return new ValidatorResponse(false, translate('email_required_error'));
     } else if (!regex.test(email)) {
-      return new ValidatorResponse(false, 'Email is an invalid format');
+      return new ValidatorResponse(false, translate('email_invalid_error'));
     } else {
       return new ValidatorResponse(true);
     }
@@ -21,16 +23,16 @@ class FormValidator extends Component {
     const containNumbers = /\d/.test(password);
 
     if (password.length === 0) {
-      return new ValidatorResponse(false, 'Password is required');
+      return new ValidatorResponse(false, translate('password_required_error'));
     } else if (password.length < 7) {
       return new ValidatorResponse(
         false,
-        'Password must be seven or more characters',
+        translate('password_too_short_error'),
       );
     } else if (!containsLetters || !containNumbers) {
       return new ValidatorResponse(
         false,
-        'Password must contain both letters and numbers',
+        translate('password_non_alphanumeric_error'),
       );
     } else {
       return new ValidatorResponse(true);
@@ -40,15 +42,28 @@ class FormValidator extends Component {
   validateName = (key, value) => {
     const lettersCheck = /[a-zA-Z]/g.test(value);
 
+    let keyTranslation = '';
+    if (key === 'First Name') {
+      keyTranslation = translate('first_name_for_sentance');
+    } else {
+      keyTranslation = translate('last_name_for_sentance');
+    }
+
     if (value.length === 0) {
-      return new ValidatorResponse(false, `${key} is required`);
+      return new ValidatorResponse(
+        false,
+        keyTranslation + translate('name_required_error'),
+      );
     } else if (value.length > 50) {
       return new ValidatorResponse(
         false,
-        `${key} must be no longer than fifty characters`,
+        keyTranslation + translate('name_too_long_error'),
       );
     } else if (!lettersCheck) {
-      return new ValidatorResponse(false, `${key} must only contain letters`);
+      return new ValidatorResponse(
+        false,
+        keyTranslation + translate('name_numeric_error'),
+      );
     } else {
       return new ValidatorResponse(true);
     }
@@ -56,7 +71,7 @@ class FormValidator extends Component {
 
   validatePasswordMatch = (password, conformation) => {
     if (password !== conformation) {
-      return new ValidatorResponse(false, 'Passwords do no match');
+      return new ValidatorResponse(false, translate('password_confirm_error'));
     } else {
       return new ValidatorResponse(true);
     }
@@ -71,10 +86,11 @@ class FormValidator extends Component {
 
       toCheck.forEach((check) => {
         if (sampleText.includes(check)) {
-          sampleText = sampleText.replace(check, 'non related coffee item');
-          toast(
-            'Please try to keep your reviews clean. I have had to remove all profanity from your review.',
+          sampleText = sampleText.replace(
+            check,
+            translate('profanity_replace'),
           );
+          toast(translate('profanity_error_toast'));
         }
       });
     });

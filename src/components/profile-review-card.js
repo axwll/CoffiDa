@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   loc_name: {
-    color: 'tomato',
+    color: '#F06543',
     fontWeight: 'bold',
   },
   light_text: {

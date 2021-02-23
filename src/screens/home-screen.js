@@ -1,13 +1,12 @@
 import { faFilter, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Container, Header, Icon, Input, Item } from 'native-base';
-import React from 'react';
+import React, { Component } from 'react';
 import { FlatList, Keyboard, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
-import AbstractComponent from '../components/abstract-component';
 import LoadingSpinner from '../components/loading-spinner';
 import MainCard from '../components/main-card';
 import { translate } from '../locales';
@@ -17,7 +16,7 @@ import { toast } from '../utils/toast';
 
 let apiRequests = null;
 
-class Home extends AbstractComponent {
+class Home extends Component {
   constructor(props) {
     super(props);
 
@@ -25,7 +24,8 @@ class Home extends AbstractComponent {
       loading: true,
       offset: 0,
       limit: 5,
-      queryParams: '',
+      filterQuery: '',
+      searchQuery: '',
       coffeeShops: [],
       modalVisible: false,
       overallFilter: 0,
@@ -48,14 +48,17 @@ class Home extends AbstractComponent {
     this.find();
   }
 
-  find = async () => {
-    const query = `?limit=${this.state.limit}&offset=${this.state.offset}${this.state.queryParams}`;
+  find = async (extendList = false) => {
+    const query = `?limit=${this.state.limit}&offset=${this.state.offset}${this.state.filterQuery}${this.state.searchQuery}`;
 
     const response = await apiRequests.get(`/find${query}`);
 
     if (response) {
-      const existing = this.state.coffeeShops;
-      this.setState({coffeeShops: existing.concat(response)});
+      if (extendList) {
+        this.setState({coffeeShops: this.state.coffeeShops.concat(response)});
+      } else {
+        this.setState({coffeeShops: response});
+      }
     }
 
     this.setState({loading: false});
@@ -67,7 +70,7 @@ class Home extends AbstractComponent {
       priceFilter: 0,
       qualFilter: 0,
       cleanFilter: 0,
-      queryParams: '',
+      filterQuery: '',
     });
   };
 
@@ -78,7 +81,7 @@ class Home extends AbstractComponent {
     const clean = this.state.cleanFilter;
 
     if (!overall && !price && !qual && !clean) {
-      toast('Please select some filter options');
+      toast(transalte('select_filter_toast'));
       return;
     }
 
@@ -94,7 +97,7 @@ class Home extends AbstractComponent {
         modalVisible: false,
         coffeeShops: [],
         loading: true,
-        queryParams: query,
+        filterQuery: query,
       },
       () => {
         this.find();
@@ -120,8 +123,9 @@ class Home extends AbstractComponent {
 
     this.setState(
       {
+        offset: 0,
         loading: true,
-        queryParams: query,
+        searchQuery: query,
       },
       () => {
         this.find();
@@ -151,8 +155,9 @@ class Home extends AbstractComponent {
     if (distanceFromEnd < 0) return;
 
     const off = this.state.offset;
-    this.setState({offset: off + 5}, () => {
-      this.find();
+    const limit = this.state.limit;
+    this.setState({offset: off + limit}, () => {
+      this.find(true);
     });
   };
 
@@ -166,7 +171,7 @@ class Home extends AbstractComponent {
             <Item rounded style={styles.srch}>
               <Icon name="ios-search" />
               <Input
-                placeholder="Search"
+                placeholder={translate('search_box_placeholder')}
                 onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
               />
             </Item>
@@ -185,17 +190,14 @@ class Home extends AbstractComponent {
               <Modal
                 animationType="slide"
                 transparent={true}
-                visible={this.state.modalVisible}
-                onRequestClose={() => {
-                  Alert.alert('Modal has been closed.');
-                }}>
+                visible={this.state.modalVisible}>
                 <View style={styles.centered_view}>
                   <View style={styles.modal}>
                     <View style={styles.modal_header}>
                       <View style={styles.modal_header_left}>
                         <TouchableOpacity onPress={() => this.clearFilters()}>
                           <Text style={styles.header_left_text}>
-                            Clear Filters
+                            {translate('clear_filters')}
                           </Text>
                         </TouchableOpacity>
                       </View>
@@ -212,9 +214,11 @@ class Home extends AbstractComponent {
                     </View>
                     <View style={styles.modal_body}>
                       <Text style={styles.modal_header_text}>
-                        Filter results by rating
+                        {translate('filter_by_rating')}
                       </Text>
-                      <Text style={styles.modal_text}>Overall Rating</Text>
+                      <Text style={styles.modal_text}>
+                        {translate('overall_rating')}
+                      </Text>
                       <Stars
                         default={this.state.overallFilter}
                         update={(rating) =>
@@ -227,7 +231,9 @@ class Home extends AbstractComponent {
                         emptyStar={Empty}
                       />
 
-                      <Text style={styles.modal_text}>Price Rating</Text>
+                      <Text style={styles.modal_text}>
+                        {translate('price_rating')}
+                      </Text>
                       <Stars
                         default={this.state.priceFilter}
                         update={(rating) =>
@@ -240,7 +246,9 @@ class Home extends AbstractComponent {
                         emptyStar={Empty}
                       />
 
-                      <Text style={styles.modal_text}>Quality Rating</Text>
+                      <Text style={styles.modal_text}>
+                        {translate('quality_rating')}
+                      </Text>
                       <Stars
                         default={this.state.qualFilter}
                         update={(rating) => this.setState({qualFilter: rating})}
@@ -251,7 +259,9 @@ class Home extends AbstractComponent {
                         emptyStar={Empty}
                       />
 
-                      <Text style={styles.modal_text}>Cleanliness Rating</Text>
+                      <Text style={styles.modal_text}>
+                        {translate('clean_rating')}
+                      </Text>
                       <Stars
                         default={this.state.cleanFilter}
                         update={(rating) =>
@@ -267,7 +277,9 @@ class Home extends AbstractComponent {
                       <TouchableOpacity
                         style={styles.button}
                         onPress={() => this.filterResults()}>
-                        <Text style={styles.text_style}>Filter Results</Text>
+                        <Text style={styles.text_style}>
+                          {translate('filter_results')}
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -302,7 +314,7 @@ const styles = StyleSheet.create({
   },
   header: {
     borderBottomWidth: 0.5,
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
   },
   srch: {
@@ -310,14 +322,6 @@ const styles = StyleSheet.create({
   },
   filter: {
     flex: 1,
-  },
-  subHeading: {
-    height: 50,
-    backgroundColor: 'grey',
-  },
-  right: {
-    flex: 1,
-    flexDirection: 'row',
   },
   filter_icon: {
     color: '#F06543',
@@ -332,7 +336,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#313638',
   },
-
   centered_view: {
     position: 'absolute',
     flex: 1,
@@ -343,7 +346,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   modal: {
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 5,
     marginLeft: 20,
@@ -365,7 +368,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   header_left_text: {
-    color: 'grey',
+    color: '#808080',
     textDecorationLine: 'underline',
   },
   modal_header_right: {
@@ -373,7 +376,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   close_modal_icon: {
-    color: 'grey',
+    color: '#808080',
   },
   modal_body: {
     alignItems: 'center',
@@ -385,10 +388,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
     elevation: 2,
-    backgroundColor: 'tomato',
+    backgroundColor: '#F06543',
   },
   text_style: {
-    color: 'white',
+    color: '#FFFFFF',
     fontWeight: 'bold',
     textAlign: 'center',
   },

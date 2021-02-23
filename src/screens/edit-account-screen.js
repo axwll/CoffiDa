@@ -253,7 +253,7 @@ class EditAccount extends Component {
         <TouchableOpacity
           style={styles.btn_primary}
           onPress={() => this.updateName()}>
-          <Text style={styles.btn_text}>Update Name</Text>
+          <Text style={styles.btn_text}>{translate('update_name')}</Text>
         </TouchableOpacity>
       </Form>
     );
@@ -265,7 +265,7 @@ class EditAccount extends Component {
         <Item style={styles.item}>
           <Input
             style={styles.input}
-            placeholder="Password"
+            placeholder={translate('password_placeholder')}
             onChangeText={this.handlePasswordInput}
           />
         </Item>
@@ -280,7 +280,7 @@ class EditAccount extends Component {
         <Item style={styles.item}>
           <Input
             style={styles.input}
-            placeholder="Confirm Password"
+            placeholder={translate('confirm_password_placeholder')}
             onChangeText={this.handlePasswordConfirmlInput}
           />
         </Item>
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   error_text: {
-    color: 'tomato',
+    color: '#F06543',
     textAlign: 'center',
     fontSize: 16,
   },

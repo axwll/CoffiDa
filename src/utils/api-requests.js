@@ -24,26 +24,31 @@ class ApiRequests extends Component {
     return null;
   };
 
-  responseCheck = (responseJson) => {
-    // check if response has been parsed or retuns OK
-    if (responseJson || responseJson === 'OK') {
-      return responseJson;
-    }
-
-    // Will reach here if request errored
-    return null;
+  get = (url) => {
+    return fetch(API_URL + url, {
+      method: 'GET',
+      headers: {'x-Authorization': this.state.token},
+    })
+      .then((response) => this.checkStatus(response, true))
+      .catch((error) => ErrorHandler.apiError(error));
   };
 
-  get = (url) => {
-    return (
-      fetch(API_URL + url, {
-        method: 'GET',
-        headers: {'x-Authorization': this.state.token},
+  getImage = (url) => {
+    return fetch(API_URL + url + '?timestamp=' + Date.now(), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'image/jpeg',
+        'x-Authorization': this.state.token,
+      },
+    })
+      .then((response) => {
+        if (ErrorHandler.checkSuccess(response.status)) {
+          return response;
+        }
+
+        return null;
       })
-        .then((response) => this.checkStatus(response, true))
-        //   .then((responseJson) => this.responseCheck(responseJson ))
-        .catch((error) => ErrorHandler.apiError(error))
-    );
+      .catch((error) => ErrorHandler.apiError(error));
   };
 
   post = (
@@ -52,19 +57,16 @@ class ApiRequests extends Component {
     responseExpected = false,
     contentType = 'application/json',
   ) => {
-    return (
-      fetch(API_URL + url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': contentType,
-          'x-Authorization': this.state.token,
-        },
-        body: body,
-      })
-        .then((response) => this.checkStatus(response, responseExpected))
-        // .then((responseJson) => this.responseCheck(responseJson))
-        .catch((error) => ErrorHandler.apiError(error))
-    );
+    return fetch(API_URL + url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': contentType,
+        'x-Authorization': this.state.token,
+      },
+      body: body,
+    })
+      .then((response) => this.checkStatus(response, responseExpected))
+      .catch((error) => ErrorHandler.apiError(error));
   };
 
   patch = (url, body, contentType = 'application/json') => {
@@ -83,10 +85,7 @@ class ApiRequests extends Component {
   delete = (url) => {
     return fetch(API_URL + url, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': contentType,
-        'x-Authorization': this.state.token,
-      },
+      headers: {'x-Authorization': this.state.token},
     })
       .then((response) => this.checkStatus(response))
       .catch((error) => ErrorHandler.apiError(error));

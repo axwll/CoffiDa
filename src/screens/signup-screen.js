@@ -189,7 +189,7 @@ class Signup extends Component {
             </Button>
           </Left>
           <Body style={styles.header_body}>
-            <Title style={styles.title}>Sign Up</Title>
+            <Title style={styles.title}>{translate('signup')}</Title>
           </Body>
         </Header>
 
@@ -199,7 +199,7 @@ class Signup extends Component {
             <Item style={styles.item}>
               <Input
                 style={styles.input}
-                placeholder="Email"
+                placeholder={translate('email_placeholder')}
                 onChangeText={this.handleEmailInput}
               />
             </Item>
@@ -214,7 +214,7 @@ class Signup extends Component {
             <Item style={styles.item}>
               <Input
                 style={styles.input}
-                placeholder="First Name"
+                placeholder={translate('first_name_placeholder')}
                 onChangeText={this.handleFirstNameInput}
               />
             </Item>
@@ -229,7 +229,7 @@ class Signup extends Component {
             <Item style={styles.item}>
               <Input
                 style={styles.input}
-                placeholder="Last Name"
+                placeholder={translate('last_name_placeholder')}
                 onChangeText={this.handleLastNameInput}
               />
             </Item>
@@ -244,7 +244,7 @@ class Signup extends Component {
             <Item style={styles.item}>
               <Input
                 style={styles.input}
-                placeholder="Password"
+                placeholder={translate('password_placeholder')}
                 onChangeText={this.handlePasswordInput}
                 secureTextEntry={true}
               />
@@ -260,7 +260,7 @@ class Signup extends Component {
             <Item style={styles.item}>
               <Input
                 style={styles.input}
-                placeholder="Confirm Password"
+                placeholder={translate('confirm_password_placeholder')}
                 onChangeText={this.handlePasswordConfirmlInput}
                 secureTextEntry={true}
               />
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   error_text: {
-    color: 'tomato',
+    color: '#F06543',
     textAlign: 'center',
     fontSize: 16,
   },

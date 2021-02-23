@@ -1,9 +1,11 @@
 import { faCompass, faMugHot, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { Component } from 'react';
+import { Text } from 'react-native';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
+import { translate } from '../locales';
 import AddReviewScreen from '../screens/add-review-screen';
 import EditAccountScreen from '../screens/edit-account-screen';
 import ExploreScreen from '../screens/explore-screen';
@@ -104,10 +106,23 @@ export default createBottomTabNavigator(
 
         return <FontAwesomeIcon icon={iconName} color={tintColor} size={20} />;
       },
+      tabBarLabel: () => {
+        const {routeName} = navigation.state;
+        let tabName;
+        if (routeName === 'Explore') {
+          tabName = translate('explore');
+        } else if (routeName === 'Profile') {
+          tabName = translate('profile');
+        } else {
+          tabName = translate('home');
+        }
+
+        return <Text style={{textAlign: 'center'}}>{tabName}</Text>;
+      },
     }),
     tabBarOptions: {
-      activeTintColor: 'tomato',
-      inactiveTintColor: 'grey',
+      activeTintColor: '#F06543',
+      inactiveTintColor: '#808080',
     },
   },
 );

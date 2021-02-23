@@ -10,6 +10,7 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 import LoadingSpinner from '../components/loading-spinner';
 import ReviewIcon from '../components/review-icon';
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 import { toast } from '../utils/toast';
@@ -168,7 +169,7 @@ class Explore extends Component {
 
       return (
         <View style={styles.loading_view}>
-          <Text style={styles.load_text}>Location could not be determined</Text>
+          <Text style={styles.load_text}>{translate('cant_get_location')}</Text>
         </View>
       );
     } else {
@@ -178,7 +179,7 @@ class Explore extends Component {
             <Item rounded style={styles.srch}>
               <Icon name="ios-search" />
               <Input
-                placeholder="Search"
+                placeholder={translate('search_box_placeholder')}
                 onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
               />
             </Item>
@@ -188,7 +189,9 @@ class Explore extends Component {
               style={styles.text_button}
               onPress={() => this.getNearbyLocations()}>
               <FontAwesomeIcon icon={faMugHot} size={20} color={'#F06543'} />
-              <Text style={styles.btn_text}>Find Coffee Shops</Text>
+              <Text style={styles.btn_text}>
+                {translate('find_coffee_shops_btn')}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -199,7 +202,7 @@ class Explore extends Component {
                 size={20}
                 color={'#F06543'}
               />
-              <Text style={styles.btn_text}>Find Me</Text>
+              <Text style={styles.btn_text}>{translate('find_me_btn')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -273,7 +276,9 @@ class Explore extends Component {
                           <Text>({location.location_reviews.length})</Text>
                         </View>
                         <TouchableOpacity style={styles.btn}>
-                          <Text style={styles.btn_text}>More info</Text>
+                          <Text style={styles.btn_text}>
+                            {translate('more_info_btn')}
+                          </Text>
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -303,7 +308,7 @@ const styles = StyleSheet.create({
     height: 250,
     width: CARD_WIDTH,
     overflow: 'hidden',
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
   },
   card_Image: {
     flex: 3,
@@ -339,7 +344,7 @@ const styles = StyleSheet.create({
   },
   srch: {
     flex: 9,
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
   },
   button_view: {
     zIndex: 1,
@@ -351,8 +356,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    color: 'tomato',
-    backgroundColor: 'white',
+    color: '#F06543',
+    backgroundColor: '#FFFFFF',
     margin: 10,
     paddingLeft: 10,
     borderRadius: 20,

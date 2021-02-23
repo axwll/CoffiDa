@@ -30,12 +30,12 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'tomato',
+    backgroundColor: '#F06543',
   },
   text: {
     fontSize: 50,
     fontFamily: 'Pacifico-Regular',
-    color: 'white',
+    color: '#FFFFFF',
   },
 });
 

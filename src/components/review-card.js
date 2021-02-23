@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   user: {
-    color: 'tomato',
+    color: '#F06543',
     fontWeight: 'bold',
   },
   light_text: {

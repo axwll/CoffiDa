@@ -101,7 +101,7 @@ class Settings extends Component {
               <TouchableOpacity onPress={() => this.openEditProfile('name')}>
                 <CardItem>
                   <Body>
-                    <Text>Change Name</Text>
+                    <Text>{translate('change_name')}</Text>
                   </Body>
                 </CardItem>
               </TouchableOpacity>

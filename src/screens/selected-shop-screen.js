@@ -46,6 +46,10 @@ class SelectedShop extends Component {
     );
   }
 
+  componentWillUnmount() {
+    this._onFocusListener.remove();
+  }
+
   getUserInfo = async (userId) => {
     const response = await apiRequests.get(`/user/${userId}`);
 
@@ -87,7 +91,9 @@ class SelectedShop extends Component {
 
   favLocation = async () => {
     const locationId = this.state.locationId;
-    const response = await apiRequests.get(`/location/${locationId}/favourite`);
+    const response = await apiRequests.post(
+      `/location/${locationId}/favourite`,
+    );
 
     if (response) {
       this.setState({favorite: true});
@@ -188,17 +194,17 @@ class SelectedShop extends Component {
                 </CardItem>
                 <CardItem style={styles.reviews_card}>
                   <ReviewIcon
-                    name="Price"
+                    name={transalte('price')}
                     rating={this.state.shopData.avg_price_rating}
                     rotate={true}
                   />
                   <ReviewIcon
-                    name="Cleanliness"
+                    name={transalte('cleanliness')}
                     rating={this.state.shopData.avg_clenliness_rating}
                     rotate={true}
                   />
                   <ReviewIcon
-                    name="Quality"
+                    name={transalte('quality')}
                     rating={this.state.shopData.avg_quality_rating}
                     rotate={true}
                   />
@@ -216,7 +222,7 @@ class SelectedShop extends Component {
                   <TouchableOpacity
                     style={styles.button}
                     onPress={() => this.addReview()}>
-                    <Text style={styles.btn_text}>Add a Review</Text>
+                    <Text style={styles.btn_text}>{translate('add_review')}</Text>
                   </TouchableOpacity>
                 </View>
               ) : (

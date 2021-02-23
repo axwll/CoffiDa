@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 import { toast } from '../utils/toast';
@@ -35,7 +36,7 @@ class TakePhoto extends Component {
       );
 
       if (response === 'OK') {
-        toast('Picture Added');
+        toast(translate('photo_added_toast'));
 
         if (this.props.navigation.getParam('update')) {
           this.props.navigation.navigate('Profile');
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   icon: {
-    color: 'grey',
+    color: '#808080',
   },
 });
 

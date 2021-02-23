@@ -2,6 +2,7 @@ import { Container } from 'native-base';
 import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 import { toast } from '../utils/toast';
@@ -43,11 +44,11 @@ class PhotoDecision extends Component {
     }
 
     const response = await apiRequests.delete(
-      `/location${locationId}/review/${reviewId}/photo`,
+      `/location/${locationId}/review/${reviewId}/photo`,
     );
 
     if (response === 'OK') {
-      toast('Review photo deleted');
+      toast(translate('photo_deleted_toast'));
       this.props.navigation.navigate('Profile');
     }
   };
@@ -73,13 +74,13 @@ class PhotoDecision extends Component {
             <TouchableOpacity
               style={[styles.button, styles.btn_primary]}
               onPress={() => this.yesClicked()}>
-              <Text style={styles.btn_text}>Yes</Text>
+              <Text style={styles.btn_text}>{translate('yes')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.button, styles.btn_secondary]}
               onPress={() => this.noClicked()}>
-              <Text style={styles.btn_text}>No</Text>
+              <Text style={styles.btn_text}>{translate('no')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -121,8 +122,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F06543',
   },
   btn_secondary: {
-    borderColor: 'grey',
-    backgroundColor: 'grey',
+    borderColor: '#808080',
+    backgroundColor: '#808080',
   },
   btn_text: {
     padding: 10,

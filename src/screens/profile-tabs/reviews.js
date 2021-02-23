@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Button, Card, CardItem, Left, Right } from 'native-base';
 import React, { Component } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import { withNavigation } from 'react-navigation';
 
 import LoadingSpinner from '../../components/loading-spinner';
 import ProfileReviewCard from '../../components/profile-review-card';
@@ -30,6 +29,18 @@ class Reviews extends Component {
     this.setState({userId: await getItem('USER_ID')});
 
     this.getUserInfo();
+
+    this._onFocusListener = this.props.navigation.addListener(
+      'didFocus',
+      async (payload) => {
+        this.setState({loading: true});
+        this.getUserInfo();
+      },
+    );
+  }
+
+  componentWillUnmount() {
+    this._onFocusListener.remove();
   }
 
   getUserInfo = async () => {
@@ -133,10 +144,6 @@ class Reviews extends Component {
             data={this.state.userInfo.reviews}
             renderItem={(item) => this.renderItem(item)}
             keyExtractor={(item) => item.review.review_id.toString()}
-            // onEndReachedThreshold={0.01}
-            // onEndReached={({distanceFromEnd}) =>
-            //   this.handleLoadMore(distanceFromEnd)
-            // }
             ListEmptyComponent={this.renderNoData()}
           />
         </SafeAreaView>
@@ -172,4 +179,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default withNavigation(Reviews);
+export default Reviews;

@@ -15,11 +15,7 @@ class ErrorHandler extends Component {
   };
 
   checkStatusCode = (statusCode) => {
-    const exists = SUCCESS_CODES.some((item) => {
-      return item.code === statusCode;
-    });
-
-    if (exists) {
+    if (this.checkSuccess(statusCode)) {
       return new ErrorResponse('success');
     }
 
@@ -36,6 +32,12 @@ class ErrorHandler extends Component {
 
     this.log(`Network request returned error: ${message}`, message);
     return new ErrorResponse('error', message);
+  };
+
+  checkSuccess = (statusCode) => {
+    return SUCCESS_CODES.some((item) => {
+      return item.code === statusCode;
+    });
   };
 
   log = (logMessage, toastMessage) => {

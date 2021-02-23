@@ -109,7 +109,7 @@ class Login extends Component {
             </Button>
           </Left>
           <Body style={styles.header_body}>
-            <Title style={styles.title}>Log In</Title>
+            <Title style={styles.title}>{translate('login')}</Title>
           </Body>
         </Header>
 
@@ -117,7 +117,7 @@ class Login extends Component {
           <Item style={styles.item}>
             <Input
               style={styles.input}
-              placeholder="Email"
+              placeholder={translate('email_placeholder')}
               onChangeText={this.handleEmailInput}
             />
           </Item>
@@ -130,7 +130,7 @@ class Login extends Component {
           <Item style={styles.item}>
             <Input
               style={styles.input}
-              placeholder="Password"
+              placeholder={translate('password_placeholder')}
               onChangeText={this.handlePasswordlInput}
               secureTextEntry={true}
             />
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   error_text: {
-    color: 'tomato',
+    color: '#F06543',
     textAlign: 'center',
     fontSize: 16,
   },

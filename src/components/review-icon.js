@@ -45,7 +45,7 @@ class ReviewIcon extends Component {
 const styles = StyleSheet.create({
   color: {
     backgroundColor: 'transparent',
-    textShadowColor: 'black',
+    textShadowColor: '#313638',
     textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 2,
   },

@@ -108,10 +108,6 @@ class Likes extends Component {
             data={this.state.userInfo.liked_reviews}
             renderItem={(item) => this.renderItem(item)}
             keyExtractor={(item) => item.review.review_id.toString()}
-            // onEndReachedThreshold={0.01}
-            // onEndReached={({distanceFromEnd}) =>
-            //   this.handleLoadMore(distanceFromEnd)
-            // }
             ListEmptyComponent={this.renderNoData()}
           />
         </SafeAreaView>

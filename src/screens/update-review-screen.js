@@ -13,7 +13,7 @@ import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 import { toast } from '../utils/toast';
-import { profanityFilter } from '../utils/validator';
+import Validator from '../utils/validator';
 
 let apiRequests = null;
 
@@ -50,11 +50,15 @@ class UpdateReview extends Component {
     );
   }
 
+  componentWillUnmount() {
+    this._onFocusListener.remove();
+  }
+
   checkForImage = async () => {
     const locationId = this.state.shopData.location_id;
     const reviewId = this.state.reviewId;
 
-    const response = await apiRequests.get(
+    const response = await apiRequests.getImage(
       `/location/${locationId}/review/${reviewId}/photo`,
     );
 
@@ -62,7 +66,6 @@ class UpdateReview extends Component {
       this.setState({
         imageExists: true,
         imageUrl: response.url,
-        //   imageUrl: response.url + '&timestamp=' + new Date(),
       });
     } else {
       this.setState({imageExists: false});
@@ -86,23 +89,23 @@ class UpdateReview extends Component {
 
   validateReview = (text) => {
     if (text.length === 0) {
-      toast("Please write a review, thats why you're here");
+      toast(translate('empty_review_error_toast'));
       return false;
     }
 
     if (text.length > 500) {
-      toast('Too many characters in your review. Please write less. :)');
+      toast(translate('max_chars_error_toast'));
       return false;
     }
 
-    return profanityFilter(text);
+    return true;
   };
 
   editReviewPhoto = () => {
     this.props.navigation.navigate('UpdateDeletePhoto', {
       locationId: this.state.shopData.location_id,
       reviewId: this.state.reviewId,
-      displayText: 'Would you like to update your review photo?',
+      displayText: translate('update_review_photo_text'),
       updateReview: true,
       deleteReview: false,
     });
@@ -112,16 +115,19 @@ class UpdateReview extends Component {
     this.props.navigation.navigate('UpdateDeletePhoto', {
       locationId: this.state.shopData.location_id,
       reviewId: this.state.reviewId,
-      displayText: 'Would you like to delete the review photo?',
+      displayText: translate('delete_review_photo_text'),
       updateReview: false,
       deleteReview: true,
     });
   };
 
   updateReview = async () => {
-    if (!this.validateReview(this.state.reviewBody)) {
+    let reviewBody = this.state.reviewBody;
+    if (!this.validateReview(reviewBody, locationId)) {
       return;
     }
+
+    reviewBody = Validator.profanityFilter(reviewBody);
 
     const locationId = this.state.shopData.location_id;
     const reviewId = this.state.reviewId;
@@ -131,7 +137,7 @@ class UpdateReview extends Component {
       price_rating: this.state.priceRating,
       quality_rating: this.state.qualRating,
       clenliness_rating: this.state.cleanRating,
-      review_body: this.state.reviewBody,
+      review_body: reviewBody,
     });
 
     const response = await apiRequests.patch(
@@ -140,7 +146,8 @@ class UpdateReview extends Component {
     );
 
     if (response === 'OK') {
-      toast('Review updated!');
+      toast(translate('review_updated_toast'));
+      this.props.navigation.goBack();
     }
   };
 
@@ -163,7 +170,7 @@ class UpdateReview extends Component {
             </Left>
 
             <Body style={styles.header_body}>
-              <Title style={styles.title}>{translate('add_review')}</Title>
+              <Title style={styles.title}>{translate('update_review')}</Title>
             </Body>
           </Header>
 
@@ -217,7 +224,7 @@ class UpdateReview extends Component {
                     })
                   }>
                   <Text style={styles.btn_outline_text}>
-                    Add Photo to review
+                    {translate('app_photo_review')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -287,7 +294,7 @@ class UpdateReview extends Component {
 
             <View>
               <Text>
-                {translate('overall_rating')} {this.state.overallRating}
+                {translate('overall_rating')}: {this.state.overallRating}
               </Text>
             </View>
 
@@ -372,6 +379,7 @@ const styles = StyleSheet.create({
     borderColor: '#F06543',
     backgroundColor: '#F06543',
     borderRadius: 5,
+    marginTop: 10,
   },
   btn_text: {
     padding: 10,
