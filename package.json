@@ -12,8 +12,8 @@
         "start": "react-native start",
         "test": "jest",
         "lint": "eslint .",
-        "audit": "npm audit --json | npm-audit-helper --prod-only",
-        "pre-push": "npm run audit && npm run lint && npm run test",
+        "lintfile": "eslint",
+        "fixfile": "eslint --fix",
         "postinstall": "jetifier -r && patch-package"
     },
     "dependencies": {

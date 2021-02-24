@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 
 import ILLEGAL_WORDS from '../assets/data/profanity-filter.json';
 import { translate } from '../locales';
@@ -7,15 +7,17 @@ import { toast } from './toast';
 
 class FormValidator extends Component {
   validateEmail = (email) => {
-    const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    const regex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
     if (email.length === 0) {
       return new ValidatorResponse(false, translate('email_required_error'));
-    } else if (!regex.test(email)) {
-      return new ValidatorResponse(false, translate('email_invalid_error'));
-    } else {
-      return new ValidatorResponse(true);
     }
+
+    if (!regex.test(email)) {
+      return new ValidatorResponse(false, translate('email_invalid_error'));
+    }
+
+    return new ValidatorResponse(true);
   };
 
   validatePassword = (password) => {
@@ -24,19 +26,23 @@ class FormValidator extends Component {
 
     if (password.length === 0) {
       return new ValidatorResponse(false, translate('password_required_error'));
-    } else if (password.length < 7) {
+    }
+
+    if (password.length < 7) {
       return new ValidatorResponse(
         false,
         translate('password_too_short_error'),
       );
-    } else if (!containsLetters || !containNumbers) {
+    }
+
+    if (!containsLetters || !containNumbers) {
       return new ValidatorResponse(
         false,
         translate('password_non_alphanumeric_error'),
       );
-    } else {
-      return new ValidatorResponse(true);
     }
+
+    return new ValidatorResponse(true);
   };
 
   validateName = (key, value) => {
@@ -54,30 +60,35 @@ class FormValidator extends Component {
         false,
         keyTranslation + translate('name_required_error'),
       );
-    } else if (value.length > 50) {
+    }
+
+    if (value.length > 50) {
       return new ValidatorResponse(
         false,
         keyTranslation + translate('name_too_long_error'),
       );
-    } else if (!lettersCheck) {
+    }
+
+    if (!lettersCheck) {
       return new ValidatorResponse(
         false,
         keyTranslation + translate('name_numeric_error'),
       );
-    } else {
-      return new ValidatorResponse(true);
     }
+
+    return new ValidatorResponse(true);
   };
 
   validatePasswordMatch = (password, conformation) => {
     if (password !== conformation) {
       return new ValidatorResponse(false, translate('password_confirm_error'));
-    } else {
-      return new ValidatorResponse(true);
     }
+
+    return new ValidatorResponse(true);
   };
 
   profanityFilter = (sampleText) => {
+    let formatted = sampleText;
     ILLEGAL_WORDS.forEach((word) => {
       // Makes a capitalised string of each illegal word
       const capitalised = word.charAt(0).toUpperCase() + word.slice(1);
@@ -86,16 +97,13 @@ class FormValidator extends Component {
 
       toCheck.forEach((check) => {
         if (sampleText.includes(check)) {
-          sampleText = sampleText.replace(
-            check,
-            translate('profanity_replace'),
-          );
+          formatted = sampleText.replace(check, translate('profanity_replace'));
           toast(translate('profanity_error_toast'));
         }
       });
     });
 
-    return sampleText;
+    return formatted;
   };
 }
 

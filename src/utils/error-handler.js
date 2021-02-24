@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 
 import ERROR_CODES from '../assets/data/error_codes.json';
 import SUCCESS_CODES from '../assets/data/success_codes.json';
@@ -19,9 +19,7 @@ class ErrorHandler extends Component {
       return new ErrorResponse('success');
     }
 
-    const error = ERROR_CODES.find((item) => {
-      return item.code === statusCode;
-    });
+    const error = ERROR_CODES.find((item) => item.code === statusCode);
 
     let message = '';
     if (error) {
@@ -34,11 +32,7 @@ class ErrorHandler extends Component {
     return new ErrorResponse('error', message);
   };
 
-  checkSuccess = (statusCode) => {
-    return SUCCESS_CODES.some((item) => {
-      return item.code === statusCode;
-    });
-  };
+  checkSuccess = (statusCode) => SUCCESS_CODES.some((item) => item.code === statusCode);
 
   log = (logMessage, toastMessage) => {
     console.log(logMessage);
