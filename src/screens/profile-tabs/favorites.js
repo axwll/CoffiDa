@@ -1,16 +1,18 @@
-import React, { Component } from 'react';
-import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import React, {Component} from 'react';
+import {FlatList, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 
 import LoadingSpinner from '../../components/loading-spinner';
 import MainCard from '../../components/main-card';
-import { translate } from '../../locales';
+import {translate} from '../../locales';
 import ApiRequests from '../../utils/api-requests';
-import { getItem } from '../../utils/async-storage';
+import {getItem} from '../../utils/async-storage';
 import ThemeProvider from '../../utils/theme-provider';
 
 class Favorites extends Component {
   constructor(props) {
     super(props);
+
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.state = {
       loading: true,
@@ -22,7 +24,6 @@ class Favorites extends Component {
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({
       userId: JSON.parse(await getItem('USER_ID')),
@@ -33,7 +34,7 @@ class Favorites extends Component {
 
   findFavorites = async () => {
     const query = `limit=${this.state.limit}&offset=${this.state.offset}&search_in=favourite`;
-    const response = await apiRequests.get(`/find?${query}`);
+    const response = await this.apiRequests.get(`/find?${query}`);
 
     if (response) {
       const existing = this.state.favorites;

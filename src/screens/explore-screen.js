@@ -1,22 +1,34 @@
-import { METER_FEET_CONVERSION_R, METER_MILES_CONVERSION_R } from '@env';
-import { faMugHot, faSearchLocation, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { getDistance } from 'geolib';
-import { Container, Icon, Input, Item } from 'native-base';
-import React, { Component } from 'react';
-import { Animated, Dimensions, Image, PermissionsAndroid, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {METER_FEET_CONVERSION_R, METER_MILES_CONVERSION_R} from '@env';
+import {
+  faMugHot,
+  faSearchLocation,
+  faTimes,
+} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {getDistance} from 'geolib';
+import {Container, Icon, Input, Item} from 'native-base';
+import React, {Component} from 'react';
+import {
+  Animated,
+  Dimensions,
+  Image,
+  PermissionsAndroid,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 
 import LoadingSpinner from '../components/loading-spinner';
 import ReviewIcon from '../components/review-icon';
-import { translate } from '../locales';
+import {translate} from '../locales';
 import ApiRequests from '../utils/api-requests';
-import { getItem } from '../utils/async-storage';
+import {getItem} from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
-import { toast } from '../utils/toast';
+import {toast} from '../utils/toast';
 
-// import {mapDarkStyle} from '../styles/map-style';
 async function requestPermssion(params) {
   try {
     const granted = await PermissionsAndroid.request(
@@ -52,13 +64,14 @@ class Explore extends Component {
     super(props);
 
     this.state = {
-      location: null,
+      myLocation: null,
       locationPermission: false,
       loading: true,
-      clicked: false,
-      showCards: false,
+      showCardList: false,
       showMarkers: false,
       locationsList: [],
+      showSingleMarker: false,
+      singleShop: {},
     };
 
     this.getNearbyLocations = this.getNearbyLocations.bind(this);
@@ -66,56 +79,99 @@ class Explore extends Component {
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
 
-    this.findCoordinates();
+    this.mapSetup();
+
+    this._onFocusListener = this.props.navigation.addListener(
+      'didFocus',
+      async (payload) => {
+        this.setState({loading: true});
+        this.mapSetup();
+      },
+    );
+  }
+
+  componentWillUnmount() {
+    this._onFocusListener.remove();
+  }
+
+  mapSetup = () => {
+    this.findCoordinates()
+      .then((coordinates) => {
+        this.setState({myLocation: coordinates});
+      })
+      .then(() => {
+        const shopData = this.props.navigation.getParam('shopData');
+        if (this.props.navigation.getParam('shopData')) {
+          // Will have this prop if passed from 'SelectedShop'
+          this.setShopLocation(shopData);
+        }
+      })
+      .catch((err) => toast(err));
 
     this.setState({loading: false});
-  }
+  };
 
   findCoordinates = async () => {
     if (!this.state.locationPermission) {
       this.state.locationPermission = await requestPermssion();
     }
 
-    Geolocation.getCurrentPosition(
-      (position) => {
-        this.setState({
-          //   location: position.coords,
-          location: {
-            accuracy: 603,
-            altitude: 0,
-            heading: 90,
-            latitude: 53.38587,
-            longitude: -2.1455589,
-            speed: 0,
-          },
-        });
-      },
-      (error) => {
-        toast(error.message);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 20000,
-        maximumAge: 1000,
-      },
+    return new Promise((resolve, reject) => {
+      Geolocation.getCurrentPosition(
+        (position) => {
+          // resolve(position.coords);
+          resolve({latitude: 53.38587, longitude: -2.1455589});
+        },
+        (error) => reject(error.message),
+        {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 1000,
+        },
+      );
+    });
+  };
+
+  setShopLocation = (shopData) => {
+    const shopLocation = {
+      latitude: shopData.latitude,
+      longitude: shopData.longitude,
+    };
+
+    shopData.distance_from_me = this.distanceBetween(
+      this.state.myLocation,
+      shopLocation,
     );
+
+    this.setState({
+      singleShop: {
+        location: {
+          latitude: shopData.latitude,
+          longitude: shopData.longitude,
+        },
+        title: shopData.location_name,
+        description: this.parseDistanceValue(shopData.distance_from_me),
+      },
+      showSingleMarker: true,
+    });
   };
 
   getNearbyLocations = async () => {
-    this.setState({showMyMarker: false});
+    this.setState({
+      showSingleMarker: false,
+      showMyMarker: false,
+    });
     LATITUDE_DELTA = 0.0922;
     LONGITUDE_DELTA = 0.5;
 
     const response = await this.apiRequests.get('/find');
 
     if (response) {
-      const myLocation = this.state.location;
       response.forEach((location) => {
-        location.distance_from_me = getDistance(
-          {latitude: myLocation.latitude, longitude: myLocation.longitude},
-          {latitude: location.latitude, longitude: location.longitude},
+        location.distance_from_me = this.distanceBetween(
+          this.state.myLocation,
+          location,
         );
       });
 
@@ -124,11 +180,18 @@ class Explore extends Component {
       });
 
       this.setState({
-        showCards: true,
+        showCardList: true,
         showMarkers: true,
-        locationsList: sortedLocations.slice(0, 9),
+        locationsList: sortedLocations.slice(0, 5),
       });
     }
+  };
+
+  distanceBetween = (location1, location2) => {
+    return getDistance(
+      {latitude: location1.latitude, longitude: location1.longitude},
+      {latitude: location2.latitude, longitude: location2.longitude},
+    );
   };
 
   parseDistanceValue = (distance) => {
@@ -143,16 +206,21 @@ class Explore extends Component {
   };
 
   moveToMyLocation = () => {
-    const myLocation = this.state.location;
-
     this.setState({
-      showCards: false,
+      showCardList: false,
       showMarkers: false,
+      showSingleMarker: false,
       showMyMarker: true,
-      location: myLocation,
     });
-    LONGITUDE_DELTA = 0.005;
-    LATITUDE_DELTA = 0.005;
+
+    LONGITUDE_DELTA = 0.05;
+    LATITUDE_DELTA = 0.05;
+
+    this.findCoordinates()
+      .then((coordinates) => {
+        this.setState({myLocation: coordinates});
+      })
+      .catch((err) => toast(err));
   };
 
   shouldShow = (stateBoolean) => {
@@ -164,12 +232,14 @@ class Explore extends Component {
   };
 
   render() {
-    if (!this.state.location) {
+    const themeStyles = ThemeProvider.getTheme();
+
+    if (!this.state.myLocation) {
       if (!this.state.locationPermission) return <LoadingSpinner size={50} />;
 
       return (
         <View style={styles.loading_view}>
-          <Text style={[styles.btn_text, this.themeStyles.color_dark]}>
+          <Text style={[styles.btn_text, themeStyles.color_dark]}>
             {translate('cant_get_location')}
           </Text>
         </View>
@@ -178,9 +248,7 @@ class Explore extends Component {
       return (
         <Container style={styles.map_container}>
           <View style={styles.header}>
-            <Item
-              rounded
-              style={[styles.srch, this.themeStyles.background_light]}>
+            <Item rounded style={[styles.srch, themeStyles.background_light]}>
               <Icon name="ios-search" />
               <Input
                 placeholder={translate('search_box_placeholder')}
@@ -192,16 +260,16 @@ class Explore extends Component {
             <TouchableOpacity
               style={[
                 styles.text_button,
-                this.themeStyles.background_light,
-                this.themeStyles.color_primary,
+                themeStyles.background_light,
+                themeStyles.color_primary,
               ]}
               onPress={() => this.getNearbyLocations()}>
               <FontAwesomeIcon
                 icon={faMugHot}
                 size={20}
-                color={this.themeStyles.color_primary.color}
+                color={themeStyles.color_primary.color}
               />
-              <Text style={[styles.btn_text, this.themeStyles.color_primary]}>
+              <Text style={[styles.btn_text, themeStyles.color_primary]}>
                 {translate('find_coffee_shops_btn')}
               </Text>
             </TouchableOpacity>
@@ -209,16 +277,16 @@ class Explore extends Component {
             <TouchableOpacity
               style={[
                 styles.text_button,
-                this.themeStyles.background_light,
-                this.themeStyles.color_primary,
+                themeStyles.background_light,
+                themeStyles.color_primary,
               ]}
               onPress={() => this.moveToMyLocation()}>
               <FontAwesomeIcon
                 icon={faSearchLocation}
                 size={20}
-                color={this.themeStyles.color_primary.color}
+                color={themeStyles.color_primary.color}
               />
-              <Text style={[styles.btn_text, this.themeStyles.color_primary]}>
+              <Text style={[styles.btn_text, themeStyles.color_primary]}>
                 {translate('find_me_btn')}
               </Text>
             </TouchableOpacity>
@@ -227,21 +295,31 @@ class Explore extends Component {
           <MapView
             provider={PROVIDER_GOOGLE}
             style={styles.map}
-            // customMapStyle={mapDarkStyle}
             region={{
-              latitude: this.state.location.latitude,
-              longitude: this.state.location.longitude,
+              latitude: this.state.myLocation.latitude,
+              longitude: this.state.myLocation.longitude,
               latitudeDelta: LATITUDE_DELTA,
               longitudeDelta: (LONGITUDE_DELTA * width) / height,
             }}>
+            {/* This renders if the map is navigated to from 'SelectedShop' */}
             {this.state.showMyMarker && (
               <Marker
-                coordinate={this.state.location}
+                coordinate={this.state.myLocation}
                 title={'My location'}
                 description={'I am here'}
               />
             )}
 
+            {/* This renders if the 'find me' button is clicked*/}
+            {this.state.showSingleMarker && (
+              <Marker
+                coordinate={this.state.singleShop.location}
+                title={this.state.singleShop.title}
+                description={this.state.singleShop.description}
+              />
+            )}
+
+            {/* This renders if the 'find coffee shops' button is clicked*/}
             {this.shouldShow(this.state.showMarkers) &&
               this.state.locationsList.map((location, index) => {
                 return (
@@ -259,20 +337,20 @@ class Explore extends Component {
                 );
               })}
           </MapView>
-          {this.shouldShow(this.state.showCards) && (
+          {this.shouldShow(this.state.showCardList) && (
             <View style={styles.card_view}>
               <TouchableOpacity
                 style={[
                   styles.text_button,
                   styles.close_button,
-                  this.themeStyles.background_light,
-                  this.themeStyles.color_primary,
+                  themeStyles.background_light,
+                  themeStyles.color_primary,
                 ]}
-                onPress={() => this.setState({showCards: false})}>
+                onPress={() => this.setState({showCardList: false})}>
                 <FontAwesomeIcon
                   icon={faTimes}
                   size={15}
-                  color={this.themeStyles.color_primary.color}
+                  color={themeStyles.color_primary.color}
                 />
               </TouchableOpacity>
 
@@ -283,9 +361,10 @@ class Explore extends Component {
                 showHorizontalScrollIndicator={false}
                 snapToAlignment="center">
                 {this.state.locationsList.map((location, index) => {
+                  //   console.log(location);
                   return (
                     <View
-                      style={[styles.card, this.themeStyles.background_light]}
+                      style={[styles.card, themeStyles.background_light]}
                       key={index}>
                       <Image
                         source={{uri: location.photo_path}}
@@ -307,12 +386,12 @@ class Explore extends Component {
                         <TouchableOpacity
                           style={[
                             styles.btn,
-                            this.themeStyles.primary_button_color_outline,
+                            themeStyles.primary_button_color_outline,
                           ]}>
                           <Text
                             style={[
                               styles.btn_text,
-                              this.themeStyles.color_primary,
+                              themeStyles.color_primary,
                             ]}>
                             {translate('more_info_btn')}
                           </Text>

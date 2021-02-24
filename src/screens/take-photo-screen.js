@@ -1,13 +1,13 @@
-import { faCamera } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { Component } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { RNCamera } from 'react-native-camera';
+import {faCamera} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import React, {Component} from 'react';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import {RNCamera} from 'react-native-camera';
 
-import { translate } from '../locales';
+import {translate} from '../locales';
 import ApiRequests from '../utils/api-requests';
-import { getItem } from '../utils/async-storage';
-import { toast } from '../utils/toast';
+import {getItem} from '../utils/async-storage';
+import {toast} from '../utils/toast';
 
 class TakePhoto extends Component {
   constructor(props) {
@@ -16,7 +16,6 @@ class TakePhoto extends Component {
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
   }
 
   takePicture = async () => {
@@ -50,6 +49,8 @@ class TakePhoto extends Component {
   };
 
   render() {
+    const themeStyles = ThemeProvider.getTheme();
+
     return (
       <View style={{flex: 1, width: '100%'}}>
         <RNCamera
@@ -64,10 +65,10 @@ class TakePhoto extends Component {
             onPress={() => {
               this.takePicture();
             }}
-            style={[styles.button, this.themeStyles.background_color]}>
+            style={[styles.button, themeStyles.background_color]}>
             <FontAwesomeIcon
               icon={faCamera}
-              style={this.themeStyles.color_medium}
+              style={themeStyles.color_medium}
               size={25}
             />
           </TouchableOpacity>

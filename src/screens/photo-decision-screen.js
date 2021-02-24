@@ -1,12 +1,12 @@
-import { Container } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {Container} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
-import { translate } from '../locales';
+import {translate} from '../locales';
 import ApiRequests from '../utils/api-requests';
-import { getItem } from '../utils/async-storage';
+import {getItem} from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
-import { toast } from '../utils/toast';
+import {toast} from '../utils/toast';
 
 class PhotoDecision extends Component {
   constructor(props) {
@@ -19,7 +19,6 @@ class PhotoDecision extends Component {
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({
       locationId: this.props.navigation.getParam('locationId'),
@@ -65,24 +64,26 @@ class PhotoDecision extends Component {
   };
 
   render() {
+    const themeStyles = ThemeProvider.getTheme();
+
     return (
-      <Container style={[styles.container, this.themeStyles.background_color]}>
+      <Container style={[styles.container, themeStyles.background_color]}>
         <View style={styles.content}>
           <Text style={styles.header_text}>{this.state.displayText}</Text>
 
           <View style={styles.buttons}>
             <TouchableOpacity
-              style={[styles.button, this.themeStyles.primary_button_color]}
+              style={[styles.button, themeStyles.primary_button_color]}
               onPress={() => this.yesClicked()}>
-              <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+              <Text style={[styles.btn_text, themeStyles.color_light]}>
                 {translate('yes')}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.button, this.themeStyles.secondary_button_color]}
+              style={[styles.button, themeStyles.secondary_button_color]}
               onPress={() => this.noClicked()}>
-              <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+              <Text style={[styles.btn_text, themeStyles.color_light]}>
                 {translate('no')}
               </Text>
             </TouchableOpacity>

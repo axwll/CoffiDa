@@ -31,7 +31,6 @@ class Signup extends Component {
 
   componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, null);
-    this.themeStyles = ThemeProvider.getTheme();
   }
 
   handleEmailInput = async (email) => {
@@ -174,23 +173,24 @@ class Signup extends Component {
 
   render() {
     const navigation = this.props.navigation;
+    const themeStyles = ThemeProvider.getTheme();
 
     return (
       <Container
-        style={[styles.container, this.themeStyles.alt_background_color]}>
-        <Header style={[styles.header, this.themeStyles.alt_background_color]}>
+        style={[styles.container, themeStyles.alt_background_color]}>
+        <Header style={[styles.header, themeStyles.alt_background_color]}>
           <Left style={styles.header_left}>
             <Button transparent>
               <FontAwesomeIcon
                 icon={faChevronLeft}
                 size={20}
-                color={this.themeStyles.color_primary.color}
+                color={themeStyles.color_primary.color}
                 onPress={() => navigation.goBack()}
               />
             </Button>
           </Left>
           <Body style={styles.header_body}>
-            <Title style={this.themeStyles.color_dark}>
+            <Title style={themeStyles.color_dark}>
               {translate('signup')}
             </Title>
           </Body>
@@ -209,7 +209,7 @@ class Signup extends Component {
             {!this.state.validEmail && this.state.submitted && (
               <View>
                 <Text
-                  style={[styles.error_text, this.themeStyles.color_primary]}>
+                  style={[styles.error_text, themeStyles.color_primary]}>
                   {this.state.emailErrorText}
                 </Text>
               </View>
@@ -225,7 +225,7 @@ class Signup extends Component {
             {!this.state.validFirstName && this.state.submitted && (
               <View>
                 <Text
-                  style={[styles.error_text, this.themeStyles.color_primary]}>
+                  style={[styles.error_text, themeStyles.color_primary]}>
                   {this.state.firstNameErrorText}
                 </Text>
               </View>
@@ -241,7 +241,7 @@ class Signup extends Component {
             {!this.state.validLastName && this.state.submitted && (
               <View>
                 <Text
-                  style={[styles.error_text, this.themeStyles.color_primary]}>
+                  style={[styles.error_text, themeStyles.color_primary]}>
                   {this.state.lastNameErrorText}
                 </Text>
               </View>
@@ -258,7 +258,7 @@ class Signup extends Component {
             {!this.state.validPassword && this.state.submitted && (
               <View>
                 <Text
-                  style={[styles.error_text, this.themeStyles.color_primary]}>
+                  style={[styles.error_text, themeStyles.color_primary]}>
                   {this.state.passwordErrorText}
                 </Text>
               </View>
@@ -275,16 +275,16 @@ class Signup extends Component {
             {!this.state.validConfirmPassword && this.state.submitted && (
               <View>
                 <Text
-                  style={[styles.error_text, this.themeStyles.color_primary]}>
+                  style={[styles.error_text, themeStyles.color_primary]}>
                   {this.state.confirmPasswordErrorText}
                 </Text>
               </View>
             )}
 
             <TouchableOpacity
-              style={[styles.button, this.themeStyles.primary_button_color]}
+              style={[styles.button, themeStyles.primary_button_color]}
               onPress={() => this.signUpEvent()}>
-              <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+              <Text style={[styles.btn_text, themeStyles.color_light]}>
                 {translate('signup')}
               </Text>
             </TouchableOpacity>

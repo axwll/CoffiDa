@@ -1,14 +1,14 @@
-import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
-import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Button, Card, CardItem, Left, Right } from 'native-base';
-import React, { Component } from 'react';
-import { Text } from 'react-native';
+import {faHeart as faHeartRegular} from '@fortawesome/free-regular-svg-icons';
+import {faHeart as faHeartSolid} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {Button, Card, CardItem, Left, Right} from 'native-base';
+import React, {Component} from 'react';
+import {Text} from 'react-native';
 
 import ReviewIcon from '../components/review-icon';
-import { translate } from '../locales';
+import {translate} from '../locales';
 import ApiRequests from '../utils/api-requests';
-import { getItem } from '../utils/async-storage';
+import {getItem} from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 
 class ReviewCard extends Component {
@@ -23,7 +23,6 @@ class ReviewCard extends Component {
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({userId: await getItem('USER_ID')});
 
@@ -88,6 +87,7 @@ class ReviewCard extends Component {
   };
 
   render() {
+    const themeStyles = ThemeProvider.getTheme();
     const review = this.props.shopReview;
     const locationId = this.props.locationId;
 
@@ -99,30 +99,30 @@ class ReviewCard extends Component {
           </Left>
 
           <Right>
-            <Text style={this.themeStyles.color_dark}>
+            <Text style={themeStyles.color_dark}>
               {translate('price')}: {review.price_rating}/5
             </Text>
-            <Text style={this.themeStyles.color_dark}>
+            <Text style={themeStyles.color_dark}>
               {translate('cleanliness')}: {review.clenliness_rating}/5
             </Text>
-            <Text style={this.themeStyles.color_dark}>
+            <Text style={themeStyles.color_dark}>
               {translate('quality')}: {review.quality_rating}/5
             </Text>
           </Right>
         </CardItem>
         <CardItem style={{paddingTop: 0, paddingBottom: 0}}>
           <Left>
-            <Button transparent style={this.themeStyles.color_dark}>
+            <Button transparent style={themeStyles.color_dark}>
               <FontAwesomeIcon
                 icon={this.state.liked ? faHeartSolid : faHeartRegular}
                 size={15}
-                color={this.themeStyles.color_primary.color}
+                color={themeStyles.color_primary.color}
                 onPress={() =>
                   this.likeButtonPressed(locationId, review.review_id)
                 }
               />
             </Button>
-            <Text style={styles.like_count}>{review.likes}</Text>
+            <Text>{review.likes}</Text>
           </Left>
           <Right>
             <ReviewIcon rating={review.overall_rating} size={15} spacing={5} />

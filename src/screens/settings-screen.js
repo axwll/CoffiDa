@@ -23,7 +23,6 @@ class Settings extends Component {
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({userId: await getItem('USER_ID')});
 
@@ -56,33 +55,30 @@ class Settings extends Component {
     this.props.navigation.navigate('Auth');
   };
 
-  toggleSwitch = () => {
-    const enabledState = this.state.isEnabled;
-    this.setState({isEnabled: !enabledState});
-  };
-
   render() {
+    const themeStyles = ThemeProvider.getTheme();
+
     if (this.state.loading) {
       return <LoadingSpinner size={50} />;
     } else {
       const navigation = this.props.navigation;
 
       return (
-        <Container style={this.themeStyles.container}>
-          <Header style={[styles.header, this.themeStyles.background_color]}>
+        <Container style={themeStyles.container}>
+          <Header style={[styles.header, themeStyles.background_color]}>
             <Left style={styles.header_left}>
               <Button transparent>
                 <FontAwesomeIcon
                   icon={faChevronLeft}
                   size={20}
-                  color={this.themeStyles.color_primary.color}
+                  color={themeStyles.color_primary.color}
                   onPress={() => navigation.navigate('Profile')}
                 />
               </Button>
             </Left>
 
             <Body style={styles.header_body}>
-              <Title style={this.themeStyles.color_dark}>
+              <Title style={themeStyles.color_dark}>
                 {translate('settings')}
               </Title>
             </Body>

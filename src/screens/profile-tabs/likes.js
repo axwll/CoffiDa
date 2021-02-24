@@ -1,19 +1,21 @@
-import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Button, Card, CardItem, Left } from 'native-base';
-import React, { Component } from 'react';
-import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import {faHeart as faHeartSolid} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {Button, Card, CardItem, Left} from 'native-base';
+import React, {Component} from 'react';
+import {FlatList, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 
 import LoadingSpinner from '../../components/loading-spinner';
 import ProfileReviewCard from '../../components/profile-review-card';
-import { translate } from '../../locales';
+import {translate} from '../../locales';
 import ApiRequests from '../../utils/api-requests';
-import { getItem } from '../../utils/async-storage';
+import {getItem} from '../../utils/async-storage';
 import ThemeProvider from '../../utils/theme-provider';
 
 class Likes extends Component {
   constructor(props) {
     super(props);
+
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.state = {
       loading: true,
@@ -23,7 +25,6 @@ class Likes extends Component {
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({userId: await getItem('USER_ID')});
 

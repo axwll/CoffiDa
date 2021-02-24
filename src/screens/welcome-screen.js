@@ -1,9 +1,9 @@
-import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {faEnvelope} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import React, {Component} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
-import { translate } from '../locales';
+import {translate} from '../locales';
 import ThemeProvider from '../utils/theme-provider';
 
 class Welcome extends Component {
@@ -50,7 +50,7 @@ class Welcome extends Component {
                 style={[
                   styles.button,
                   styles.btn_secondary,
-                  themeStyles.secondary_button_color,
+                  themeStyles.alt_background_color,
                 ]}
                 onPress={() => navigation.navigate('Signup')}>
                 <View style={styles.btn_icon_view}>

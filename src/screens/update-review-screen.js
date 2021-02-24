@@ -1,19 +1,30 @@
-import { faTrashAlt } from '@fortawesome/free-regular-svg-icons';
-import { faChevronLeft, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Content, Form, Header, Left, Right, Textarea, Title } from 'native-base';
-import React, { Component } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {faTrashAlt} from '@fortawesome/free-regular-svg-icons';
+import {faChevronLeft, faPencilAlt} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  Body,
+  Button,
+  Container,
+  Content,
+  Form,
+  Header,
+  Left,
+  Right,
+  Textarea,
+  Title,
+} from 'native-base';
+import React, {Component} from 'react';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
 import LoadingSpinner from '../components/loading-spinner';
-import { translate } from '../locales';
+import {translate} from '../locales';
 import ApiRequests from '../utils/api-requests';
-import { getItem } from '../utils/async-storage';
+import {getItem} from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
-import { toast } from '../utils/toast';
+import {toast} from '../utils/toast';
 import Validator from '../utils/validator';
 
 class UpdateReview extends Component {
@@ -35,7 +46,6 @@ class UpdateReview extends Component {
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({
       shopData: this.props.navigation.getParam('shopData'),
@@ -152,25 +162,27 @@ class UpdateReview extends Component {
   };
 
   render() {
+    const themeStyles = ThemeProvider.getTheme();
+
     if (this.state.loading) {
       return <LoadingSpinner size={50} />;
     } else {
       return (
-        <Container style={this.themeStyles.container}>
-          <Header style={[styles.header, this.themeStyles.background_color]}>
+        <Container style={themeStyles.container}>
+          <Header style={[styles.header, themeStyles.background_color]}>
             <Left style={styles.header_left}>
               <Button transparent>
                 <FontAwesomeIcon
                   icon={faChevronLeft}
                   size={20}
-                  color={this.themeStyles.color_primary.color}
+                  color={themeStyles.color_primary.color}
                   onPress={() => this.props.navigation.goBack()}
                 />
               </Button>
             </Left>
 
             <Body style={styles.header_body}>
-              <Title style={[styles.title, this.themeStyle.color_dark]}>
+              <Title style={[styles.title, themeStyles.color_dark]}>
                 {translate('update_review')}
               </Title>
             </Body>
@@ -190,7 +202,7 @@ class UpdateReview extends Component {
                     <FontAwesomeIcon
                       icon={faPencilAlt}
                       size={15}
-                      color={this.themeStyles.color_primary.color}
+                      color={themeStyles.color_primary.color}
                       onPress={() => this.editReviewPhoto()}
                     />
                   </Button>
@@ -199,7 +211,7 @@ class UpdateReview extends Component {
                     <FontAwesomeIcon
                       icon={faTrashAlt}
                       size={15}
-                      color={this.themeStyles.color_primary.color}
+                      color={themeStyles.color_primary.color}
                       onPress={() => this.deleteReviewPhoto()}
                     />
                   </Button>
@@ -219,7 +231,7 @@ class UpdateReview extends Component {
                 <TouchableOpacity
                   style={[
                     styles.btn_primary_outline,
-                    this.themeStyles.primary_button_color_outline,
+                    themeStyles.primary_button_color_outline,
                   ]}
                   onPress={() =>
                     this.props.navigation.navigate('TakePhoto', {
@@ -229,10 +241,7 @@ class UpdateReview extends Component {
                     })
                   }>
                   <Text
-                    style={[
-                      styles.btn_outline_text,
-                      this.themeStyles.color_dark,
-                    ]}>
+                    style={[styles.btn_outline_text, themeStyles.color_dark]}>
                     {translate('app_photo_review')}
                   </Text>
                 </TouchableOpacity>
@@ -317,12 +326,9 @@ class UpdateReview extends Component {
               />
             </Form>
             <TouchableOpacity
-              style={[
-                styles.btn_primary,
-                this.themeStyles.primary_button_color,
-              ]}
+              style={[styles.btn_primary, themeStyles.primary_button_color]}
               onPress={() => this.updateReview()}>
-              <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+              <Text style={[styles.btn_text, themeStyles.color_light]}>
                 {translate('update_review')}
               </Text>
             </TouchableOpacity>

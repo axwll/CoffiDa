@@ -1,12 +1,22 @@
-import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Form, Header, Input, Item, Left, Title } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  Body,
+  Button,
+  Container,
+  Form,
+  Header,
+  Input,
+  Item,
+  Left,
+  Title,
+} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
-import { translate } from '../locales';
+import {translate} from '../locales';
 import ApiRequests from '../utils/api-requests';
-import { getItem } from '../utils/async-storage';
+import {getItem} from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 import Validator from '../utils/validator';
 
@@ -15,6 +25,9 @@ class EditAccount extends Component {
     super(props);
 
     const type = this.props.navigation.getParam('type');
+
+    // set in constructor because it is used in functions other that render
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.state = {
       type: type,
@@ -34,7 +47,6 @@ class EditAccount extends Component {
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
 
     const userInfo = this.props.navigation.getParam('userInfo');
     this.setState({

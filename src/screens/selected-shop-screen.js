@@ -1,16 +1,39 @@
-import { faStar as faStarRegular } from '@fortawesome/free-regular-svg-icons';
-import { faChevronLeft, faDirections, faPlus, faStar as faStarSolid } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Card, CardItem, Container, Content, Header, Left, Right, Title } from 'native-base';
-import React, { Component } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {faStar as faStarRegular} from '@fortawesome/free-regular-svg-icons';
+import {
+  faChevronLeft,
+  faDirections,
+  faPlus,
+  faStar as faStarSolid,
+} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  Body,
+  Button,
+  Card,
+  CardItem,
+  Container,
+  Content,
+  Header,
+  Left,
+  Right,
+  Title,
+} from 'native-base';
+import React, {Component} from 'react';
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import LoadingSpinner from '../components/loading-spinner';
 import ReviewCard from '../components/review-card';
 import ReviewIcon from '../components/review-icon';
-import { translate } from '../locales';
+import {translate} from '../locales';
 import ApiRequests from '../utils/api-requests';
-import { getItem } from '../utils/async-storage';
+import {getItem} from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 
 class SelectedShop extends Component {
@@ -27,7 +50,6 @@ class SelectedShop extends Component {
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({userId: await getItem('USER_ID')});
 
@@ -111,36 +133,34 @@ class SelectedShop extends Component {
     }
   };
 
-  getDirections = () => {
-    this.props.navigation.navigate('Explore');
-  };
-
-  addReview = () => {
-    this.props.navigation.navigate('AddReview', {
+  navigate = (screenName) => {
+    this.props.navigation.navigate(screenName, {
       shopData: this.state.shopData,
     });
   };
 
   render() {
+    const themeStyles = ThemeProvider.getTheme();
+
     if (this.state.loading) {
       return <LoadingSpinner size={50} />;
     } else {
       return (
-        <Container style={this.themeStyles.container}>
-          <Header style={[styles.header, this.themeStyles.background_color]}>
+        <Container style={themeStyles.container}>
+          <Header style={[styles.header, themeStyles.background_color]}>
             <Left style={styles.header_left}>
               <Button transparent>
                 <FontAwesomeIcon
                   icon={faChevronLeft}
                   size={20}
-                  color={this.themeStyles.color_primary.color}
+                  color={themeStyles.color_primary.color}
                   onPress={() => this.props.navigation.goBack()}
                 />
               </Button>
             </Left>
 
             <Body style={styles.header_body}>
-              <Title style={this.themeStyles.color_dark}>
+              <Title style={themeStyles.color_dark}>
                 {this.state.shopData.location_name}
               </Title>
             </Body>
@@ -149,7 +169,7 @@ class SelectedShop extends Component {
               <FontAwesomeIcon
                 icon={this.state.favorite ? faStarSolid : faStarRegular}
                 size={20}
-                color={this.themeStyles.color_primary.color}
+                color={themeStyles.color_primary.color}
                 onPress={() => this.favButtonPressed()}
               />
             </Right>
@@ -170,8 +190,8 @@ class SelectedShop extends Component {
                     <FontAwesomeIcon
                       icon={faPlus}
                       size={20}
-                      color={this.themeStyles.color_primary.color}
-                      onPress={() => this.addReview()}
+                      color={themeStyles.color_primary.color}
+                      onPress={() => this.navigate('AddReview')}
                     />
                   </View>
                   <View style={styles.num_reviews}>
@@ -186,8 +206,8 @@ class SelectedShop extends Component {
                     <FontAwesomeIcon
                       icon={faDirections}
                       size={20}
-                      color={this.themeStyles.color_primary.color}
-                      onPress={() => this.getDirections()}
+                      color={themeStyles.color_primary.color}
+                      onPress={() => this.navigate('Explore')}
                     />
                   </View>
                 </CardItem>
@@ -211,7 +231,7 @@ class SelectedShop extends Component {
               </Card>
 
               <View style={styles.sub_heading_view}>
-                <Title style={this.themeStyles.color_dark}>
+                <Title style={themeStyles.color_dark}>
                   {translate('raiting_review')}
                 </Title>
               </View>
@@ -221,9 +241,9 @@ class SelectedShop extends Component {
                   <TouchableOpacity
                     style={[
                       styles.button,
-                      this.themeStyles.primary_button_color_outline,
+                      themeStyles.primary_button_color_outline,
                     ]}
-                    onPress={() => this.addReview()}>
+                    onPress={() => this.navigate('AddReview')}>
                     <Text style={styles.btn_text}>
                       {translate('add_review')}
                     </Text>

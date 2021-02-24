@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
-import { DarkModeContext } from 'react-native-dynamic';
+import React, {Component} from 'react';
+import {DarkModeContext} from 'react-native-dynamic';
 
-import { darkStyles } from '../styles/dark-styles';
-import { lightStyles } from '../styles/light-styles';
+import {darkStyles} from '../styles/dark-styles';
+import {lightStyles} from '../styles/light-styles';
 
 class Theme extends Component {
   static contextType = DarkModeContext;

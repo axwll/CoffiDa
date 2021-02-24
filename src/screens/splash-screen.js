@@ -1,13 +1,12 @@
-import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, {Component} from 'react';
+import {StyleSheet, Text, View} from 'react-native';
 
-import { getItem } from '../utils/async-storage';
+import {getItem} from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 
 class SplashScreen extends Component {
   constructor() {
     super();
-    this.themeStyles = ThemeProvider.getTheme();
     this.checkToken();
   }
 
@@ -18,9 +17,10 @@ class SplashScreen extends Component {
   };
 
   render() {
+    const themeStyles = ThemeProvider.getTheme();
     return (
-      <View style={[styles.view, this.themeStyles.primary_background_color]}>
-        <Text style={[styles.text, this.themeStyles.color_light]}>CoffiDa</Text>
+      <View style={[styles.view, themeStyles.primary_background_color]}>
+        <Text style={[styles.text, themeStyles.color_light]}>CoffiDa</Text>
       </View>
     );
   }
@@ -32,12 +32,10 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F06543',
   },
   text: {
     fontSize: 50,
     fontFamily: 'Pacifico-Regular',
-    color: '#FFFFFF',
   },
 });
 

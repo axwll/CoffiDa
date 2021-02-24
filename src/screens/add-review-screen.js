@@ -1,17 +1,27 @@
-import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Content, Form, Header, Left, Textarea, Title } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  Body,
+  Button,
+  Container,
+  Content,
+  Form,
+  Header,
+  Left,
+  Textarea,
+  Title,
+} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
-import { translate } from '../locales';
+import {translate} from '../locales';
 import ApiRequests from '../utils/api-requests';
-import { getItem } from '../utils/async-storage';
+import {getItem} from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
-import { toast } from '../utils/toast';
+import {toast} from '../utils/toast';
 import Validator from '../utils/validator';
 
 class AddReview extends Component {
@@ -29,7 +39,6 @@ class AddReview extends Component {
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
   }
 
   calculateOverall = () => {
@@ -77,7 +86,7 @@ class AddReview extends Component {
       review_body: reviewBody,
     });
 
-    const response = await apiRequests.post(
+    const response = await this.apiRequests.post(
       `/location/${locationId}/review`,
       postBody,
     );
@@ -89,24 +98,25 @@ class AddReview extends Component {
   };
 
   render() {
+    const themeStyles = ThemeProvider.getTheme();
     const shopData = this.props.navigation.getParam('shopData');
 
     return (
-      <Container style={this.themeStyles.container}>
-        <Header style={[styles.header, this.themeStyles.background_color]}>
+      <Container style={themeStyles.container}>
+        <Header style={[styles.header, themeStyles.background_color]}>
           <Left style={styles.header_left}>
             <Button transparent>
               <FontAwesomeIcon
                 icon={faChevronLeft}
                 size={20}
-                color={this.themeStyles.color_primary.color}
+                color={themeStyles.color_primary.color}
                 onPress={() => this.props.navigation.goBack()}
               />
             </Button>
           </Left>
 
           <Body style={styles.header_body}>
-            <Title style={[styles.title, this.themeStyles.color_dark]}>
+            <Title style={[styles.title, themeStyles.color_dark]}>
               {translate('new_review')}
             </Title>
           </Body>
@@ -114,7 +124,7 @@ class AddReview extends Component {
 
         <Content padder>
           <View>
-            <Text style={[styles.title, this.themeStyles.color_dark]}>
+            <Text style={[styles.title, themeStyles.color_dark]}>
               {shopData.location_name}
             </Text>
           </View>
@@ -198,9 +208,9 @@ class AddReview extends Component {
           </Form>
 
           <TouchableOpacity
-            style={[styles.btn_primary, this.themeStyles.primary_button_color]}
+            style={[styles.btn_primary, themeStyles.primary_button_color]}
             onPress={() => this.createReview(shopData.location_id)}>
-            <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+            <Text style={[styles.btn_text, themeStyles.color_light]}>
               {translate('post_review')}
             </Text>
           </TouchableOpacity>

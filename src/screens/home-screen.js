@@ -1,22 +1,33 @@
-import { faFilter, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Container, Header, Icon, Input, Item } from 'native-base';
-import React, { Component } from 'react';
-import { FlatList, Keyboard, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {faFilter, faTimes} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {Container, Header, Icon, Input, Item} from 'native-base';
+import React, {Component} from 'react';
+import {
+  FlatList,
+  Keyboard,
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
 import LoadingSpinner from '../components/loading-spinner';
 import MainCard from '../components/main-card';
-import { translate } from '../locales';
+import {translate} from '../locales';
 import ApiRequests from '../utils/api-requests';
-import { getItem } from '../utils/async-storage';
+import {getItem} from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 
 class Home extends Component {
   constructor(props) {
     super(props);
+
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.state = {
       loading: true,
@@ -41,7 +52,6 @@ class Home extends Component {
     }
 
     this.apiRequests = new ApiRequests(this.props, token);
-    this.themeStyles = ThemeProvider.getTheme();
 
     // lists all shops
     this.find();

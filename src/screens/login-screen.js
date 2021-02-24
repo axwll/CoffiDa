@@ -1,12 +1,24 @@
-import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Form, Header, Input, Item, Left, Title } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  Body,
+  Button,
+  Container,
+  Form,
+  Header,
+  Input,
+  Item,
+  Left,
+  Title,
+} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
-import { translate } from '../locales';
+import {translate} from '../locales';
+import {darkStyles} from '../styles/dark-styles';
+import {lightStyles} from '../styles/light-styles';
 import ApiRequests from '../utils/api-requests';
-import { getItem, setItem } from '../utils/async-storage';
+import {getItem} from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 import Validator from '../utils/validator';
 
@@ -25,7 +37,6 @@ class Login extends Component {
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
   }
 
   handleEmailInput = (email) => {
@@ -95,24 +106,22 @@ class Login extends Component {
 
   render() {
     const navigation = this.props.navigation;
+    const themeStyles = ThemeProvider.getTheme();
     return (
-      <Container
-        style={[styles.container, this.themeStyles.alt_background_color]}>
-        <Header style={[styles.header, this.themeStyles.alt_background_color]}>
+      <Container style={[styles.container, themeStyles.alt_background_color]}>
+        <Header style={[styles.header, themeStyles.alt_background_color]}>
           <Left style={styles.header_left}>
             <Button transparent>
               <FontAwesomeIcon
                 icon={faChevronLeft}
                 size={20}
-                color={this.themeStyles.color_primary.color}
+                color={themeStyles.color_primary.color}
                 onPress={() => navigation.goBack()}
               />
             </Button>
           </Left>
           <Body style={styles.header_body}>
-            <Title style={this.themeStyles.color_dark}>
-              {translate('login')}
-            </Title>
+            <Title style={themeStyles.color_dark}>{translate('login')}</Title>
           </Body>
         </Header>
 
@@ -126,7 +135,7 @@ class Login extends Component {
           </Item>
           {!this.state.validEmail && this.state.submitted && (
             <View>
-              <Text style={[styles.error_text, this.themeStyles.color_primary]}>
+              <Text style={[styles.error_text, themeStyles.color_primary]}>
                 {this.state.emailErrorText}
               </Text>
             </View>
@@ -142,16 +151,16 @@ class Login extends Component {
           </Item>
           {!this.state.validPassword && this.state.submitted && (
             <View>
-              <Text style={[styles.error_text, this.themeStyles.color_primary]}>
+              <Text style={[styles.error_text, themeStyles.color_primary]}>
                 {this.state.passwordErrorText}
               </Text>
             </View>
           )}
 
           <TouchableOpacity
-            style={[styles.button, this.themeStyles.primary_button_color]}
+            style={[styles.button, themeStyles.primary_button_color]}
             onPress={() => this.logInEvent()}>
-            <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+            <Text style={[styles.btn_text, themeStyles.color_light]}>
               {translate('login')}
             </Text>
           </TouchableOpacity>

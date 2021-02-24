@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import {StyleSheet} from 'react-native';
 
 /**
  * TODO: Change to dark mode styles
@@ -22,11 +22,14 @@ export const darkStyles = StyleSheet.create({
   color_dark: {
     color: '#313638',
   },
+  color_medium: {
+    color: '#808080',
+  },
   color_light: {
     color: '#FFFFFF',
   },
-  color_medium: {
-    color: '#808080',
+  alt_color_light: {
+    color: '#E0DFD5',
   },
   primary_button_color: {
     borderColor: '#F06543',
@@ -41,5 +44,20 @@ export const darkStyles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     backgroundColor: '#E8E9EB',
+  },
+  segment_btn: {
+    flex: 1,
+    justifyContent: 'center',
+    borderBottomColor: '#FFFFFF',
+    borderBottomWidth: 1.5,
+    borderColor: '#E8E9EB',
+  },
+  active_segment: {
+    flex: 1,
+    justifyContent: 'center',
+    borderBottomWidth: 3,
+    borderBottomColor: '#F06543',
+    backgroundColor: '#E8E9EB',
+    borderColor: '#E8E9EB',
   },
 });

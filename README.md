@@ -42,3 +42,9 @@ What style guide have I used
 ? Which style guide do you want to follow? Airbnb: https://github.com/airbnb/javascript
 ? What format do you want your config file to be in? JavaScript
 Checking peerDependencies of eslint-config-airbnb-base@latest
+
+
+- future plans
+- style guide
+- additional info
+    patches folder

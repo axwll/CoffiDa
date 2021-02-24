@@ -16,6 +16,8 @@ class Reviews extends Component {
   constructor(props) {
     super(props);
 
+    this.themeStyles = ThemeProvider.getTheme();
+
     this.state = {
       loading: true,
       userInfo: [],
@@ -24,7 +26,6 @@ class Reviews extends Component {
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({userId: await getItem('USER_ID')});
 

@@ -1,13 +1,21 @@
-import { faCog } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Header, Right, Segment, Title } from 'native-base';
-import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {faCog} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  Body,
+  Button,
+  Container,
+  Header,
+  Right,
+  Segment,
+  Title,
+} from 'native-base';
+import React, {Component} from 'react';
+import {StyleSheet, Text, View} from 'react-native';
 
 import LoadingSpinner from '../components/loading-spinner';
-import { translate } from '../locales';
+import {translate} from '../locales';
 import ApiRequests from '../utils/api-requests';
-import { getItem } from '../utils/async-storage';
+import {getItem} from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 import FavoritesTab from './profile-tabs/favorites';
 import LikesTab from './profile-tabs/likes';
@@ -17,17 +25,18 @@ class Profile extends Component {
   constructor(props) {
     super(props);
 
+    // set in constructor because it is used in functions other that render
+    this.themeStyles = ThemeProvider.getTheme();
+
     this.state = {
       loading: true,
       activePage: 1,
       userInfo: [],
-      tab: 'review',
     };
   }
 
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({userId: await getItem('USER_ID')});
 
@@ -45,12 +54,6 @@ class Profile extends Component {
 
     this.setState({loading: false});
   };
-
-  openSettings = () => {
-    this.props.navigation.navigate('Settings', {userInfo: this.state.userInfo});
-  };
-
-  selectComponent = (activePage) => () => this.setState({activePage});
 
   _renderComponent = () => {
     if (this.state.activePage === 1) {
@@ -74,6 +77,23 @@ class Profile extends Component {
     }
   };
 
+  _renderButton = (index, btn_text) => {
+    return (
+      <Button
+        style={[
+          this.state.activePage === index
+            ? this.themeStyles.active_segment
+            : this.themeStyles.segment_btn,
+        ]}
+        active={this.state.activePage === index}
+        onPress={this.selectComponent(index)}>
+        <Text>{btn_text}</Text>
+      </Button>
+    );
+  };
+
+  selectComponent = (activePage) => () => this.setState({activePage});
+
   render() {
     if (this.state.loading) {
       return <LoadingSpinner size={50} />;
@@ -92,7 +112,11 @@ class Profile extends Component {
                 icon={faCog}
                 size={20}
                 color={this.themeStyles.color_primary.color}
-                onPress={() => this.openSettings()}
+                onPress={() =>
+                  this.props.navigation.navigate('Settings', {
+                    userInfo: this.state.userInfo,
+                  })
+                }
               />
             </Right>
           </Header>
@@ -107,36 +131,9 @@ class Profile extends Component {
               style={[styles.segment_view, this.themeStyles.background_color]}>
               <Segment
                 style={[styles.segment, this.themeStyles.background_color]}>
-                <Button
-                  style={[
-                    this.state.activePage === 1
-                      ? this.themeStyles.active_segment
-                      : this.themeStyles.segment_btn,
-                  ]}
-                  active={this.state.activePage === 1}
-                  onPress={this.selectComponent(1)}>
-                  <Text>{translate('reviews')}</Text>
-                </Button>
-                <Button
-                  style={[
-                    this.state.activePage === 2
-                      ? this.themeStyles.active_segment
-                      : this.themeStyles.segment_btn,
-                  ]}
-                  active={this.state.activePage === 2}
-                  onPress={this.selectComponent(2)}>
-                  <Text>{translate('favorites')}</Text>
-                </Button>
-                <Button
-                  style={[
-                    this.state.activePage === 3
-                      ? this.themeStyles.active_segment
-                      : this.themeStyles.segment_btn,
-                  ]}
-                  active={this.state.activePage === 3}
-                  onPress={this.selectComponent(3)}>
-                  <Text>{translate('likes')}</Text>
-                </Button>
+                {this._renderButton(1, translate('reviews'))}
+                {this._renderButton(2, translate('favorites'))}
+                {this._renderButton(3, translate('likes'))}
               </Segment>
             </View>
             <View style={styles.segment_content}>
