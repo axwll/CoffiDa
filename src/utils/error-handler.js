@@ -3,7 +3,7 @@ import { Component } from 'react';
 import ERROR_CODES from '../assets/data/error_codes.json';
 import SUCCESS_CODES from '../assets/data/success_codes.json';
 import ErrorResponse from '../models/error-response';
-import { toast } from './toast';
+import toast from './toast';
 
 class ErrorHandler extends Component {
   apiError = (url, err) => {

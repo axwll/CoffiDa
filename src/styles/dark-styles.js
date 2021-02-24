@@ -1,9 +1,9 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 
 /**
  * TODO: Change to dark mode styles
  */
-export const darkStyles = StyleSheet.create({
+const darkStyles = StyleSheet.create({
   primary_background_color: {
     backgroundColor: '#F06543',
   },
@@ -61,3 +61,5 @@ export const darkStyles = StyleSheet.create({
     borderColor: '#E8E9EB',
   },
 });
+
+export default darkStyles;

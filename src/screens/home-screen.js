@@ -1,26 +1,17 @@
-import {faFilter, faTimes} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {Container, Header, Icon, Input, Item} from 'native-base';
-import React, {Component} from 'react';
-import {
-  FlatList,
-  Keyboard,
-  Modal,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { faFilter, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Container, Header, Icon, Input, Item } from 'native-base';
+import React, { Component } from 'react';
+import { FlatList, Keyboard, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
 import LoadingSpinner from '../components/loading-spinner';
 import MainCard from '../components/main-card';
-import {translate} from '../locales';
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
-import {getItem} from '../utils/async-storage';
+import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 
 class Home extends Component {
@@ -57,20 +48,20 @@ class Home extends Component {
     this.find();
   }
 
-  find = async (extendList = false) => {
+  find = async(extendList = false) => {
     const query = `?limit=${this.state.limit}&offset=${this.state.offset}${this.state.filterQuery}${this.state.searchQuery}`;
 
     const response = await this.apiRequests.get(`/find${query}`);
 
     if (response) {
       if (extendList) {
-        this.setState({coffeeShops: this.state.coffeeShops.concat(response)});
+        this.setState({ coffeeShops: this.state.coffeeShops.concat(response) });
       } else {
-        this.setState({coffeeShops: response});
+        this.setState({ coffeeShops: response });
       }
     }
 
-    this.setState({loading: false});
+    this.setState({ loading: false });
   };
 
   clearFilters = () => {
@@ -115,19 +106,20 @@ class Home extends Component {
   };
 
   formatQuery = (string, value, query = '') => {
+    let _query = query;
     if (value) {
-      query += `&${string}=${value}`;
+      _query += `&${string}=${value}`;
     }
 
-    return query;
+    return _query;
   };
 
-  search = async (text) => {
+  search = async(text) => {
     Keyboard.dismiss();
 
     let query = '';
     if (text) {
-      query = '&q=' + text;
+      query = `&q=${text}`;
     }
 
     this.setState(
@@ -142,32 +134,28 @@ class Home extends Component {
     );
   };
 
-  renderItem = (shop) => {
-    return (
-      <MainCard
-        key={shop.item.location_id}
-        shopData={shop.item}
-        navigation={this.props.navigation}
-      />
-    );
-  };
+  renderItem = (shop) => (
+    <MainCard
+      key={shop.item.location_id}
+      shopData={shop.item}
+      navigation={this.props.navigation}
+    />
+  );
 
-  renderNoData = () => {
-    return (
-      <View style={styles.loading_view}>
-        <Text style={[styles.load_text, this.themeStyles.color_dark]}>
-          {translate('no_results')}
-        </Text>
-      </View>
-    );
-  };
+  renderNoData = () => (
+    <View style={styles.loading_view}>
+      <Text style={[styles.load_text, this.themeStyles.color_dark]}>
+        {translate('no_results')}
+      </Text>
+    </View>
+  );
 
   handleLoadMore = (distanceFromEnd) => {
     if (distanceFromEnd < 0) return;
 
     const off = this.state.offset;
-    const limit = this.state.limit;
-    this.setState({offset: off + limit}, () => {
+    const { limit } = this.state;
+    this.setState({ offset: off + limit }, () => {
       this.find(true);
     });
   };
@@ -175,160 +163,155 @@ class Home extends Component {
   render() {
     if (this.state.loading) {
       return <LoadingSpinner size={50} />;
-    } else {
-      return (
-        <Container style={this.themeStyles.container}>
-          <Header
-            searchBar
-            rounded
-            style={[styles.header, this.themeStyles.background_light]}>
-            <Item rounded style={styles.srch}>
-              <Icon name="ios-search" />
-              <Input
-                placeholder={translate('search_box_placeholder')}
-                onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
-              />
-            </Item>
-            <TouchableOpacity
-              style={styles.filter}
-              onPress={() => this.setState({modalVisible: true})}>
-              <FontAwesomeIcon
-                icon={faFilter}
-                style={[styles.filter_icon, this.themeStyles.color_primary]}
-                size={20}
-              />
-            </TouchableOpacity>
-          </Header>
-          {this.state.modalVisible && (
-            <View style={styles.centered_view}>
-              <Modal
-                animationType="slide"
-                transparent={true}
-                visible={this.state.modalVisible}>
-                <View style={styles.centered_view}>
-                  <View
-                    style={[styles.modal, this.themeStyles.background_light]}>
-                    <View style={styles.modal_header}>
-                      <View style={styles.modal_header_left}>
-                        <TouchableOpacity onPress={() => this.clearFilters()}>
-                          <Text
-                            style={[
-                              styles.header_left_text,
-                              this.themeStyles.color_medium,
-                            ]}>
-                            {translate('clear_filters')}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                      <View style={styles.modal_header_right}>
-                        <TouchableOpacity
-                          onPress={() => this.setState({modalVisible: false})}>
-                          <FontAwesomeIcon
-                            icon={faTimes}
-                            style={this.themeStyles.color_medium}
-                            size={20}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                    <View style={styles.modal_body}>
-                      <Text style={styles.modal_header_text}>
-                        {translate('filter_by_rating')}
-                      </Text>
-                      <Text style={styles.modal_text}>
-                        {translate('overall_rating')}
-                      </Text>
-                      <Stars
-                        default={this.state.overallFilter}
-                        update={(rating) =>
-                          this.setState({overallFilter: rating})
-                        }
-                        spacing={5}
-                        starSize={25}
-                        count={5}
-                        fullStar={Full}
-                        emptyStar={Empty}
-                      />
-
-                      <Text style={styles.modal_text}>
-                        {translate('price_rating')}
-                      </Text>
-                      <Stars
-                        default={this.state.priceFilter}
-                        update={(rating) =>
-                          this.setState({priceFilter: rating})
-                        }
-                        spacing={5}
-                        starSize={25}
-                        count={5}
-                        fullStar={Full}
-                        emptyStar={Empty}
-                      />
-
-                      <Text style={styles.modal_text}>
-                        {translate('quality_rating')}
-                      </Text>
-                      <Stars
-                        default={this.state.qualFilter}
-                        update={(rating) => this.setState({qualFilter: rating})}
-                        spacing={5}
-                        starSize={25}
-                        count={5}
-                        fullStar={Full}
-                        emptyStar={Empty}
-                      />
-
-                      <Text style={styles.modal_text}>
-                        {translate('clean_rating')}
-                      </Text>
-                      <Stars
-                        default={this.state.cleanFilter}
-                        update={(rating) =>
-                          this.setState({cleanFilter: rating})
-                        }
-                        spacing={5}
-                        starSize={25}
-                        count={5}
-                        fullStar={Full}
-                        emptyStar={Empty}
-                      />
-
-                      <TouchableOpacity
-                        style={[
-                          styles.button,
-                          this.themeStyles.primary_button_color,
-                        ]}
-                        onPress={() => this.filterResults()}>
+    }
+    return (
+      <Container style={this.themeStyles.container}>
+        <Header
+          searchBar
+          rounded
+          style={[styles.header, this.themeStyles.background_light]}>
+          <Item rounded style={styles.srch}>
+            <Icon name='ios-search' />
+            <Input
+              placeholder={translate('search_box_placeholder')}
+              onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
+            />
+          </Item>
+          <TouchableOpacity
+            style={styles.filter}
+            onPress={() => this.setState({ modalVisible: true })}>
+            <FontAwesomeIcon
+              icon={faFilter}
+              style={[styles.filter_icon, this.themeStyles.color_primary]}
+              size={20}
+            />
+          </TouchableOpacity>
+        </Header>
+        {this.state.modalVisible && (
+          <View style={styles.centered_view}>
+            <Modal
+              animationType='slide'
+              transparent
+              visible={this.state.modalVisible}>
+              <View style={styles.centered_view}>
+                <View
+                  style={[styles.modal, this.themeStyles.background_light]}>
+                  <View style={styles.modal_header}>
+                    <View style={styles.modal_header_left}>
+                      <TouchableOpacity onPress={() => this.clearFilters()}>
                         <Text
                           style={[
-                            styles.text_style,
-                            this.themeStyles.color_light,
+                            styles.header_left_text,
+                            this.themeStyles.color_medium,
                           ]}>
-                          {translate('filter_results')}
+                          {translate('clear_filters')}
                         </Text>
                       </TouchableOpacity>
                     </View>
+                    <View style={styles.modal_header_right}>
+                      <TouchableOpacity
+                        onPress={() => this.setState({ modalVisible: false })}>
+                        <FontAwesomeIcon
+                          icon={faTimes}
+                          style={this.themeStyles.color_medium}
+                          size={20}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  <View style={styles.modal_body}>
+                    <Text style={styles.modal_header_text}>
+                      {translate('filter_by_rating')}
+                    </Text>
+                    <Text style={styles.modal_text}>
+                      {translate('overall_rating')}
+                    </Text>
+                    <Stars
+                      default={this.state.overallFilter}
+                      update={(rating) => this.setState({ overallFilter: rating })
+                      }
+                      spacing={5}
+                      starSize={25}
+                      count={5}
+                      fullStar={Full}
+                      emptyStar={Empty}
+                    />
+
+                    <Text style={styles.modal_text}>
+                      {translate('price_rating')}
+                    </Text>
+                    <Stars
+                      default={this.state.priceFilter}
+                      update={(rating) => this.setState({ priceFilter: rating })
+                      }
+                      spacing={5}
+                      starSize={25}
+                      count={5}
+                      fullStar={Full}
+                      emptyStar={Empty}
+                    />
+
+                    <Text style={styles.modal_text}>
+                      {translate('quality_rating')}
+                    </Text>
+                    <Stars
+                      default={this.state.qualFilter}
+                      update={(rating) => this.setState({ qualFilter: rating })}
+                      spacing={5}
+                      starSize={25}
+                      count={5}
+                      fullStar={Full}
+                      emptyStar={Empty}
+                    />
+
+                    <Text style={styles.modal_text}>
+                      {translate('clean_rating')}
+                    </Text>
+                    <Stars
+                      default={this.state.cleanFilter}
+                      update={(rating) => this.setState({ cleanFilter: rating })
+                      }
+                      spacing={5}
+                      starSize={25}
+                      count={5}
+                      fullStar={Full}
+                      emptyStar={Empty}
+                    />
+
+                    <TouchableOpacity
+                      style={[
+                        styles.button,
+                        this.themeStyles.primary_button_color,
+                      ]}
+                      onPress={() => this.filterResults()}>
+                      <Text
+                        style={[
+                          styles.text_style,
+                          this.themeStyles.color_light,
+                        ]}>
+                        {translate('filter_results')}
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
-              </Modal>
-            </View>
-          )}
+              </View>
+            </Modal>
+          </View>
+        )}
 
-          <SafeAreaView style={styles.container}>
-            <FlatList
-              data={this.state.coffeeShops}
-              renderItem={(shop) => this.renderItem(shop)}
-              keyExtractor={(shop) => shop.location_id.toString()}
-              onEndReachedThreshold={0.01}
-              onEndReached={({distanceFromEnd}) =>
-                this.handleLoadMore(distanceFromEnd)
-              }
-              ListEmptyComponent={this.renderNoData()}
-            />
-          </SafeAreaView>
-        </Container>
-      );
-    }
+        <SafeAreaView style={styles.container}>
+          <FlatList
+            data={this.state.coffeeShops}
+            renderItem={(shop) => this.renderItem(shop)}
+            keyExtractor={(shop) => shop.location_id.toString()}
+            onEndReachedThreshold={0.01}
+            onEndReached={({ distanceFromEnd }) => this.handleLoadMore(distanceFromEnd)
+            }
+            ListEmptyComponent={this.renderNoData()}
+          />
+        </SafeAreaView>
+      </Container>
+    );
   }
 }
 

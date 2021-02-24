@@ -18,8 +18,8 @@ class ReviewIcon extends Component {
             styles.review_rating,
             {
               transform: this.props.rotate
-                ? [{rotate: '270deg'}]
-                : [{rotate: '0deg'}],
+                ? [{ rotate: '270deg' }]
+                : [{ rotate: '0deg' }],
             },
           ]}>
           <Stars

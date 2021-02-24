@@ -33,7 +33,7 @@ class Signup extends Component {
     this.apiRequests = new ApiRequests(this.props, null);
   }
 
-  handleEmailInput = async (email) => {
+  handleEmailInput = async(email) => {
     const response = Validator.validateEmail(email);
 
     await this.stateSetter(
@@ -45,7 +45,7 @@ class Signup extends Component {
     );
   };
 
-  handleFirstNameInput = async (firstName) => {
+  handleFirstNameInput = async(firstName) => {
     const response = Validator.validateName('First Name', firstName);
 
     await this.stateSetter(
@@ -57,7 +57,7 @@ class Signup extends Component {
     );
   };
 
-  handleLastNameInput = async (lastName) => {
+  handleLastNameInput = async(lastName) => {
     const response = Validator.validateName('Last Name', lastName);
 
     await this.stateSetter(
@@ -69,7 +69,7 @@ class Signup extends Component {
     );
   };
 
-  handlePasswordInput = async (password) => {
+  handlePasswordInput = async(password) => {
     const response = Validator.validatePassword(password);
 
     await this.stateSetter(
@@ -81,8 +81,8 @@ class Signup extends Component {
     );
   };
 
-  handlePasswordConfirmlInput = async (confirmPassword) => {
-    const password = this.state.password;
+  handlePasswordConfirmlInput = async(confirmPassword) => {
+    const { password } = this.state;
 
     if (!password) {
       // need to have a password before i can check they match
@@ -114,14 +114,14 @@ class Signup extends Component {
     }
   };
 
-  signUpEvent = async () => {
-    this.setState({submitted: true});
+  signUpEvent = async() => {
+    this.setState({ submitted: true });
 
-    const email = this.state.email;
-    const firstName = this.state.firstName;
-    const lastName = this.state.lastName;
-    const password = this.state.password;
-    const confirmPassword = this.state.confirmPassword;
+    const { email } = this.state;
+    const { firstName } = this.state;
+    const { lastName } = this.state;
+    const { password } = this.state;
+    const { confirmPassword } = this.state;
 
     if (!email || !firstName || !lastName || !password || !confirmPassword) {
       this.handleEmailInput(email);
@@ -132,11 +132,11 @@ class Signup extends Component {
     }
 
     if (
-      !this.state.validEmail ||
-      !this.state.validFirstName ||
-      !this.state.validLastName ||
-      !this.state.validPassword ||
-      !this.state.validConfirmPassword
+      !this.state.validEmail
+      || !this.state.validFirstName
+      || !this.state.validLastName
+      || !this.state.validPassword
+      || !this.state.validConfirmPassword
     ) {
       return;
     }
@@ -145,7 +145,7 @@ class Signup extends Component {
     await this.logIn();
   };
 
-  signUp = async () => {
+  signUp = async() => {
     const postBody = JSON.stringify({
       first_name: this.state.firstName,
       last_name: this.state.lastName,
@@ -156,7 +156,7 @@ class Signup extends Component {
     await this.apiRequests.post('/user', postBody);
   };
 
-  logIn = async () => {
+  logIn = async() => {
     const postBody = JSON.stringify({
       email: this.state.email,
       password: this.state.password,
@@ -172,7 +172,7 @@ class Signup extends Component {
   };
 
   render() {
-    const navigation = this.props.navigation;
+    const { navigation } = this.props;
     const themeStyles = ThemeProvider.getTheme();
 
     return (
@@ -197,7 +197,7 @@ class Signup extends Component {
         </Header>
 
         <ScrollView
-          contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}>
+          contentContainerStyle={styles.container_style}>
           <Form>
             <Item style={styles.item}>
               <Input
@@ -252,7 +252,7 @@ class Signup extends Component {
                 style={styles.input}
                 placeholder={translate('password_placeholder')}
                 onChangeText={this.handlePasswordInput}
-                secureTextEntry={true}
+                secureTextEntry
               />
             </Item>
             {!this.state.validPassword && this.state.submitted && (
@@ -269,7 +269,7 @@ class Signup extends Component {
                 style={styles.input}
                 placeholder={translate('confirm_password_placeholder')}
                 onChangeText={this.handlePasswordConfirmlInput}
-                secureTextEntry={true}
+                secureTextEntry
               />
             </Item>
             {!this.state.validConfirmPassword && this.state.submitted && (
@@ -307,6 +307,10 @@ const styles = StyleSheet.create({
   header_body: {
     flex: 1,
     alignItems: 'center',
+  },
+  container_style: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   item: {
     borderBottomWidth: 0,

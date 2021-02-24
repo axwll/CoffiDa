@@ -1,24 +1,12 @@
-import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Body,
-  Button,
-  Container,
-  Form,
-  Header,
-  Input,
-  Item,
-  Left,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Container, Form, Header, Input, Item, Left, Title } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import {translate} from '../locales';
-import {darkStyles} from '../styles/dark-styles';
-import {lightStyles} from '../styles/light-styles';
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
-import {getItem} from '../utils/async-storage';
+import { getItem, setItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 import Validator from '../utils/validator';
 
@@ -46,12 +34,12 @@ class Login extends Component {
       this.setState({
         validEmail: false,
         emailErrorText: response.message,
-        email: email,
+        email,
       });
     } else {
       this.setState({
         validEmail: true,
-        email: email,
+        email,
       });
     }
   };
@@ -63,18 +51,18 @@ class Login extends Component {
       this.setState({
         validPassword: false,
         passwordErrorText: response.message,
-        password: password,
+        password,
       });
     } else {
       this.setState({
         validPassword: true,
-        password: password,
+        password,
       });
     }
   };
 
-  logInEvent = async () => {
-    this.setState({submitted: true});
+  logInEvent = async() => {
+    this.setState({ submitted: true });
 
     if (!this.state.email || !this.state.password) {
       this.handleEmailInput(this.state.email);
@@ -89,7 +77,7 @@ class Login extends Component {
     this.logIn();
   };
 
-  logIn = async () => {
+  logIn = async() => {
     const postBody = JSON.stringify({
       email: this.state.email,
       password: this.state.password,
@@ -105,7 +93,7 @@ class Login extends Component {
   };
 
   render() {
-    const navigation = this.props.navigation;
+    const { navigation } = this.props;
     const themeStyles = ThemeProvider.getTheme();
     return (
       <Container style={[styles.container, themeStyles.alt_background_color]}>
@@ -146,7 +134,7 @@ class Login extends Component {
               style={styles.input}
               placeholder={translate('password_placeholder')}
               onChangeText={this.handlePasswordlInput}
-              secureTextEntry={true}
+              secureTextEntry
             />
           </Item>
           {!this.state.validPassword && this.state.submitted && (

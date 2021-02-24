@@ -1,27 +1,17 @@
-import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Body,
-  Button,
-  Container,
-  Content,
-  Form,
-  Header,
-  Left,
-  Textarea,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Container, Content, Form, Header, Left, Textarea, Title } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
-import {translate} from '../locales';
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
-import {getItem} from '../utils/async-storage';
+import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
-import {toast} from '../utils/toast';
+import toast from '../utils/toast';
 import Validator from '../utils/validator';
 
 class AddReview extends Component {
@@ -47,11 +37,11 @@ class AddReview extends Component {
     const qual = this.state.qualRating;
     const avRating = Math.round((price + clean + qual) / 3);
 
-    this.setState({overallRating: avRating});
+    this.setState({ overallRating: avRating });
   };
 
   updateState = (identifier, rating) => {
-    this.setState({[identifier]: rating}, function () {
+    this.setState({ [identifier]: rating }, function calculate() {
       this.calculateOverall();
     });
   };
@@ -70,8 +60,8 @@ class AddReview extends Component {
     return true;
   };
 
-  createReview = async (locationId) => {
-    let reviewBody = this.state.reviewBody;
+  createReview = async(locationId) => {
+    let { reviewBody } = this.state;
     if (!this.validateReview(reviewBody, locationId)) {
       return;
     }
@@ -203,7 +193,7 @@ class AddReview extends Component {
               bordered
               placeholder={translate('leave_review')}
               value={this.state.reviewBody}
-              onChangeText={(text) => this.setState({reviewBody: text})}
+              onChangeText={(text) => this.setState({ reviewBody: text })}
             />
           </Form>
 
@@ -252,7 +242,7 @@ const styles = StyleSheet.create({
   review_rating: {
     justifyContent: 'center',
     flex: 1,
-    transform: [{rotate: '270deg'}],
+    transform: [{ rotate: '270deg' }],
   },
   review_description: {
     alignItems: 'center',

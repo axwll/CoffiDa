@@ -1,7 +1,7 @@
-import React, {Component} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import React, { Component } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-import {getItem} from '../utils/async-storage';
+import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 
 class SplashScreen extends Component {
@@ -10,7 +10,7 @@ class SplashScreen extends Component {
     this.checkToken();
   }
 
-  checkToken = async () => {
+  checkToken = async() => {
     const authToken = await getItem('AUTH_TOKEN');
 
     this.props.navigation.navigate(authToken ? 'App' : 'Auth');

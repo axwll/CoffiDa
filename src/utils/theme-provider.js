@@ -1,10 +1,12 @@
-import React, {Component} from 'react';
-import {DarkModeContext} from 'react-native-dynamic';
+import { Component } from 'react';
+import { DarkModeContext } from 'react-native-dynamic';
 
-import {darkStyles} from '../styles/dark-styles';
-import {lightStyles} from '../styles/light-styles';
+import darkStyles from '../styles/dark-styles';
+import lightStyles from '../styles/light-styles';
 
 class Theme extends Component {
+  static contextType = DarkModeContext;
+
   getTheme = () => {
     if (this.context === 'dark') {
       return darkStyles;
@@ -12,8 +14,6 @@ class Theme extends Component {
 
     return lightStyles;
   };
-
-  static contextType = DarkModeContext;
 }
 
 const ThemeProvider = new Theme();

@@ -7,10 +7,6 @@ import ThemeProvider from '../utils/theme-provider';
 import ReviewIcon from './review-icon';
 
 class ProfileReviewCard extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const themeStyles = ThemeProvider.getTheme();
 

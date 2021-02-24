@@ -3,7 +3,7 @@ import { Component } from 'react';
 import ILLEGAL_WORDS from '../assets/data/profanity-filter.json';
 import { translate } from '../locales';
 import ValidatorResponse from '../models/validation-response';
-import { toast } from './toast';
+import toast from './toast';
 
 class FormValidator extends Component {
   validateEmail = (email) => {

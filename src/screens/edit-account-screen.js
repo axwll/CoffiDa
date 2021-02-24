@@ -1,22 +1,12 @@
-import {faChevronLeft} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Body,
-  Button,
-  Container,
-  Form,
-  Header,
-  Input,
-  Item,
-  Left,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Container, Form, Header, Input, Item, Left, Title } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import {translate} from '../locales';
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
-import {getItem} from '../utils/async-storage';
+import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 import Validator from '../utils/validator';
 
@@ -30,7 +20,7 @@ class EditAccount extends Component {
     this.themeStyles = ThemeProvider.getTheme();
 
     this.state = {
-      type: type,
+      type,
       submitted: false,
       email: '',
       validEmail: true,
@@ -57,7 +47,7 @@ class EditAccount extends Component {
     });
   }
 
-  handleEmailInput = async (email) => {
+  handleEmailInput = async(email) => {
     const response = Validator.validateEmail(email);
 
     await this.stateSetter(
@@ -69,7 +59,7 @@ class EditAccount extends Component {
     );
   };
 
-  handleFirstNameInput = async (firstName) => {
+  handleFirstNameInput = async(firstName) => {
     const response = Validator.validateName('First Name', firstName);
 
     await this.stateSetter(
@@ -81,7 +71,7 @@ class EditAccount extends Component {
     );
   };
 
-  handleLastNameInput = async (lastName) => {
+  handleLastNameInput = async(lastName) => {
     const response = Validator.validateName('Last Name', lastName);
 
     await this.stateSetter(
@@ -93,7 +83,7 @@ class EditAccount extends Component {
     );
   };
 
-  handlePasswordInput = async (password) => {
+  handlePasswordInput = async(password) => {
     const response = Validator.validatePassword(password);
 
     await this.stateSetter(
@@ -105,12 +95,12 @@ class EditAccount extends Component {
     );
   };
 
-  handlePasswordConfirmlInput = async (confirmPassword) => {
-    const password = this.state.password;
+  handlePasswordConfirmlInput = async(confirmPassword) => {
+    const { password } = this.state;
 
     if (!password) {
       // Set this to true so the confirm password error doesnt show beofre a password is entered
-      this.setState({validConfirmPassword: true});
+      this.setState({ validConfirmPassword: true });
       return;
     }
     const response = Validator.validatePasswordMatch(password, confirmPassword);
@@ -140,17 +130,17 @@ class EditAccount extends Component {
   };
 
   updateEmail = () => {
-    this.setState({submitted: true});
+    this.setState({ submitted: true });
 
     if (!this.state.validEmail) {
       return;
     }
 
-    this.updateUserInfo({email: email});
+    this.updateUserInfo({ email: this.state.email });
   };
 
   updateName = () => {
-    this.setState({submitted: true});
+    this.setState({ submitted: true });
 
     if (!this.state.validFirstName || !this.state.validLastName) {
       return;
@@ -163,10 +153,10 @@ class EditAccount extends Component {
   };
 
   resetPassword = () => {
-    this.setState({submitted: true});
+    this.setState({ submitted: true });
 
-    const password = this.state.password;
-    const confirmPassword = this.state.confirmPassword;
+    const { password } = this.state;
+    const { confirmPassword } = this.state;
 
     if (!password || !confirmPassword) {
       this.handlePasswordInput(password);
@@ -177,14 +167,14 @@ class EditAccount extends Component {
       return;
     }
 
-    this.updateUserInfo({password: password});
+    this.updateUserInfo({ password });
   };
 
-  updateUserInfo = async (data) => {
-    this.setState({submitted: true});
+  updateUserInfo = async(data) => {
+    this.setState({ submitted: true });
 
     const response = await this.apiRequests.patch(
-      '/user/' + this.state.userId,
+      `/user/${this.state.userId}`,
       JSON.stringify(data),
     );
 
@@ -197,132 +187,125 @@ class EditAccount extends Component {
   _renderComponent = () => {
     if (this.state.type === 'email') {
       return this.emailForm();
-    } else if (this.state.type === 'password') {
+    } if (this.state.type === 'password') {
       return this.passwordForm();
-    } else {
-      return this.nameForm();
     }
+    return this.nameForm();
   };
 
-  emailForm = () => {
-    return (
-      <Form style={styles.form_view}>
-        <Item style={styles.item}>
-          <Input
-            style={styles.input}
-            value={this.state.email}
-            onChangeText={this.handleEmailInput}
-          />
-        </Item>
-        {!this.state.validEmail && this.state.submitted && (
-          <View>
-            <Text style={[styles.error_text, this.themeStyles.color_primary]}>
-              {this.state.emailErrorText}
-            </Text>
-          </View>
-        )}
-
-        <TouchableOpacity
-          style={[styles.btn_primary, this.themeStyles.primary_button_color]}
-          onPress={() => this.updateEmail()}>
-          <Text style={[styles.btn_text, this.themeStyles.color_light]}>
-            {translate('update_email')}
+  emailForm = () => (
+    <Form style={styles.form_view}>
+      <Item style={styles.item}>
+        <Input
+          style={styles.input}
+          value={this.state.email}
+          onChangeText={this.handleEmailInput}
+        />
+      </Item>
+      {!this.state.validEmail && this.state.submitted && (
+        <View>
+          <Text style={[styles.error_text, this.themeStyles.color_primary]}>
+            {this.state.emailErrorText}
           </Text>
-        </TouchableOpacity>
-      </Form>
-    );
-  };
+        </View>
+      )}
 
-  nameForm = () => {
-    return (
-      <Form style={styles.form_view}>
-        <Item style={styles.item}>
-          <Input
-            style={styles.input}
-            value={this.state.firstName}
-            onChangeText={this.handleFirstNameInput}
-          />
-        </Item>
-        {!this.state.validFirstName && this.state.submitted && (
-          <View>
-            <Text style={[styles.error_text, this.themeStyles.color_primary]}>
-              {this.state.firstNameErrorText}
-            </Text>
-          </View>
-        )}
+      <TouchableOpacity
+        style={[styles.btn_primary, this.themeStyles.primary_button_color]}
+        onPress={() => this.updateEmail()}>
+        <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+          {translate('update_email')}
+        </Text>
+      </TouchableOpacity>
+    </Form>
+  );
 
-        <Item style={styles.item}>
-          <Input
-            style={styles.input}
-            value={this.state.lastName}
-            onChangeText={this.handleLastNameInput}
-          />
-        </Item>
-        {!this.state.validLastName && this.state.submitted && (
-          <View>
-            <Text style={[styles.error_text, this.themeStyles.color_primary]}>
-              {this.state.lastNameErrorText}
-            </Text>
-          </View>
-        )}
-
-        <TouchableOpacity
-          style={[styles.btn_primary, this.themeStyles.primary_button_color]}
-          onPress={() => this.updateName()}>
-          <Text style={[styles.btn_text, this.themeStyles.color_light]}>
-            {translate('update_name')}
+  nameForm = () => (
+    <Form style={styles.form_view}>
+      <Item style={styles.item}>
+        <Input
+          style={styles.input}
+          value={this.state.firstName}
+          onChangeText={this.handleFirstNameInput}
+        />
+      </Item>
+      {!this.state.validFirstName && this.state.submitted && (
+        <View>
+          <Text style={[styles.error_text, this.themeStyles.color_primary]}>
+            {this.state.firstNameErrorText}
           </Text>
-        </TouchableOpacity>
-      </Form>
-    );
-  };
+        </View>
+      )}
 
-  passwordForm = () => {
-    return (
-      <Form style={styles.form_view}>
-        <Item style={styles.item}>
-          <Input
-            style={styles.input}
-            placeholder={translate('password_placeholder')}
-            onChangeText={this.handlePasswordInput}
-          />
-        </Item>
-        {!this.state.validPassword && this.state.submitted && (
-          <View>
-            <Text style={[styles.error_text, this.themeStyles.color_primary]}>
-              {this.state.passwordErrorText}
-            </Text>
-          </View>
-        )}
-
-        <Item style={styles.item}>
-          <Input
-            style={styles.input}
-            placeholder={translate('confirm_password_placeholder')}
-            onChangeText={this.handlePasswordConfirmlInput}
-          />
-        </Item>
-        {!this.state.validConfirmPassword && this.state.submitted && (
-          <View>
-            <Text style={[styles.error_text, this.themeStyles.color_primary]}>
-              {this.state.confirmPasswordErrorText}
-            </Text>
-          </View>
-        )}
-
-        <TouchableOpacity
-          style={[styles.btn_primary, this.themeStyles.primary_button_color]}
-          onPress={() => this.resetPassword()}>
-          <Text style={[styles.btn_text, this.themeStyles.color_light]}>
-            {translate('reset_password')}
+      <Item style={styles.item}>
+        <Input
+          style={styles.input}
+          value={this.state.lastName}
+          onChangeText={this.handleLastNameInput}
+        />
+      </Item>
+      {!this.state.validLastName && this.state.submitted && (
+        <View>
+          <Text style={[styles.error_text, this.themeStyles.color_primary]}>
+            {this.state.lastNameErrorText}
           </Text>
-        </TouchableOpacity>
-      </Form>
-    );
-  };
+        </View>
+      )}
+
+      <TouchableOpacity
+        style={[styles.btn_primary, this.themeStyles.primary_button_color]}
+        onPress={() => this.updateName()}>
+        <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+          {translate('update_name')}
+        </Text>
+      </TouchableOpacity>
+    </Form>
+  );
+
+  passwordForm = () => (
+    <Form style={styles.form_view}>
+      <Item style={styles.item}>
+        <Input
+          style={styles.input}
+          placeholder={translate('password_placeholder')}
+          onChangeText={this.handlePasswordInput}
+        />
+      </Item>
+      {!this.state.validPassword && this.state.submitted && (
+        <View>
+          <Text style={[styles.error_text, this.themeStyles.color_primary]}>
+            {this.state.passwordErrorText}
+          </Text>
+        </View>
+      )}
+
+      <Item style={styles.item}>
+        <Input
+          style={styles.input}
+          placeholder={translate('confirm_password_placeholder')}
+          onChangeText={this.handlePasswordConfirmlInput}
+        />
+      </Item>
+      {!this.state.validConfirmPassword && this.state.submitted && (
+        <View>
+          <Text style={[styles.error_text, this.themeStyles.color_primary]}>
+            {this.state.confirmPasswordErrorText}
+          </Text>
+        </View>
+      )}
+
+      <TouchableOpacity
+        style={[styles.btn_primary, this.themeStyles.primary_button_color]}
+        onPress={() => this.resetPassword()}>
+        <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+          {translate('reset_password')}
+        </Text>
+      </TouchableOpacity>
+    </Form>
+  );
 
   render() {
-    const navigation = this.props.navigation;
+    const { navigation } = this.props;
 
     return (
       <Container style={this.themeStyles.container}>

@@ -1,30 +1,19 @@
-import {faTrashAlt} from '@fortawesome/free-regular-svg-icons';
-import {faChevronLeft, faPencilAlt} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {
-  Body,
-  Button,
-  Container,
-  Content,
-  Form,
-  Header,
-  Left,
-  Right,
-  Textarea,
-  Title,
-} from 'native-base';
-import React, {Component} from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { faTrashAlt } from '@fortawesome/free-regular-svg-icons';
+import { faChevronLeft, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Body, Button, Container, Content, Form, Header, Left, Right, Textarea, Title } from 'native-base';
+import React, { Component } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
 import LoadingSpinner from '../components/loading-spinner';
-import {translate} from '../locales';
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
-import {getItem} from '../utils/async-storage';
+import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
-import {toast} from '../utils/toast';
+import toast from '../utils/toast';
 import Validator from '../utils/validator';
 
 class UpdateReview extends Component {
@@ -53,9 +42,9 @@ class UpdateReview extends Component {
 
     this._onFocusListener = this.props.navigation.addListener(
       'didFocus',
-      async (payload) => {
+      async() => {
         this.checkForImage();
-        this.setState({loading: false});
+        this.setState({ loading: false });
       },
     );
   }
@@ -64,9 +53,9 @@ class UpdateReview extends Component {
     this._onFocusListener.remove();
   }
 
-  checkForImage = async () => {
+  checkForImage = async() => {
     const locationId = this.state.shopData.location_id;
-    const reviewId = this.state.reviewId;
+    const { reviewId } = this.state;
 
     const response = await this.apiRequests.getImage(
       `/location/${locationId}/review/${reviewId}/photo`,
@@ -78,7 +67,7 @@ class UpdateReview extends Component {
         imageUrl: response.url,
       });
     } else {
-      this.setState({imageExists: false});
+      this.setState({ imageExists: false });
     }
   };
 
@@ -88,11 +77,11 @@ class UpdateReview extends Component {
     const qual = this.state.qualRating;
     const avRating = Math.round((price + clean + qual) / 3);
 
-    this.setState({overallRating: avRating});
+    this.setState({ overallRating: avRating });
   };
 
   updateState = (identifier, rating) => {
-    this.setState({[identifier]: rating}, function () {
+    this.setState({ [identifier]: rating }, function calculate() {
       this.calculateOverall();
     });
   };
@@ -131,8 +120,8 @@ class UpdateReview extends Component {
     });
   };
 
-  updateReview = async () => {
-    let reviewBody = this.state.reviewBody;
+  updateReview = async() => {
+    let { reviewBody } = this.state;
     if (!this.validateReview(reviewBody, locationId)) {
       return;
     }
@@ -140,7 +129,7 @@ class UpdateReview extends Component {
     reviewBody = Validator.profanityFilter(reviewBody);
 
     const locationId = this.state.shopData.location_id;
-    const reviewId = this.state.reviewId;
+    const { reviewId } = this.state;
 
     const patchBody = JSON.stringify({
       overall_rating: this.state.overallRating,
@@ -166,176 +155,174 @@ class UpdateReview extends Component {
 
     if (this.state.loading) {
       return <LoadingSpinner size={50} />;
-    } else {
-      return (
-        <Container style={themeStyles.container}>
-          <Header style={[styles.header, themeStyles.background_color]}>
-            <Left style={styles.header_left}>
-              <Button transparent>
-                <FontAwesomeIcon
-                  icon={faChevronLeft}
-                  size={20}
-                  color={themeStyles.color_primary.color}
-                  onPress={() => this.props.navigation.goBack()}
-                />
-              </Button>
+    }
+    return (
+      <Container style={themeStyles.container}>
+        <Header style={[styles.header, themeStyles.background_color]}>
+          <Left style={styles.header_left}>
+            <Button transparent>
+              <FontAwesomeIcon
+                icon={faChevronLeft}
+                size={20}
+                color={themeStyles.color_primary.color}
+                onPress={() => this.props.navigation.goBack()}
+              />
+            </Button>
+          </Left>
+
+          <Body style={styles.header_body}>
+            <Title style={[styles.title, themeStyles.color_dark]}>
+              {translate('update_review')}
+            </Title>
+          </Body>
+        </Header>
+
+        <Content padder>
+          <View style={styles.title_view}>
+            <Left style={styles.title_left}>
+              <Text style={styles.title}>
+                {this.state.shopData.location_name}
+              </Text>
             </Left>
 
-            <Body style={styles.header_body}>
-              <Title style={[styles.title, themeStyles.color_dark]}>
-                {translate('update_review')}
-              </Title>
-            </Body>
-          </Header>
+            {this.state.imageExists && (
+              <Right style={styles.title_right}>
+                <Button transparent style={styles.title_btn}>
+                  <FontAwesomeIcon
+                    icon={faPencilAlt}
+                    size={15}
+                    color={themeStyles.color_primary.color}
+                    onPress={() => this.editReviewPhoto()}
+                  />
+                </Button>
 
-          <Content padder>
-            <View style={styles.title_view}>
-              <Left style={styles.title_left}>
-                <Text style={styles.title}>
-                  {this.state.shopData.location_name}
-                </Text>
-              </Left>
+                <Button transparent style={styles.title_btn}>
+                  <FontAwesomeIcon
+                    icon={faTrashAlt}
+                    size={15}
+                    color={themeStyles.color_primary.color}
+                    onPress={() => this.deleteReviewPhoto()}
+                  />
+                </Button>
+              </Right>
+            )}
+          </View>
 
-              {this.state.imageExists && (
-                <Right style={styles.title_right}>
-                  <Button transparent style={styles.title_btn}>
-                    <FontAwesomeIcon
-                      icon={faPencilAlt}
-                      size={15}
-                      color={themeStyles.color_primary.color}
-                      onPress={() => this.editReviewPhoto()}
-                    />
-                  </Button>
-
-                  <Button transparent style={styles.title_btn}>
-                    <FontAwesomeIcon
-                      icon={faTrashAlt}
-                      size={15}
-                      color={themeStyles.color_primary.color}
-                      onPress={() => this.deleteReviewPhoto()}
-                    />
-                  </Button>
-                </Right>
-              )}
+          {this.state.imageExists ? (
+            <View>
+              <Image
+                source={{ uri: this.state.imageUrl }}
+                style={{ height: 200, width: 'auto', flex: 1 }}
+              />
             </View>
+          ) : (
+            <View>
+              <TouchableOpacity
+                style={[
+                  styles.btn_primary_outline,
+                  themeStyles.primary_button_color_outline,
+                ]}
+                onPress={() => this.props.navigation.navigate('TakePhoto', {
+                  locationId: this.state.shopData.location_id,
+                  reviewId: this.state.reviewId,
+                  update: true,
+                })
+                }>
+                <Text
+                  style={[styles.btn_outline_text, themeStyles.color_dark]}>
+                  {translate('app_photo_review')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
-            {this.state.imageExists ? (
-              <View>
-                <Image
-                  source={{uri: this.state.imageUrl}}
-                  style={{height: 200, width: 'auto', flex: 1}}
+          <View style={styles.review_container}>
+            {/* Price Rating Buttons */}
+            <View style={styles.review_section}>
+              <View style={styles.review_rating}>
+                <Stars
+                  default={this.state.priceRating}
+                  update={(rating) => {
+                    this.updateState('priceRating', rating);
+                  }}
+                  spacing={4}
+                  starSize={20}
+                  count={5}
+                  fullStar={Full}
+                  emptyStar={Empty}
                 />
               </View>
-            ) : (
-              <View>
-                <TouchableOpacity
-                  style={[
-                    styles.btn_primary_outline,
-                    themeStyles.primary_button_color_outline,
-                  ]}
-                  onPress={() =>
-                    this.props.navigation.navigate('TakePhoto', {
-                      locationId: this.state.shopData.location_id,
-                      reviewId: this.state.reviewId,
-                      update: true,
-                    })
-                  }>
-                  <Text
-                    style={[styles.btn_outline_text, themeStyles.color_dark]}>
-                    {translate('app_photo_review')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            <View style={styles.review_container}>
-              {/* Price Rating Buttons */}
-              <View style={styles.review_section}>
-                <View style={styles.review_rating}>
-                  <Stars
-                    default={this.state.priceRating}
-                    update={(rating) => {
-                      this.updateState('priceRating', rating);
-                    }}
-                    spacing={4}
-                    starSize={20}
-                    count={5}
-                    fullStar={Full}
-                    emptyStar={Empty}
-                  />
-                </View>
-                <View style={styles.review_description}>
-                  <Text>{translate('price')}</Text>
-                </View>
-              </View>
-
-              {/* Cleanliness Rating Buttons */}
-              <View style={styles.review_section}>
-                <View style={styles.review_rating}>
-                  <Stars
-                    default={this.state.cleanRating}
-                    update={(rating) => {
-                      this.updateState('cleanRating', rating);
-                    }}
-                    spacing={4}
-                    starSize={20}
-                    count={5}
-                    fullStar={Full}
-                    emptyStar={Empty}
-                  />
-                </View>
-                <View style={styles.review_description}>
-                  <Text>{translate('cleanliness')}</Text>
-                </View>
-              </View>
-
-              {/* Quality Rating Buttons */}
-              <View style={styles.review_section}>
-                <View style={styles.review_rating}>
-                  <Stars
-                    default={this.state.qualRating}
-                    update={(rating) => {
-                      this.updateState('qualRating', rating);
-                    }}
-                    spacing={4}
-                    starSize={20}
-                    count={5}
-                    fullStar={Full}
-                    emptyStar={Empty}
-                  />
-                </View>
-                <View style={styles.review_description}>
-                  <Text>{translate('quality')}</Text>
-                </View>
+              <View style={styles.review_description}>
+                <Text>{translate('price')}</Text>
               </View>
             </View>
 
-            <View>
-              <Text>
-                {translate('overall_rating')}: {this.state.overallRating}
-              </Text>
+            {/* Cleanliness Rating Buttons */}
+            <View style={styles.review_section}>
+              <View style={styles.review_rating}>
+                <Stars
+                  default={this.state.cleanRating}
+                  update={(rating) => {
+                    this.updateState('cleanRating', rating);
+                  }}
+                  spacing={4}
+                  starSize={20}
+                  count={5}
+                  fullStar={Full}
+                  emptyStar={Empty}
+                />
+              </View>
+              <View style={styles.review_description}>
+                <Text>{translate('cleanliness')}</Text>
+              </View>
             </View>
 
-            <Form>
-              <Textarea
-                rowSpan={4}
-                bordered
-                placeholder={translate('leave_review')}
-                value={this.state.reviewBody}
-                onChangeText={(text) => this.setState({reviewBody: text})}
-              />
-            </Form>
-            <TouchableOpacity
-              style={[styles.btn_primary, themeStyles.primary_button_color]}
-              onPress={() => this.updateReview()}>
-              <Text style={[styles.btn_text, themeStyles.color_light]}>
-                {translate('update_review')}
-              </Text>
-            </TouchableOpacity>
-          </Content>
-        </Container>
-      );
-    }
+            {/* Quality Rating Buttons */}
+            <View style={styles.review_section}>
+              <View style={styles.review_rating}>
+                <Stars
+                  default={this.state.qualRating}
+                  update={(rating) => {
+                    this.updateState('qualRating', rating);
+                  }}
+                  spacing={4}
+                  starSize={20}
+                  count={5}
+                  fullStar={Full}
+                  emptyStar={Empty}
+                />
+              </View>
+              <View style={styles.review_description}>
+                <Text>{translate('quality')}</Text>
+              </View>
+            </View>
+          </View>
+
+          <View>
+            <Text>
+              {translate('overall_rating')}: {this.state.overallRating}
+            </Text>
+          </View>
+
+          <Form>
+            <Textarea
+              rowSpan={4}
+              bordered
+              placeholder={translate('leave_review')}
+              value={this.state.reviewBody}
+              onChangeText={(text) => this.setState({ reviewBody: text })}
+            />
+          </Form>
+          <TouchableOpacity
+            style={[styles.btn_primary, themeStyles.primary_button_color]}
+            onPress={() => this.updateReview()}>
+            <Text style={[styles.btn_text, themeStyles.color_light]}>
+              {translate('update_review')}
+            </Text>
+          </TouchableOpacity>
+        </Content>
+      </Container>
+    );
   }
 }
 
@@ -381,7 +368,7 @@ const styles = StyleSheet.create({
   review_rating: {
     justifyContent: 'center',
     flex: 1,
-    transform: [{rotate: '270deg'}],
+    transform: [{ rotate: '270deg' }],
   },
   review_description: {
     alignItems: 'center',

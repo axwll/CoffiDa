@@ -1,26 +1,23 @@
-import {faCamera} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import React, {Component} from 'react';
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import {RNCamera} from 'react-native-camera';
+import { faCamera } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import React, { Component } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { RNCamera } from 'react-native-camera';
 
-import {translate} from '../locales';
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
-import {getItem} from '../utils/async-storage';
-import {toast} from '../utils/toast';
+import { getItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
+import toast from '../utils/toast';
 
 class TakePhoto extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
   }
 
-  takePicture = async () => {
+  takePicture = async() => {
     if (this.camera) {
-      const options = {quality: 0.5, base64: true};
+      const options = { quality: 0.5, base64: true };
       const data = await this.camera.takePictureAsync(options);
 
       const locationId = this.props.navigation.getParam('locationId');
@@ -42,7 +39,7 @@ class TakePhoto extends Component {
         }
 
         this.props.navigation.navigate('SelectedShop', {
-          locationId: locationId,
+          locationId,
         });
       }
     }
@@ -52,7 +49,7 @@ class TakePhoto extends Component {
     const themeStyles = ThemeProvider.getTheme();
 
     return (
-      <View style={{flex: 1, width: '100%'}}>
+      <View style={{ flex: 1, width: '100%' }}>
         <RNCamera
           captureAudio={false} // Removes the CaptureAudio warning from screen
           ref={(ref) => {

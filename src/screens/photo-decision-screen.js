@@ -1,12 +1,12 @@
-import {Container} from 'native-base';
-import React, {Component} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { Container } from 'native-base';
+import React, { Component } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import {translate} from '../locales';
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
-import {getItem} from '../utils/async-storage';
+import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
-import {toast} from '../utils/toast';
+import toast from '../utils/toast';
 
 class PhotoDecision extends Component {
   constructor(props) {
@@ -29,14 +29,14 @@ class PhotoDecision extends Component {
     });
   }
 
-  yesClicked = async () => {
-    const locationId = this.state.locationId;
-    const reviewId = this.state.reviewId;
+  yesClicked = async() => {
+    const { locationId } = this.state;
+    const { reviewId } = this.state;
 
     if (!this.state.deleteReview) {
       this.props.navigation.navigate('TakePhoto', {
-        locationId: locationId,
-        reviewId: reviewId,
+        locationId,
+        reviewId,
         update: true,
       });
       return;

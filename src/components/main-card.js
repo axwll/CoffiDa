@@ -8,10 +8,6 @@ import ThemeProvider from '../utils/theme-provider';
 import ReviewIcon from './review-icon';
 
 class MainCard extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   clicked = () => {
     this.props.navigation.navigate('SelectedShop', {
       locationId: this.props.shopData.location_id,
@@ -33,8 +29,8 @@ class MainCard extends Component {
         </CardItem>
         <CardItem cardBody>
           <Image
-            source={{uri: shop.photo_path}}
-            style={{height: 200, width: 100, flex: 1}}
+            source={{ uri: shop.photo_path }}
+            style={{ height: 200, width: 100, flex: 1 }}
           />
         </CardItem>
         <CardItem>
@@ -49,7 +45,7 @@ class MainCard extends Component {
           </Left>
 
           <Right style={styles.right}>
-            <ReviewIcon rating={shop.avg_overall_rating} primary={true} />
+            <ReviewIcon rating={shop.avg_overall_rating} primary />
             <Text>({shop.location_reviews.length})</Text>
           </Right>
         </CardItem>

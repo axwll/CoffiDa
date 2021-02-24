@@ -12,6 +12,7 @@
         "start": "react-native start",
         "test": "jest",
         "lint": "eslint .",
+        "lintfixall": "eslint --fix .",
         "lintfile": "eslint",
         "fixfile": "eslint --fix",
         "postinstall": "jetifier -r && patch-package"

@@ -1,15 +1,15 @@
-import {faHeart as faHeartRegular} from '@fortawesome/free-regular-svg-icons';
-import {faHeart as faHeartSolid} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {Button, Card, CardItem, Left, Right} from 'native-base';
-import React, {Component} from 'react';
-import {Text} from 'react-native';
+import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
+import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Button, Card, CardItem, Left, Right } from 'native-base';
+import React, { Component } from 'react';
+import { Text } from 'react-native';
 
-import ReviewIcon from '../components/review-icon';
-import {translate} from '../locales';
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
-import {getItem} from '../utils/async-storage';
+import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
+import ReviewIcon from './review-icon';
 
 class ReviewCard extends Component {
   constructor(props) {
@@ -24,36 +24,34 @@ class ReviewCard extends Component {
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
 
-    this.setState({userId: await getItem('USER_ID')});
+    this.setState({ userId: await getItem('USER_ID') });
 
     await this.getUserInfo();
     await this.checkIfAlreadyLiked();
   }
 
-  getUserInfo = async () => {
-    const userId = this.state.userId;
+  getUserInfo = async() => {
+    const { userId } = this.state;
     const response = await this.apiRequests.get(`/user/${userId}`);
 
     if (response) {
-      this.setState({userInfo: response});
+      this.setState({ userInfo: response });
     }
   };
 
   checkIfAlreadyLiked = () => {
-    const liked_reviews = this.state.userInfo.liked_reviews;
-    if (liked_reviews.length !== 0) {
-      liked_reviews.forEach((like) => {
+    const likedReviews = this.state.userInfo.liked_reviews;
+    if (likedReviews.length !== 0) {
+      likedReviews.forEach((like) => {
         if (like.review.review_id === this.props.shopReview.review_id) {
           // User has already liked this review
-          this.setState({liked: true});
-          return;
+          this.setState({ liked: true });
         }
       });
     }
 
     // User has not previously liked the review
-    this.setState({liked: false});
-    return;
+    this.setState({ liked: false });
   };
 
   likeButtonPressed = (locationId, reviewId) => {
@@ -65,31 +63,31 @@ class ReviewCard extends Component {
     this.likeReview(locationId, reviewId);
   };
 
-  likeReview = async (locationId, reviewId) => {
+  likeReview = async(locationId, reviewId) => {
     const response = await this.apiRequests.post(
       `location/${locationId}/review/${reviewId}/like`,
       {}, // This request doesnt need a request body
     );
 
     if (response) {
-      this.setState({liked: true});
+      this.setState({ liked: true });
     }
   };
 
-  unlikeReview = async (locationId, reviewId) => {
+  unlikeReview = async(locationId, reviewId) => {
     const response = await this.apiRequests.delete(
       `location/${locationId}/review/${reviewId}/like`,
     );
 
     if (response) {
-      this.setState({liked: false});
+      this.setState({ liked: false });
     }
   };
 
   render() {
     const themeStyles = ThemeProvider.getTheme();
     const review = this.props.shopReview;
-    const locationId = this.props.locationId;
+    const { locationId } = this.props;
 
     return (
       <Card>
@@ -110,15 +108,14 @@ class ReviewCard extends Component {
             </Text>
           </Right>
         </CardItem>
-        <CardItem style={{paddingTop: 0, paddingBottom: 0}}>
+        <CardItem style={{ paddingTop: 0, paddingBottom: 0 }}>
           <Left>
             <Button transparent style={themeStyles.color_dark}>
               <FontAwesomeIcon
                 icon={this.state.liked ? faHeartSolid : faHeartRegular}
                 size={15}
                 color={themeStyles.color_primary.color}
-                onPress={() =>
-                  this.likeButtonPressed(locationId, review.review_id)
+                onPress={() => this.likeButtonPressed(locationId, review.review_id)
                 }
               />
             </Button>

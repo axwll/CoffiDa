@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-export const lightStyles = StyleSheet.create({
+const lightStyles = StyleSheet.create({
   primary_background_color: {
     backgroundColor: '#F06543',
   },
@@ -61,3 +61,5 @@ export const lightStyles = StyleSheet.create({
     borderColor: '#E8E9EB',
   },
 });
+
+export default lightStyles;

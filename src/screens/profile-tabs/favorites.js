@@ -1,11 +1,11 @@
-import React, {Component} from 'react';
-import {FlatList, SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import React, { Component } from 'react';
+import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
 import LoadingSpinner from '../../components/loading-spinner';
 import MainCard from '../../components/main-card';
-import {translate} from '../../locales';
+import { translate } from '../../locales';
 import ApiRequests from '../../utils/api-requests';
-import {getItem} from '../../utils/async-storage';
+import { getItem } from '../../utils/async-storage';
 import ThemeProvider from '../../utils/theme-provider';
 
 class Favorites extends Component {
@@ -32,34 +32,32 @@ class Favorites extends Component {
     this.findFavorites();
   }
 
-  findFavorites = async () => {
+  findFavorites = async() => {
     const query = `limit=${this.state.limit}&offset=${this.state.offset}&search_in=favourite`;
     const response = await this.apiRequests.get(`/find?${query}`);
 
     if (response) {
       const existing = this.state.favorites;
-      this.setState({favorites: existing.concat(response)});
+      this.setState({ favorites: existing.concat(response) });
     }
 
-    this.setState({loading: false});
+    this.setState({ loading: false });
   };
 
-  renderNoData = () => {
-    return (
-      <View style={styles.loading_view}>
-        <Text style={[styles.load_text, this.themeStyles.color_dark]}>
-          {translate('no_results')}
-        </Text>
-      </View>
-    );
-  };
+  renderNoData = () => (
+    <View style={styles.loading_view}>
+      <Text style={[styles.load_text, this.themeStyles.color_dark]}>
+        {translate('no_results')}
+      </Text>
+    </View>
+  );
 
   handleLoadMore = (distanceFromEnd) => {
     if (distanceFromEnd < 0) return;
 
     const off = this.state.offset;
-    const limit = this.state.limit;
-    this.setState({offset: off + limit}, () => {
+    const { limit } = this.state;
+    this.setState({ offset: off + limit }, () => {
       this.findFavorites();
     });
   };
@@ -67,29 +65,25 @@ class Favorites extends Component {
   render() {
     if (this.state.loading) {
       return <LoadingSpinner size={50} />;
-    } else {
-      return (
-        <SafeAreaView>
-          <FlatList
-            data={this.state.favorites}
-            renderItem={(fav) => {
-              return (
-                <MainCard
-                  shopData={fav.item}
-                  navigation={this.props.navigation}
-                />
-              );
-            }}
-            keyExtractor={(item) => item.location_id.toString()}
-            onEndReachedThreshold={0.01}
-            onEndReached={({distanceFromEnd}) =>
-              this.handleLoadMore(distanceFromEnd)
-            }
-            ListEmptyComponent={this.renderNoData()}
-          />
-        </SafeAreaView>
-      );
     }
+    return (
+      <SafeAreaView>
+        <FlatList
+          data={this.state.favorites}
+          renderItem={(fav) => (
+            <MainCard
+              shopData={fav.item}
+              navigation={this.props.navigation}
+            />
+          )}
+          keyExtractor={(item) => item.location_id.toString()}
+          onEndReachedThreshold={0.01}
+          onEndReached={({ distanceFromEnd }) => this.handleLoadMore(distanceFromEnd)
+          }
+          ListEmptyComponent={this.renderNoData()}
+        />
+      </SafeAreaView>
+    );
   }
 }
 const styles = StyleSheet.create({

@@ -1,6 +1,6 @@
 import { faCompass, faMugHot, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { Component } from 'react';
+import React from 'react';
 import { Text } from 'react-native';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
@@ -70,12 +70,12 @@ const HomeStack = createStackNavigator(
 /**
  * Hides the TabBar from the 'TakePhoto' Screen
  */
-HomeStack.navigationOptions = ({navigation}) => {
+HomeStack.navigationOptions = ({ navigation }) => {
   let tabBarVisible = true;
 
-  let routeName = navigation.state.routes[navigation.state.index].routeName;
+  const { routeName } = navigation.state.routes[navigation.state.index];
 
-  if (routeName == 'TakePhoto') {
+  if (routeName === 'TakePhoto') {
     tabBarVisible = false;
   }
 
@@ -95,9 +95,9 @@ export default createBottomTabNavigator(
     Profile: ProfileStack,
   },
   {
-    defaultNavigationOptions: ({navigation}) => ({
-      tabBarIcon: ({focused, horizontal, tintColor}) => {
-        const {routeName} = navigation.state;
+    defaultNavigationOptions: ({ navigation }) => ({
+      tabBarIcon: ({ tintColor }) => {
+        const { routeName } = navigation.state;
         let iconName;
         if (routeName === 'Home') {
           iconName = faMugHot;
@@ -110,7 +110,7 @@ export default createBottomTabNavigator(
         return <FontAwesomeIcon icon={iconName} color={tintColor} size={20} />;
       },
       tabBarLabel: () => {
-        const {routeName} = navigation.state;
+        const { routeName } = navigation.state;
         let tabName;
         if (routeName === 'Explore') {
           tabName = translate('explore');
@@ -121,7 +121,7 @@ export default createBottomTabNavigator(
         }
 
         return (
-          <Text style={[{textAlign: 'center'}, themeStyles.color_dark]}>
+          <Text style={[{ textAlign: 'center' }, themeStyles.color_dark]}>
             {tabName}
           </Text>
         );

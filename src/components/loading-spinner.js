@@ -24,7 +24,7 @@ class LoadingSpinner extends Component {
   };
 
   render() {
-    const {style, size} = this.props;
+    const { size } = this.props;
     const rotate = this.spinValue.interpolate({
       inputRange: [0, 1],
       outputRange: ['0deg', '360deg'],
@@ -32,8 +32,8 @@ class LoadingSpinner extends Component {
     const themeStyles = ThemeProvider.getTheme();
 
     return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <Animated.View style={{transform: [{rotate}]}}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Animated.View style={{ transform: [{ rotate }] }}>
           <FontAwesomeIcon
             icon={faCog}
             size={size}
