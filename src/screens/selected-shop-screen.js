@@ -11,9 +11,7 @@ import ReviewIcon from '../components/review-icon';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
-
-let locationId = null;
-let apiRequests = null;
+import ThemeProvider from '../utils/theme-provider';
 
 class SelectedShop extends Component {
   constructor(props) {
@@ -28,7 +26,8 @@ class SelectedShop extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({userId: await getItem('USER_ID')});
 
@@ -51,7 +50,7 @@ class SelectedShop extends Component {
   }
 
   getUserInfo = async (userId) => {
-    const response = await apiRequests.get(`/user/${userId}`);
+    const response = await this.apiRequests.get(`/user/${userId}`);
 
     if (response) {
       this.setState({currentUser: response});
@@ -60,7 +59,7 @@ class SelectedShop extends Component {
 
   getLocation = async () => {
     const locationId = this.state.locationId;
-    const response = await apiRequests.get(`/location/${locationId}`);
+    const response = await this.apiRequests.get(`/location/${locationId}`);
 
     if (response) {
       this.setState({shopData: response});
@@ -91,7 +90,7 @@ class SelectedShop extends Component {
 
   favLocation = async () => {
     const locationId = this.state.locationId;
-    const response = await apiRequests.post(
+    const response = await this.apiRequests.post(
       `/location/${locationId}/favourite`,
     );
 
@@ -103,7 +102,7 @@ class SelectedShop extends Component {
   unFavLocation = async () => {
     const locationId = this.state.locationId;
 
-    const response = await apiRequests.delete(
+    const response = await this.apiRequests.delete(
       `/location/${locationId}/favourite`,
     );
 
@@ -127,21 +126,21 @@ class SelectedShop extends Component {
       return <LoadingSpinner size={50} />;
     } else {
       return (
-        <Container style={styles.container} key={this.state.locationId}>
-          <Header style={styles.header}>
+        <Container style={this.themeStyles.container}>
+          <Header style={[styles.header, this.themeStyles.background_color]}>
             <Left style={styles.header_left}>
               <Button transparent>
                 <FontAwesomeIcon
                   icon={faChevronLeft}
                   size={20}
-                  color={'#F06543'}
+                  color={this.themeStyles.color_primary.color}
                   onPress={() => this.props.navigation.goBack()}
                 />
               </Button>
             </Left>
 
             <Body style={styles.header_body}>
-              <Title style={styles.title}>
+              <Title style={this.themeStyles.color_dark}>
                 {this.state.shopData.location_name}
               </Title>
             </Body>
@@ -150,7 +149,7 @@ class SelectedShop extends Component {
               <FontAwesomeIcon
                 icon={this.state.favorite ? faStarSolid : faStarRegular}
                 size={20}
-                color={'#F06543'}
+                color={this.themeStyles.color_primary.color}
                 onPress={() => this.favButtonPressed()}
               />
             </Right>
@@ -171,7 +170,7 @@ class SelectedShop extends Component {
                     <FontAwesomeIcon
                       icon={faPlus}
                       size={20}
-                      color={'#F06543'}
+                      color={this.themeStyles.color_primary.color}
                       onPress={() => this.addReview()}
                     />
                   </View>
@@ -187,24 +186,24 @@ class SelectedShop extends Component {
                     <FontAwesomeIcon
                       icon={faDirections}
                       size={20}
-                      color={'#F06543'}
+                      color={this.themeStyles.color_primary.color}
                       onPress={() => this.getDirections()}
                     />
                   </View>
                 </CardItem>
                 <CardItem style={styles.reviews_card}>
                   <ReviewIcon
-                    name={transalte('price')}
+                    name={translate('price')}
                     rating={this.state.shopData.avg_price_rating}
                     rotate={true}
                   />
                   <ReviewIcon
-                    name={transalte('cleanliness')}
+                    name={translate('cleanliness')}
                     rating={this.state.shopData.avg_clenliness_rating}
                     rotate={true}
                   />
                   <ReviewIcon
-                    name={transalte('quality')}
+                    name={translate('quality')}
                     rating={this.state.shopData.avg_quality_rating}
                     rotate={true}
                   />
@@ -212,7 +211,7 @@ class SelectedShop extends Component {
               </Card>
 
               <View style={styles.sub_heading_view}>
-                <Title style={styles.sub_heading_text}>
+                <Title style={this.themeStyles.color_dark}>
                   {translate('raiting_review')}
                 </Title>
               </View>
@@ -220,9 +219,14 @@ class SelectedShop extends Component {
               {this.state.shopData.location_reviews.length === 0 ? (
                 <View style={styles.btn_view}>
                   <TouchableOpacity
-                    style={styles.button}
+                    style={[
+                      styles.button,
+                      this.themeStyles.primary_button_color_outline,
+                    ]}
                     onPress={() => this.addReview()}>
-                    <Text style={styles.btn_text}>{translate('add_review')}</Text>
+                    <Text style={styles.btn_text}>
+                      {translate('add_review')}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -245,15 +249,9 @@ class SelectedShop extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#E8E9EB',
-  },
   header: {
     height: 50,
     borderBottomWidth: 0.5,
-    backgroundColor: '#E8E9EB',
   },
   header_left: {
     flex: 1,
@@ -262,15 +260,9 @@ const styles = StyleSheet.create({
     flex: 4,
     alignItems: 'center',
   },
-  title: {
-    color: '#313638',
-  },
   sub_heading_view: {
     flex: 1,
     alignItems: 'center',
-  },
-  sub_heading_text: {
-    color: '#313638',
   },
   header_right: {
     flex: 1,
@@ -305,7 +297,6 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 10,
     marginRight: 5,
-    borderColor: '#F06543',
   },
 });
 

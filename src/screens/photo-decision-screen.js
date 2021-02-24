@@ -5,9 +5,8 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
 import { toast } from '../utils/toast';
-
-let apiRequests = null;
 
 class PhotoDecision extends Component {
   constructor(props) {
@@ -19,7 +18,8 @@ class PhotoDecision extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({
       locationId: this.props.navigation.getParam('locationId'),
@@ -43,7 +43,7 @@ class PhotoDecision extends Component {
       return;
     }
 
-    const response = await apiRequests.delete(
+    const response = await this.apiRequests.delete(
       `/location/${locationId}/review/${reviewId}/photo`,
     );
 
@@ -66,21 +66,25 @@ class PhotoDecision extends Component {
 
   render() {
     return (
-      <Container style={styles.container}>
+      <Container style={[styles.container, this.themeStyles.background_color]}>
         <View style={styles.content}>
           <Text style={styles.header_text}>{this.state.displayText}</Text>
 
           <View style={styles.buttons}>
             <TouchableOpacity
-              style={[styles.button, styles.btn_primary]}
+              style={[styles.button, this.themeStyles.primary_button_color]}
               onPress={() => this.yesClicked()}>
-              <Text style={styles.btn_text}>{translate('yes')}</Text>
+              <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+                {translate('yes')}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.button, styles.btn_secondary]}
+              style={[styles.button, this.themeStyles.secondary_button_color]}
               onPress={() => this.noClicked()}>
-              <Text style={styles.btn_text}>{translate('no')}</Text>
+              <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+                {translate('no')}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -92,7 +96,6 @@ class PhotoDecision extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E8E9EB',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -117,17 +120,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1,
   },
-  btn_primary: {
-    borderColor: '#F06543',
-    backgroundColor: '#F06543',
-  },
-  btn_secondary: {
-    borderColor: '#808080',
-    backgroundColor: '#808080',
-  },
   btn_text: {
     padding: 10,
-    color: '#FFFFFF',
     alignItems: 'center',
   },
 });

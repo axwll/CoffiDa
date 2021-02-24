@@ -7,9 +7,8 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { setItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
 import Validator from '../utils/validator';
-
-let apiRequests = null;
 
 class Signup extends Component {
   constructor(props) {
@@ -31,7 +30,8 @@ class Signup extends Component {
   }
 
   componentDidMount() {
-    apiRequests = new ApiRequests(this.props, null);
+    this.apiRequests = new ApiRequests(this.props, null);
+    this.themeStyles = ThemeProvider.getTheme();
   }
 
   handleEmailInput = async (email) => {
@@ -154,7 +154,7 @@ class Signup extends Component {
       password: this.state.password,
     });
 
-    await apiRequests.post('/user', postBody);
+    await this.apiRequests.post('/user', postBody);
   };
 
   logIn = async () => {
@@ -163,7 +163,7 @@ class Signup extends Component {
       password: this.state.password,
     });
 
-    const response = await apiRequests.post('/user/login', postBody, true);
+    const response = await this.apiRequests.post('/user/login', postBody, true);
 
     if (response) {
       setItem('AUTH_TOKEN', response.token);
@@ -176,20 +176,23 @@ class Signup extends Component {
     const navigation = this.props.navigation;
 
     return (
-      <Container style={styles.container}>
-        <Header style={styles.header}>
+      <Container
+        style={[styles.container, this.themeStyles.alt_background_color]}>
+        <Header style={[styles.header, this.themeStyles.alt_background_color]}>
           <Left style={styles.header_left}>
             <Button transparent>
               <FontAwesomeIcon
                 icon={faChevronLeft}
                 size={20}
-                color={'#F06543'}
+                color={this.themeStyles.color_primary.color}
                 onPress={() => navigation.goBack()}
               />
             </Button>
           </Left>
           <Body style={styles.header_body}>
-            <Title style={styles.title}>{translate('signup')}</Title>
+            <Title style={this.themeStyles.color_dark}>
+              {translate('signup')}
+            </Title>
           </Body>
         </Header>
 
@@ -205,7 +208,8 @@ class Signup extends Component {
             </Item>
             {!this.state.validEmail && this.state.submitted && (
               <View>
-                <Text style={styles.error_text}>
+                <Text
+                  style={[styles.error_text, this.themeStyles.color_primary]}>
                   {this.state.emailErrorText}
                 </Text>
               </View>
@@ -220,7 +224,8 @@ class Signup extends Component {
             </Item>
             {!this.state.validFirstName && this.state.submitted && (
               <View>
-                <Text style={styles.error_text}>
+                <Text
+                  style={[styles.error_text, this.themeStyles.color_primary]}>
                   {this.state.firstNameErrorText}
                 </Text>
               </View>
@@ -235,7 +240,8 @@ class Signup extends Component {
             </Item>
             {!this.state.validLastName && this.state.submitted && (
               <View>
-                <Text style={styles.error_text}>
+                <Text
+                  style={[styles.error_text, this.themeStyles.color_primary]}>
                   {this.state.lastNameErrorText}
                 </Text>
               </View>
@@ -251,7 +257,8 @@ class Signup extends Component {
             </Item>
             {!this.state.validPassword && this.state.submitted && (
               <View>
-                <Text style={styles.error_text}>
+                <Text
+                  style={[styles.error_text, this.themeStyles.color_primary]}>
                   {this.state.passwordErrorText}
                 </Text>
               </View>
@@ -267,16 +274,19 @@ class Signup extends Component {
             </Item>
             {!this.state.validConfirmPassword && this.state.submitted && (
               <View>
-                <Text style={styles.error_text}>
+                <Text
+                  style={[styles.error_text, this.themeStyles.color_primary]}>
                   {this.state.confirmPasswordErrorText}
                 </Text>
               </View>
             )}
 
             <TouchableOpacity
-              style={[styles.button, styles.btn_primary]}
+              style={[styles.button, this.themeStyles.primary_button_color]}
               onPress={() => this.signUpEvent()}>
-              <Text style={styles.btn_text}>{translate('signup')}</Text>
+              <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+                {translate('signup')}
+              </Text>
             </TouchableOpacity>
           </Form>
         </ScrollView>
@@ -286,13 +296,9 @@ class Signup extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#E0DFD5',
-  },
   header: {
     height: 50,
     borderBottomWidth: 0.5,
-    backgroundColor: '#E0DFD5',
   },
   header_left: {
     position: 'absolute',
@@ -301,9 +307,6 @@ const styles = StyleSheet.create({
   header_body: {
     flex: 1,
     alignItems: 'center',
-  },
-  title: {
-    color: '#313638',
   },
   item: {
     borderBottomWidth: 0,
@@ -321,7 +324,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   error_text: {
-    color: '#F06543',
     textAlign: 'center',
     fontSize: 16,
   },
@@ -332,13 +334,8 @@ const styles = StyleSheet.create({
     margin: 10,
     marginRight: 5,
   },
-  btn_primary: {
-    borderColor: '#F06543',
-    backgroundColor: '#F06543',
-  },
   btn_text: {
     padding: 10,
-    color: '#FFFFFF',
     alignItems: 'center',
   },
 });

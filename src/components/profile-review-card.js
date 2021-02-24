@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { translate } from '../locales';
+import ThemeProvider from '../utils/theme-provider';
 import ReviewIcon from './review-icon';
 
 class ProfileReviewCard extends Component {
@@ -11,14 +12,20 @@ class ProfileReviewCard extends Component {
   }
 
   render() {
+    const themeStyles = ThemeProvider.getTheme();
+
     return (
       <View>
         <CardItem style={styles.first_item}>
           <Left style={styles.card_left}>
-            <Text style={styles.loc_name}>{this.props.title}</Text>
+            <Text style={[styles.loc_name, themeStyles.color_primary]}>
+              {this.props.title}
+            </Text>
 
             {this.props.subHeading && (
-              <Text style={styles.light_text}>{this.props.subHeading}</Text>
+              <Text style={themeStyles.color_dark}>
+                {this.props.subHeading}
+              </Text>
             )}
           </Left>
 
@@ -36,13 +43,13 @@ class ProfileReviewCard extends Component {
           </Left>
 
           <Right>
-            <Text style={styles.light_text}>
+            <Text style={themeStyles.color_dark}>
               {translate('price')}: {this.props.price_rate}/5
             </Text>
-            <Text style={styles.light_text}>
+            <Text style={themeStyles.color_dark}>
               {translate('cleanliness')}: {this.props.clean_rate}/5
             </Text>
-            <Text style={styles.light_text}>
+            <Text style={themeStyles.color_dark}>
               {translate('quality')}: {this.props.qual_rate}/5
             </Text>
           </Right>
@@ -63,11 +70,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   loc_name: {
-    color: '#F06543',
     fontWeight: 'bold',
-  },
-  light_text: {
-    color: '#313638',
   },
 });
 

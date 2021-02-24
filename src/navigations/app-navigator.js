@@ -16,6 +16,9 @@ import SelectedShopScreen from '../screens/selected-shop-screen';
 import SettingsScreen from '../screens/settings-screen';
 import TakePhotoScreen from '../screens/take-photo-screen';
 import UpdateReviewScreen from '../screens/update-review-screen';
+import ThemeProvider from '../utils/theme-provider';
+
+const themeStyles = ThemeProvider.getTheme();
 
 /**
  * The Profile stack has a nested Settings stack navigator
@@ -117,12 +120,16 @@ export default createBottomTabNavigator(
           tabName = translate('home');
         }
 
-        return <Text style={{textAlign: 'center'}}>{tabName}</Text>;
+        return (
+          <Text style={[{textAlign: 'center'}, themeStyles.color_dark]}>
+            {tabName}
+          </Text>
+        );
       },
     }),
     tabBarOptions: {
-      activeTintColor: '#F06543',
-      inactiveTintColor: '#808080',
+      activeTintColor: themeStyles.color_primary.color,
+      inactiveTintColor: themeStyles.color_medium.color,
     },
   },
 );

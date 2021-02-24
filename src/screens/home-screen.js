@@ -12,9 +12,7 @@ import MainCard from '../components/main-card';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
-import { toast } from '../utils/toast';
-
-let apiRequests = null;
+import ThemeProvider from '../utils/theme-provider';
 
 class Home extends Component {
   constructor(props) {
@@ -42,7 +40,8 @@ class Home extends Component {
       return;
     }
 
-    apiRequests = new ApiRequests(this.props, token);
+    this.apiRequests = new ApiRequests(this.props, token);
+    this.themeStyles = ThemeProvider.getTheme();
 
     // lists all shops
     this.find();
@@ -51,7 +50,7 @@ class Home extends Component {
   find = async (extendList = false) => {
     const query = `?limit=${this.state.limit}&offset=${this.state.offset}${this.state.filterQuery}${this.state.searchQuery}`;
 
-    const response = await apiRequests.get(`/find${query}`);
+    const response = await this.apiRequests.get(`/find${query}`);
 
     if (response) {
       if (extendList) {
@@ -81,7 +80,7 @@ class Home extends Component {
     const clean = this.state.cleanFilter;
 
     if (!overall && !price && !qual && !clean) {
-      toast(transalte('select_filter_toast'));
+      this.toast(translate('select_filter_toast'));
       return;
     }
 
@@ -146,7 +145,9 @@ class Home extends Component {
   renderNoData = () => {
     return (
       <View style={styles.loading_view}>
-        <Text style={styles.load_text}>{translate('no_results')}</Text>
+        <Text style={[styles.load_text, this.themeStyles.color_dark]}>
+          {translate('no_results')}
+        </Text>
       </View>
     );
   };
@@ -166,8 +167,11 @@ class Home extends Component {
       return <LoadingSpinner size={50} />;
     } else {
       return (
-        <Container style={styles.container}>
-          <Header searchBar rounded style={styles.header}>
+        <Container style={this.themeStyles.container}>
+          <Header
+            searchBar
+            rounded
+            style={[styles.header, this.themeStyles.background_light]}>
             <Item rounded style={styles.srch}>
               <Icon name="ios-search" />
               <Input
@@ -180,7 +184,7 @@ class Home extends Component {
               onPress={() => this.setState({modalVisible: true})}>
               <FontAwesomeIcon
                 icon={faFilter}
-                style={styles.filter_icon}
+                style={[styles.filter_icon, this.themeStyles.color_primary]}
                 size={20}
               />
             </TouchableOpacity>
@@ -192,11 +196,16 @@ class Home extends Component {
                 transparent={true}
                 visible={this.state.modalVisible}>
                 <View style={styles.centered_view}>
-                  <View style={styles.modal}>
+                  <View
+                    style={[styles.modal, this.themeStyles.background_light]}>
                     <View style={styles.modal_header}>
                       <View style={styles.modal_header_left}>
                         <TouchableOpacity onPress={() => this.clearFilters()}>
-                          <Text style={styles.header_left_text}>
+                          <Text
+                            style={[
+                              styles.header_left_text,
+                              this.themeStyles.color_medium,
+                            ]}>
                             {translate('clear_filters')}
                           </Text>
                         </TouchableOpacity>
@@ -206,7 +215,7 @@ class Home extends Component {
                           onPress={() => this.setState({modalVisible: false})}>
                           <FontAwesomeIcon
                             icon={faTimes}
-                            style={styles.close_modal_icon}
+                            style={this.themeStyles.color_medium}
                             size={20}
                           />
                         </TouchableOpacity>
@@ -275,9 +284,16 @@ class Home extends Component {
                       />
 
                       <TouchableOpacity
-                        style={styles.button}
+                        style={[
+                          styles.button,
+                          this.themeStyles.primary_button_color,
+                        ]}
                         onPress={() => this.filterResults()}>
-                        <Text style={styles.text_style}>
+                        <Text
+                          style={[
+                            styles.text_style,
+                            this.themeStyles.color_light,
+                          ]}>
                           {translate('filter_results')}
                         </Text>
                       </TouchableOpacity>
@@ -307,14 +323,8 @@ class Home extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#E8E9EB',
-  },
   header: {
     borderBottomWidth: 0.5,
-    backgroundColor: '#FFFFFF',
     alignItems: 'center',
   },
   srch: {
@@ -324,7 +334,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   filter_icon: {
-    color: '#F06543',
     margin: 10,
   },
   loading_view: {
@@ -334,7 +343,6 @@ const styles = StyleSheet.create({
   },
   load_text: {
     fontSize: 20,
-    color: '#313638',
   },
   centered_view: {
     position: 'absolute',
@@ -346,12 +354,10 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   modal: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 5,
     marginLeft: 20,
     marginRight: 20,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -368,15 +374,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   header_left_text: {
-    color: '#808080',
     textDecorationLine: 'underline',
   },
   modal_header_right: {
     flex: 1,
     alignItems: 'flex-end',
-  },
-  close_modal_icon: {
-    color: '#808080',
   },
   modal_body: {
     alignItems: 'center',
@@ -388,10 +390,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
     elevation: 2,
-    backgroundColor: '#F06543',
   },
   text_style: {
-    color: '#FFFFFF',
     fontWeight: 'bold',
     textAlign: 'center',
   },

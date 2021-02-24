@@ -12,10 +12,9 @@ import LoadingSpinner from '../components/loading-spinner';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
 import { toast } from '../utils/toast';
 import Validator from '../utils/validator';
-
-let apiRequests = null;
 
 class UpdateReview extends Component {
   constructor(props) {
@@ -35,7 +34,8 @@ class UpdateReview extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({
       shopData: this.props.navigation.getParam('shopData'),
@@ -58,7 +58,7 @@ class UpdateReview extends Component {
     const locationId = this.state.shopData.location_id;
     const reviewId = this.state.reviewId;
 
-    const response = await apiRequests.getImage(
+    const response = await this.apiRequests.getImage(
       `/location/${locationId}/review/${reviewId}/photo`,
     );
 
@@ -140,7 +140,7 @@ class UpdateReview extends Component {
       review_body: reviewBody,
     });
 
-    const response = await apiRequests.patch(
+    const response = await this.apiRequests.patch(
       `/location/${locationId}/review/${reviewId}`,
       patchBody,
     );
@@ -156,21 +156,23 @@ class UpdateReview extends Component {
       return <LoadingSpinner size={50} />;
     } else {
       return (
-        <Container style={styles.container}>
-          <Header style={styles.header}>
+        <Container style={this.themeStyles.container}>
+          <Header style={[styles.header, this.themeStyles.background_color]}>
             <Left style={styles.header_left}>
               <Button transparent>
                 <FontAwesomeIcon
                   icon={faChevronLeft}
                   size={20}
-                  color={'#F06543'}
+                  color={this.themeStyles.color_primary.color}
                   onPress={() => this.props.navigation.goBack()}
                 />
               </Button>
             </Left>
 
             <Body style={styles.header_body}>
-              <Title style={styles.title}>{translate('update_review')}</Title>
+              <Title style={[styles.title, this.themeStyle.color_dark]}>
+                {translate('update_review')}
+              </Title>
             </Body>
           </Header>
 
@@ -188,7 +190,7 @@ class UpdateReview extends Component {
                     <FontAwesomeIcon
                       icon={faPencilAlt}
                       size={15}
-                      color={'#F06543'}
+                      color={this.themeStyles.color_primary.color}
                       onPress={() => this.editReviewPhoto()}
                     />
                   </Button>
@@ -197,7 +199,7 @@ class UpdateReview extends Component {
                     <FontAwesomeIcon
                       icon={faTrashAlt}
                       size={15}
-                      color={'#F06543'}
+                      color={this.themeStyles.color_primary.color}
                       onPress={() => this.deleteReviewPhoto()}
                     />
                   </Button>
@@ -215,7 +217,10 @@ class UpdateReview extends Component {
             ) : (
               <View>
                 <TouchableOpacity
-                  style={styles.btn_primary_outline}
+                  style={[
+                    styles.btn_primary_outline,
+                    this.themeStyles.primary_button_color_outline,
+                  ]}
                   onPress={() =>
                     this.props.navigation.navigate('TakePhoto', {
                       locationId: this.state.shopData.location_id,
@@ -223,7 +228,11 @@ class UpdateReview extends Component {
                       update: true,
                     })
                   }>
-                  <Text style={styles.btn_outline_text}>
+                  <Text
+                    style={[
+                      styles.btn_outline_text,
+                      this.themeStyles.color_dark,
+                    ]}>
                     {translate('app_photo_review')}
                   </Text>
                 </TouchableOpacity>
@@ -308,9 +317,14 @@ class UpdateReview extends Component {
               />
             </Form>
             <TouchableOpacity
-              style={styles.btn_primary}
+              style={[
+                styles.btn_primary,
+                this.themeStyles.primary_button_color,
+              ]}
               onPress={() => this.updateReview()}>
-              <Text style={styles.btn_text}>{translate('update_review')}</Text>
+              <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+                {translate('update_review')}
+              </Text>
             </TouchableOpacity>
           </Content>
         </Container>
@@ -320,15 +334,9 @@ class UpdateReview extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#E8E9EB',
-  },
   header: {
     height: 50,
     borderBottomWidth: 0.5,
-    backgroundColor: '#E8E9EB',
   },
   header_left: {
     position: 'absolute',
@@ -342,7 +350,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   title: {
-    color: '#313638',
     fontSize: 20,
   },
   title_right: {
@@ -376,14 +383,11 @@ const styles = StyleSheet.create({
   btn_primary: {
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#F06543',
-    backgroundColor: '#F06543',
     borderRadius: 5,
     marginTop: 10,
   },
   btn_text: {
     padding: 10,
-    color: '#FFFFFF',
     alignItems: 'center',
   },
   photo_btn_view: {
@@ -392,13 +396,11 @@ const styles = StyleSheet.create({
   btn_primary_outline: {
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#F06543',
     borderRadius: 5,
     marginTop: 10,
     marginBottom: 10,
   },
   btn_outline_text: {
-    color: '#313638',
     padding: 5,
   },
 });

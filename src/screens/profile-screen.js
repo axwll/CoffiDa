@@ -8,11 +8,10 @@ import LoadingSpinner from '../components/loading-spinner';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
 import FavoritesTab from './profile-tabs/favorites';
 import LikesTab from './profile-tabs/likes';
 import ReviewsTab from './profile-tabs/reviews';
-
-let apiRequests = null;
 
 class Profile extends Component {
   constructor(props) {
@@ -27,7 +26,8 @@ class Profile extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({userId: await getItem('USER_ID')});
 
@@ -37,7 +37,7 @@ class Profile extends Component {
   getUserInfo = async () => {
     const userId = this.state.userId;
 
-    const response = await apiRequests.get(`/user/${userId}`);
+    const response = await this.apiRequests.get(`/user/${userId}`);
 
     if (response) {
       this.setState({userInfo: response});
@@ -79,17 +79,19 @@ class Profile extends Component {
       return <LoadingSpinner size={50} />;
     } else {
       return (
-        <Container style={styles.container}>
-          <Header style={styles.header}>
+        <Container style={this.themeStyles.container}>
+          <Header style={[styles.header, this.themeStyles.background_color]}>
             <Body style={styles.header_body}>
-              <Title style={styles.title}>{translate('profile')}</Title>
+              <Title style={this.themeStyles.color_dark}>
+                {translate('profile')}
+              </Title>
             </Body>
 
             <Right style={styles.header_right}>
               <FontAwesomeIcon
                 icon={faCog}
                 size={20}
-                color={'#F06543'}
+                color={this.themeStyles.color_primary.color}
                 onPress={() => this.openSettings()}
               />
             </Right>
@@ -101,13 +103,15 @@ class Profile extends Component {
                 {this.state.userInfo.first_name} {this.state.userInfo.last_name}
               </Text>
             </View>
-            <View style={styles.segment_view}>
-              <Segment style={styles.segment}>
+            <View
+              style={[styles.segment_view, this.themeStyles.background_color]}>
+              <Segment
+                style={[styles.segment, this.themeStyles.background_color]}>
                 <Button
                   style={[
                     this.state.activePage === 1
-                      ? styles.active_segment
-                      : styles.segment_btn,
+                      ? this.themeStyles.active_segment
+                      : this.themeStyles.segment_btn,
                   ]}
                   active={this.state.activePage === 1}
                   onPress={this.selectComponent(1)}>
@@ -116,8 +120,8 @@ class Profile extends Component {
                 <Button
                   style={[
                     this.state.activePage === 2
-                      ? styles.active_segment
-                      : styles.segment_btn,
+                      ? this.themeStyles.active_segment
+                      : this.themeStyles.segment_btn,
                   ]}
                   active={this.state.activePage === 2}
                   onPress={this.selectComponent(2)}>
@@ -126,8 +130,8 @@ class Profile extends Component {
                 <Button
                   style={[
                     this.state.activePage === 3
-                      ? styles.active_segment
-                      : styles.segment_btn,
+                      ? this.themeStyles.active_segment
+                      : this.themeStyles.segment_btn,
                   ]}
                   active={this.state.activePage === 3}
                   onPress={this.selectComponent(3)}>
@@ -146,22 +150,13 @@ class Profile extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#E8E9EB',
-  },
   header: {
     height: 50,
     borderBottomWidth: 0.5,
-    backgroundColor: '#E8E9EB',
   },
   header_body: {
     flex: 1,
     alignItems: 'center',
-  },
-  title: {
-    color: '#313638',
   },
   header_right: {
     position: 'absolute',
@@ -183,26 +178,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 0,
     paddingBottom: 0,
-    backgroundColor: '#E8E9EB',
   },
   segment_view: {
     height: 50,
-    backgroundColor: '#E8E9EB',
-  },
-  segment_btn: {
-    flex: 1,
-    justifyContent: 'center',
-    borderBottomColor: '#FFFFFF',
-    borderBottomWidth: 1.5,
-    borderColor: '#E8E9EB',
-  },
-  active_segment: {
-    flex: 1,
-    justifyContent: 'center',
-    borderBottomWidth: 3,
-    borderBottomColor: '#F06543',
-    backgroundColor: '#E8E9EB',
-    borderColor: '#E8E9EB',
   },
   segment_content: {
     flex: 1,

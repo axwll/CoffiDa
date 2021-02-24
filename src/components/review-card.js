@@ -3,39 +3,37 @@ import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Button, Card, CardItem, Left, Right } from 'native-base';
 import React, { Component } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 
 import ReviewIcon from '../components/review-icon';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
-
-let apiRequests = null;
+import ThemeProvider from '../utils/theme-provider';
 
 class ReviewCard extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      //   loading: true,
       userInfo: [],
       liked: false,
     };
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({userId: await getItem('USER_ID')});
 
     await this.getUserInfo();
     await this.checkIfAlreadyLiked();
-    // this.setState({loading: false});
   }
 
   getUserInfo = async () => {
     const userId = this.state.userId;
-    const response = await apiRequests.get(`/user/${userId}`);
+    const response = await this.apiRequests.get(`/user/${userId}`);
 
     if (response) {
       this.setState({userInfo: response});
@@ -69,7 +67,7 @@ class ReviewCard extends Component {
   };
 
   likeReview = async (locationId, reviewId) => {
-    const response = await apiRequests.post(
+    const response = await this.apiRequests.post(
       `location/${locationId}/review/${reviewId}/like`,
       {}, // This request doesnt need a request body
     );
@@ -80,7 +78,7 @@ class ReviewCard extends Component {
   };
 
   unlikeReview = async (locationId, reviewId) => {
-    const response = await apiRequests.delete(
+    const response = await this.apiRequests.delete(
       `location/${locationId}/review/${reviewId}/like`,
     );
 
@@ -101,24 +99,24 @@ class ReviewCard extends Component {
           </Left>
 
           <Right>
-            <Text style={styles.light_text}>
+            <Text style={this.themeStyles.color_dark}>
               {translate('price')}: {review.price_rating}/5
             </Text>
-            <Text style={styles.light_text}>
+            <Text style={this.themeStyles.color_dark}>
               {translate('cleanliness')}: {review.clenliness_rating}/5
             </Text>
-            <Text style={styles.light_text}>
+            <Text style={this.themeStyles.color_dark}>
               {translate('quality')}: {review.quality_rating}/5
             </Text>
           </Right>
         </CardItem>
-        <CardItem style={styles.last_item}>
+        <CardItem style={{paddingTop: 0, paddingBottom: 0}}>
           <Left>
-            <Button transparent style={styles.light_text}>
+            <Button transparent style={this.themeStyles.color_dark}>
               <FontAwesomeIcon
                 icon={this.state.liked ? faHeartSolid : faHeartRegular}
                 size={15}
-                color={'#F06543'}
+                color={this.themeStyles.color_primary.color}
                 onPress={() =>
                   this.likeButtonPressed(locationId, review.review_id)
                 }
@@ -134,23 +132,5 @@ class ReviewCard extends Component {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  first_item: {
-    paddingBottom: 0,
-    marginBottom: 0,
-  },
-  user: {
-    color: '#F06543',
-    fontWeight: 'bold',
-  },
-  light_text: {
-    color: '#313638',
-  },
-  last_item: {
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
-});
 
 export default ReviewCard;

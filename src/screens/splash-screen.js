@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { getItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
 
 class SplashScreen extends Component {
   constructor() {
     super();
+    this.themeStyles = ThemeProvider.getTheme();
     this.checkToken();
   }
 
@@ -17,8 +19,8 @@ class SplashScreen extends Component {
 
   render() {
     return (
-      <View style={styles.view}>
-        <Text style={styles.text}>CoffiDa</Text>
+      <View style={[styles.view, this.themeStyles.primary_background_color]}>
+        <Text style={[styles.text, this.themeStyles.color_light]}>CoffiDa</Text>
       </View>
     );
   }

@@ -7,9 +7,8 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
 import Validator from '../utils/validator';
-
-let apiRequests = null;
 
 class EditAccount extends Component {
   constructor(props) {
@@ -34,7 +33,8 @@ class EditAccount extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.themeStyles = ThemeProvider.getTheme();
 
     const userInfo = this.props.navigation.getParam('userInfo');
     this.setState({
@@ -171,7 +171,7 @@ class EditAccount extends Component {
   updateUserInfo = async (data) => {
     this.setState({submitted: true});
 
-    const response = await apiRequests.patch(
+    const response = await this.apiRequests.patch(
       '/user/' + this.state.userId,
       JSON.stringify(data),
     );
@@ -204,14 +204,18 @@ class EditAccount extends Component {
         </Item>
         {!this.state.validEmail && this.state.submitted && (
           <View>
-            <Text style={styles.error_text}>{this.state.emailErrorText}</Text>
+            <Text style={[styles.error_text, this.themeStyles.color_primary]}>
+              {this.state.emailErrorText}
+            </Text>
           </View>
         )}
 
         <TouchableOpacity
-          style={styles.btn_primary}
+          style={[styles.btn_primary, this.themeStyles.primary_button_color]}
           onPress={() => this.updateEmail()}>
-          <Text style={styles.btn_text}>{translate('update_email')}</Text>
+          <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+            {translate('update_email')}
+          </Text>
         </TouchableOpacity>
       </Form>
     );
@@ -229,7 +233,7 @@ class EditAccount extends Component {
         </Item>
         {!this.state.validFirstName && this.state.submitted && (
           <View>
-            <Text style={styles.error_text}>
+            <Text style={[styles.error_text, this.themeStyles.color_primary]}>
               {this.state.firstNameErrorText}
             </Text>
           </View>
@@ -244,16 +248,18 @@ class EditAccount extends Component {
         </Item>
         {!this.state.validLastName && this.state.submitted && (
           <View>
-            <Text style={styles.error_text}>
+            <Text style={[styles.error_text, this.themeStyles.color_primary]}>
               {this.state.lastNameErrorText}
             </Text>
           </View>
         )}
 
         <TouchableOpacity
-          style={styles.btn_primary}
+          style={[styles.btn_primary, this.themeStyles.primary_button_color]}
           onPress={() => this.updateName()}>
-          <Text style={styles.btn_text}>{translate('update_name')}</Text>
+          <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+            {translate('update_name')}
+          </Text>
         </TouchableOpacity>
       </Form>
     );
@@ -271,7 +277,7 @@ class EditAccount extends Component {
         </Item>
         {!this.state.validPassword && this.state.submitted && (
           <View>
-            <Text style={styles.error_text}>
+            <Text style={[styles.error_text, this.themeStyles.color_primary]}>
               {this.state.passwordErrorText}
             </Text>
           </View>
@@ -286,16 +292,18 @@ class EditAccount extends Component {
         </Item>
         {!this.state.validConfirmPassword && this.state.submitted && (
           <View>
-            <Text style={styles.error_text}>
+            <Text style={[styles.error_text, this.themeStyles.color_primary]}>
               {this.state.confirmPasswordErrorText}
             </Text>
           </View>
         )}
 
         <TouchableOpacity
-          style={styles.btn_primary}
+          style={[styles.btn_primary, this.themeStyles.primary_button_color]}
           onPress={() => this.resetPassword()}>
-          <Text style={styles.btn_text}>{translate('reset_password')}</Text>
+          <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+            {translate('reset_password')}
+          </Text>
         </TouchableOpacity>
       </Form>
     );
@@ -305,21 +313,23 @@ class EditAccount extends Component {
     const navigation = this.props.navigation;
 
     return (
-      <Container style={styles.container}>
-        <Header style={styles.header}>
+      <Container style={this.themeStyles.container}>
+        <Header style={[styles.header, this.themeStyles.background_color]}>
           <Left style={styles.header_left}>
             <Button transparent>
               <FontAwesomeIcon
                 icon={faChevronLeft}
                 size={20}
-                color={'#F06543'}
+                color={this.themeStyles.color_primary.color}
                 onPress={() => navigation.goBack()}
               />
             </Button>
           </Left>
 
           <Body style={styles.header_body}>
-            <Title style={styles.title}>{translate('edit_profile')}</Title>
+            <Title style={this.themeStyles.color_dark}>
+              {translate('edit_profile')}
+            </Title>
           </Body>
         </Header>
 
@@ -330,15 +340,9 @@ class EditAccount extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#E8E9EB',
-  },
   header: {
     height: 50,
     borderBottomWidth: 0.5,
-    backgroundColor: '#E8E9EB',
   },
   header_left: {
     position: 'absolute',
@@ -347,9 +351,6 @@ const styles = StyleSheet.create({
   header_body: {
     flex: 1,
     alignItems: 'center',
-  },
-  title: {
-    color: '#313638',
   },
   form_view: {
     flex: 1,
@@ -366,21 +367,17 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   error_text: {
-    color: '#F06543',
     textAlign: 'center',
     fontSize: 16,
   },
   btn_primary: {
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#F06543',
-    backgroundColor: '#F06543',
     borderRadius: 5,
     margin: 10,
   },
   btn_text: {
     padding: 10,
-    color: '#FFFFFF',
     alignItems: 'center',
   },
 });

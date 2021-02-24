@@ -13,6 +13,7 @@ import ReviewIcon from '../components/review-icon';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
 import { toast } from '../utils/toast';
 
 // import {mapDarkStyle} from '../styles/map-style';
@@ -41,8 +42,6 @@ async function requestPermssion(params) {
   }
 }
 
-let apiRequests = null;
-let mapRef = null;
 const {width, height} = Dimensions.get('window');
 const CARD_WIDTH = width - 40;
 let LATITUDE_DELTA = 0.0922;
@@ -66,7 +65,8 @@ class Explore extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.findCoordinates();
 
@@ -108,7 +108,7 @@ class Explore extends Component {
     LATITUDE_DELTA = 0.0922;
     LONGITUDE_DELTA = 0.5;
 
-    const response = await apiRequests.get('/find');
+    const response = await this.apiRequests.get('/find');
 
     if (response) {
       const myLocation = this.state.location;
@@ -169,14 +169,18 @@ class Explore extends Component {
 
       return (
         <View style={styles.loading_view}>
-          <Text style={styles.load_text}>{translate('cant_get_location')}</Text>
+          <Text style={[styles.btn_text, this.themeStyles.color_dark]}>
+            {translate('cant_get_location')}
+          </Text>
         </View>
       );
     } else {
       return (
         <Container style={styles.map_container}>
           <View style={styles.header}>
-            <Item rounded style={styles.srch}>
+            <Item
+              rounded
+              style={[styles.srch, this.themeStyles.background_light]}>
               <Icon name="ios-search" />
               <Input
                 placeholder={translate('search_box_placeholder')}
@@ -186,23 +190,37 @@ class Explore extends Component {
           </View>
           <View style={styles.button_view}>
             <TouchableOpacity
-              style={styles.text_button}
+              style={[
+                styles.text_button,
+                this.themeStyles.background_light,
+                this.themeStyles.color_primary,
+              ]}
               onPress={() => this.getNearbyLocations()}>
-              <FontAwesomeIcon icon={faMugHot} size={20} color={'#F06543'} />
-              <Text style={styles.btn_text}>
+              <FontAwesomeIcon
+                icon={faMugHot}
+                size={20}
+                color={this.themeStyles.color_primary.color}
+              />
+              <Text style={[styles.btn_text, this.themeStyles.color_primary]}>
                 {translate('find_coffee_shops_btn')}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.text_button}
+              style={[
+                styles.text_button,
+                this.themeStyles.background_light,
+                this.themeStyles.color_primary,
+              ]}
               onPress={() => this.moveToMyLocation()}>
               <FontAwesomeIcon
                 icon={faSearchLocation}
                 size={20}
-                color={'#F06543'}
+                color={this.themeStyles.color_primary.color}
               />
-              <Text style={styles.btn_text}>{translate('find_me_btn')}</Text>
+              <Text style={[styles.btn_text, this.themeStyles.color_primary]}>
+                {translate('find_me_btn')}
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -244,9 +262,18 @@ class Explore extends Component {
           {this.shouldShow(this.state.showCards) && (
             <View style={styles.card_view}>
               <TouchableOpacity
-                style={[styles.text_button, styles.close_button]}
+                style={[
+                  styles.text_button,
+                  styles.close_button,
+                  this.themeStyles.background_light,
+                  this.themeStyles.color_primary,
+                ]}
                 onPress={() => this.setState({showCards: false})}>
-                <FontAwesomeIcon icon={faTimes} size={15} color={'#F06543'} />
+                <FontAwesomeIcon
+                  icon={faTimes}
+                  size={15}
+                  color={this.themeStyles.color_primary.color}
+                />
               </TouchableOpacity>
 
               <Animated.ScrollView
@@ -257,7 +284,9 @@ class Explore extends Component {
                 snapToAlignment="center">
                 {this.state.locationsList.map((location, index) => {
                   return (
-                    <View style={styles.card} key={index}>
+                    <View
+                      style={[styles.card, this.themeStyles.background_light]}
+                      key={index}>
                       <Image
                         source={{uri: location.photo_path}}
                         style={styles.card_image}
@@ -275,8 +304,16 @@ class Explore extends Component {
 
                           <Text>({location.location_reviews.length})</Text>
                         </View>
-                        <TouchableOpacity style={styles.btn}>
-                          <Text style={styles.btn_text}>
+                        <TouchableOpacity
+                          style={[
+                            styles.btn,
+                            this.themeStyles.primary_button_color_outline,
+                          ]}>
+                          <Text
+                            style={[
+                              styles.btn_text,
+                              this.themeStyles.color_primary,
+                            ]}>
                             {translate('more_info_btn')}
                           </Text>
                         </TouchableOpacity>
@@ -308,7 +345,6 @@ const styles = StyleSheet.create({
     height: 250,
     width: CARD_WIDTH,
     overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
   },
   card_Image: {
     flex: 3,
@@ -344,7 +380,6 @@ const styles = StyleSheet.create({
   },
   srch: {
     flex: 9,
-    backgroundColor: '#FFFFFF',
   },
   button_view: {
     zIndex: 1,
@@ -356,8 +391,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    color: '#F06543',
-    backgroundColor: '#FFFFFF',
     margin: 10,
     paddingLeft: 10,
     borderRadius: 20,
@@ -381,11 +414,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     marginTop: 5,
-    borderColor: '#F06543',
   },
   btn_text: {
     padding: 10,
-    color: '#F06543',
     alignItems: 'center',
   },
   loading_view: {
@@ -395,7 +426,6 @@ const styles = StyleSheet.create({
   },
   load_text: {
     fontSize: 20,
-    color: '#313638',
   },
 });
 

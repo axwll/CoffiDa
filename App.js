@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { DarkModeProvider } from 'react-native-dark-mode';
 import * as RNLocalize from 'react-native-localize';
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 
@@ -40,7 +41,11 @@ class App extends Component {
   };
 
   render() {
-    return <AppContainer />;
+    return (
+      <DarkModeProvider>
+        <AppContainer />
+      </DarkModeProvider>
+    );
   }
 }
 

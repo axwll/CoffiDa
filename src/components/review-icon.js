@@ -43,12 +43,6 @@ class ReviewIcon extends Component {
 }
 
 const styles = StyleSheet.create({
-  color: {
-    backgroundColor: 'transparent',
-    textShadowColor: '#313638',
-    textShadowOffset: {width: 1, height: 1},
-    textShadowRadius: 2,
-  },
   review_section: {
     justifyContent: 'center',
     flex: 1,

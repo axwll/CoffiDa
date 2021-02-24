@@ -7,9 +7,8 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem, setItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
 import Validator from '../utils/validator';
-
-let apiRequests = null;
 
 class Login extends Component {
   constructor(props) {
@@ -25,7 +24,8 @@ class Login extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.themeStyles = ThemeProvider.getTheme();
   }
 
   handleEmailInput = (email) => {
@@ -84,7 +84,7 @@ class Login extends Component {
       password: this.state.password,
     });
 
-    const response = await apiRequests.post('/user/login', postBody, true);
+    const response = await this.apiRequests.post('/user/login', postBody, true);
 
     if (response) {
       setItem('AUTH_TOKEN', response.token);
@@ -96,20 +96,23 @@ class Login extends Component {
   render() {
     const navigation = this.props.navigation;
     return (
-      <Container style={styles.container}>
-        <Header style={styles.header}>
+      <Container
+        style={[styles.container, this.themeStyles.alt_background_color]}>
+        <Header style={[styles.header, this.themeStyles.alt_background_color]}>
           <Left style={styles.header_left}>
             <Button transparent>
               <FontAwesomeIcon
                 icon={faChevronLeft}
                 size={20}
-                color={'#F06543'}
+                color={this.themeStyles.color_primary.color}
                 onPress={() => navigation.goBack()}
               />
             </Button>
           </Left>
           <Body style={styles.header_body}>
-            <Title style={styles.title}>{translate('login')}</Title>
+            <Title style={this.themeStyles.color_dark}>
+              {translate('login')}
+            </Title>
           </Body>
         </Header>
 
@@ -123,7 +126,9 @@ class Login extends Component {
           </Item>
           {!this.state.validEmail && this.state.submitted && (
             <View>
-              <Text style={styles.error_text}>{this.state.emailErrorText}</Text>
+              <Text style={[styles.error_text, this.themeStyles.color_primary]}>
+                {this.state.emailErrorText}
+              </Text>
             </View>
           )}
 
@@ -137,16 +142,18 @@ class Login extends Component {
           </Item>
           {!this.state.validPassword && this.state.submitted && (
             <View>
-              <Text style={styles.error_text}>
+              <Text style={[styles.error_text, this.themeStyles.color_primary]}>
                 {this.state.passwordErrorText}
               </Text>
             </View>
           )}
 
           <TouchableOpacity
-            style={[styles.button, styles.btn_primary]}
+            style={[styles.button, this.themeStyles.primary_button_color]}
             onPress={() => this.logInEvent()}>
-            <Text style={styles.btn_text}>{translate('login')}</Text>
+            <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+              {translate('login')}
+            </Text>
           </TouchableOpacity>
         </Form>
       </Container>
@@ -155,13 +162,9 @@ class Login extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#E0DFD5',
-  },
   header: {
     height: 50,
     borderBottomWidth: 0.5,
-    backgroundColor: '#E0DFD5',
   },
   header_left: {
     position: 'absolute',
@@ -170,9 +173,6 @@ const styles = StyleSheet.create({
   header_body: {
     flex: 1,
     alignItems: 'center',
-  },
-  title: {
-    color: '#313638',
   },
   form: {
     flex: 1,
@@ -189,7 +189,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   error_text: {
-    color: '#F06543',
     textAlign: 'center',
     fontSize: 16,
   },
@@ -200,13 +199,8 @@ const styles = StyleSheet.create({
     margin: 10,
     marginRight: 5,
   },
-  btn_primary: {
-    borderColor: '#F06543',
-    backgroundColor: '#F06543',
-  },
   btn_text: {
     padding: 10,
-    color: '#FFFFFF',
     alignItems: 'center',
   },
 });

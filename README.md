@@ -30,6 +30,8 @@ This README would normally document whatever steps are necessary to get your app
 
 ### Style Guide setup ###
 
+What style guide have I used
+
 ./node_modules/.bin/eslint --init
 ? How would you like to use ESLint? To check syntax, find problems, and enforce code style
 ? What type of modules does your project use? JavaScript modules (import/export)

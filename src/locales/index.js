@@ -1,7 +1,7 @@
 import i18n from 'i18n-js';
 import memoize from 'lodash.memoize';
 import React from 'react';
-import {I18nManager} from 'react-native';
+import { I18nManager } from 'react-native';
 import * as RNLocalize from 'react-native-localize';
 
 // Code sourced from online tutorial
@@ -19,7 +19,7 @@ export const translate = memoize(
 
 export const setI18nConfig = () => {
   // fallback if no available language fits
-  const fallback = {languageTag: 'fr', isRTL: false};
+  const fallback = {languageTag: 'en', isRTL: false};
 
   const {languageTag, isRTL} =
     RNLocalize.findBestAvailableLanguage(Object.keys(translationGetters)) ||

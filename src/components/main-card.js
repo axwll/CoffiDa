@@ -4,6 +4,7 @@ import { Body, Card, CardItem, Left, Right } from 'native-base';
 import React, { Component } from 'react';
 import { Image, StyleSheet, Text } from 'react-native';
 
+import ThemeProvider from '../utils/theme-provider';
 import ReviewIcon from './review-icon';
 
 class MainCard extends Component {
@@ -12,12 +13,15 @@ class MainCard extends Component {
   }
 
   clicked = () => {
-    const {navigate} = this.props.navigation;
-    navigate('SelectedShop', {locationId: this.props.shopData.location_id});
+    this.props.navigation.navigate('SelectedShop', {
+      locationId: this.props.shopData.location_id,
+    });
   };
 
   render() {
     const shop = this.props.shopData;
+    const themeStyles = ThemeProvider.getTheme();
+
     return (
       <Card>
         <CardItem button onPress={() => this.clicked()}>
@@ -38,7 +42,7 @@ class MainCard extends Component {
             <FontAwesomeIcon
               icon={faMapMarkerAlt}
               size={20}
-              color={'#E0DFD5'}
+              color={themeStyles.alt_color_light.color}
               onPress={() => this.press()}
             />
             <Text>{shop.location_town}</Text>

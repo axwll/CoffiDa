@@ -2,14 +2,13 @@ import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Body, Button, Card, CardItem, Container, Content, Header, Left, Text, Title } from 'native-base';
 import React, { Component } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, Switch, TouchableOpacity } from 'react-native';
 
 import LoadingSpinner from '../components/loading-spinner';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { clear, getItem } from '../utils/async-storage';
-
-let apiRequest = null;
+import ThemeProvider from '../utils/theme-provider';
 
 class Settings extends Component {
   constructor(props) {
@@ -18,11 +17,13 @@ class Settings extends Component {
     this.state = {
       loading: true,
       userInfo: [],
+      isEnabled: false,
     };
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({userId: await getItem('USER_ID')});
 
@@ -41,7 +42,7 @@ class Settings extends Component {
     this.setState({loading: true});
 
     const userId = this.state.userId;
-    const response = await apiRequests.get(`/user/${userId}`);
+    const response = await this.apiRequests.get(`/user/${userId}`);
 
     if (response) {
       this.setState({userInfo: response});
@@ -55,6 +56,11 @@ class Settings extends Component {
     this.props.navigation.navigate('Auth');
   };
 
+  toggleSwitch = () => {
+    const enabledState = this.state.isEnabled;
+    this.setState({isEnabled: !enabledState});
+  };
+
   render() {
     if (this.state.loading) {
       return <LoadingSpinner size={50} />;
@@ -62,21 +68,23 @@ class Settings extends Component {
       const navigation = this.props.navigation;
 
       return (
-        <Container style={styles.container}>
-          <Header style={styles.header}>
+        <Container style={this.themeStyles.container}>
+          <Header style={[styles.header, this.themeStyles.background_color]}>
             <Left style={styles.header_left}>
               <Button transparent>
                 <FontAwesomeIcon
                   icon={faChevronLeft}
                   size={20}
-                  color={'#F06543'}
+                  color={this.themeStyles.color_primary.color}
                   onPress={() => navigation.navigate('Profile')}
                 />
               </Button>
             </Left>
 
             <Body style={styles.header_body}>
-              <Title style={styles.title}>{translate('settings')}</Title>
+              <Title style={this.themeStyles.color_dark}>
+                {translate('settings')}
+              </Title>
             </Body>
           </Header>
 
@@ -85,7 +93,7 @@ class Settings extends Component {
               {translate('account')}: {this.state.userInfo.email}
             </Text>
             <Text>
-              Name: {this.state.userInfo.first_name}{' '}
+              {translate('name')}: {this.state.userInfo.first_name}{' '}
               {this.state.userInfo.last_name}
             </Text>
             <Card transparent>
@@ -119,8 +127,14 @@ class Settings extends Component {
             <Text>{translate('preferences')}</Text>
             <Card transparent>
               <CardItem>
-                <Body>
-                  <Text>{translate('permissions')}</Text>
+                <Body styel={styles.dark_mode_body}>
+                  <Text>Dark Mode</Text>
+                  <Switch
+                    trackColor={{false: '#767577', true: '#81b0ff'}}
+                    thumbColor={this.state.isEnabled ? '#f5dd4b' : '#f4f3f4'}
+                    onValueChange={this.toggleSwitch}
+                    value={this.state.isEnabled}
+                  />
                 </Body>
               </CardItem>
             </Card>
@@ -142,15 +156,9 @@ class Settings extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#E8E9EB',
-  },
   header: {
     height: 50,
     borderBottomWidth: 0.5,
-    backgroundColor: '#E8E9EB',
   },
   header_left: {
     position: 'absolute',
@@ -160,8 +168,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
-  title: {
-    color: '#313638',
+  dark_mode_body: {
+    flexDirection: 'row',
   },
 });
 

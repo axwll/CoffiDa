@@ -6,8 +6,7 @@ import MainCard from '../../components/main-card';
 import { translate } from '../../locales';
 import ApiRequests from '../../utils/api-requests';
 import { getItem } from '../../utils/async-storage';
-
-let apiRequests = null;
+import ThemeProvider from '../../utils/theme-provider';
 
 class Favorites extends Component {
   constructor(props) {
@@ -22,7 +21,8 @@ class Favorites extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({
       userId: JSON.parse(await getItem('USER_ID')),
@@ -46,7 +46,9 @@ class Favorites extends Component {
   renderNoData = () => {
     return (
       <View style={styles.loading_view}>
-        <Text style={styles.load_text}>{translate('no_results')}</Text>
+        <Text style={[styles.load_text, this.themeStyles.color_dark]}>
+          {translate('no_results')}
+        </Text>
       </View>
     );
   };
@@ -97,7 +99,6 @@ const styles = StyleSheet.create({
   },
   load_text: {
     fontSize: 20,
-    color: '#313638',
   },
 });
 

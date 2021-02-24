@@ -10,10 +10,9 @@ import Full from '../assets/ratings/rating-full-primary.png';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
 import { toast } from '../utils/toast';
 import Validator from '../utils/validator';
-
-let apiRequests = null;
 
 class AddReview extends Component {
   constructor(props) {
@@ -29,7 +28,8 @@ class AddReview extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.themeStyles = ThemeProvider.getTheme();
   }
 
   calculateOverall = () => {
@@ -92,27 +92,31 @@ class AddReview extends Component {
     const shopData = this.props.navigation.getParam('shopData');
 
     return (
-      <Container style={styles.container}>
-        <Header style={styles.header}>
+      <Container style={this.themeStyles.container}>
+        <Header style={[styles.header, this.themeStyles.background_color]}>
           <Left style={styles.header_left}>
             <Button transparent>
               <FontAwesomeIcon
                 icon={faChevronLeft}
                 size={20}
-                color={'#F06543'}
+                color={this.themeStyles.color_primary.color}
                 onPress={() => this.props.navigation.goBack()}
               />
             </Button>
           </Left>
 
           <Body style={styles.header_body}>
-            <Title style={styles.title}>{translate('new_review')}</Title>
+            <Title style={[styles.title, this.themeStyles.color_dark]}>
+              {translate('new_review')}
+            </Title>
           </Body>
         </Header>
 
         <Content padder>
           <View>
-            <Text style={styles.title}>{shopData.location_name}</Text>
+            <Text style={[styles.title, this.themeStyles.color_dark]}>
+              {shopData.location_name}
+            </Text>
           </View>
 
           <View style={styles.review_container}>
@@ -194,9 +198,11 @@ class AddReview extends Component {
           </Form>
 
           <TouchableOpacity
-            style={styles.btn_primary}
+            style={[styles.btn_primary, this.themeStyles.primary_button_color]}
             onPress={() => this.createReview(shopData.location_id)}>
-            <Text style={styles.btn_text}>{translate('post_review')}</Text>
+            <Text style={[styles.btn_text, this.themeStyles.color_light]}>
+              {translate('post_review')}
+            </Text>
           </TouchableOpacity>
         </Content>
       </Container>
@@ -205,15 +211,9 @@ class AddReview extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#E8E9EB',
-  },
   header: {
     height: 50,
     borderBottomWidth: 0.5,
-    backgroundColor: '#E8E9EB',
   },
   header_left: {
     position: 'absolute',
@@ -224,7 +224,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    color: '#313638',
     fontSize: 20,
   },
   review_container: {
@@ -251,14 +250,11 @@ const styles = StyleSheet.create({
   btn_primary: {
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#F06543',
-    backgroundColor: '#F06543',
     borderRadius: 5,
     marginTop: 10,
   },
   btn_text: {
     padding: 10,
-    color: '#FFFFFF',
     alignItems: 'center',
   },
 });

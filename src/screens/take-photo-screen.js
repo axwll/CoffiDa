@@ -9,15 +9,14 @@ import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 import { toast } from '../utils/toast';
 
-let apiRequests = null;
-
 class TakePhoto extends Component {
   constructor(props) {
     super(props);
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.themeStyles = ThemeProvider.getTheme();
   }
 
   takePicture = async () => {
@@ -28,7 +27,7 @@ class TakePhoto extends Component {
       const locationId = this.props.navigation.getParam('locationId');
       const reviewId = this.props.navigation.getParam('reviewId');
 
-      const response = await apiRequests.post(
+      const response = await this.apiRequests.post(
         `/location/${locationId}/review/${reviewId}/photo`,
         data,
         false,
@@ -65,8 +64,12 @@ class TakePhoto extends Component {
             onPress={() => {
               this.takePicture();
             }}
-            style={styles.button}>
-            <FontAwesomeIcon icon={faCamera} style={styles.icon} size={25} />
+            style={[styles.button, this.themeStyles.background_color]}>
+            <FontAwesomeIcon
+              icon={faCamera}
+              style={this.themeStyles.color_medium}
+              size={25}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -91,13 +94,9 @@ const styles = StyleSheet.create({
     margin: 10,
     width: 50,
     height: 50,
-    backgroundColor: '#E8E9EB',
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  icon: {
-    color: '#808080',
   },
 });
 

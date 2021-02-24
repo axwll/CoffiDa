@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { Component } from 'react';
 import { Animated, Easing, View } from 'react-native';
 
+import ThemeProvider from '../utils/theme-provider';
+
 class LoadingSpinner extends Component {
   spinValue = new Animated.Value(0);
 
@@ -27,6 +29,7 @@ class LoadingSpinner extends Component {
       inputRange: [0, 1],
       outputRange: ['0deg', '360deg'],
     });
+    const themeStyles = ThemeProvider.getTheme();
 
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
@@ -34,7 +37,7 @@ class LoadingSpinner extends Component {
           <FontAwesomeIcon
             icon={faCog}
             size={size}
-            style={{color: '#808080'}}
+            style={themeStyles.color_medium}
           />
         </Animated.View>
       </View>

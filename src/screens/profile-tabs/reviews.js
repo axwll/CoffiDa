@@ -10,8 +10,7 @@ import ProfileReviewCard from '../../components/profile-review-card';
 import { translate } from '../../locales';
 import ApiRequests from '../../utils/api-requests';
 import { getItem } from '../../utils/async-storage';
-
-let apiRequests = null;
+import ThemeProvider from '../../utils/theme-provider';
 
 class Reviews extends Component {
   constructor(props) {
@@ -24,7 +23,8 @@ class Reviews extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.setState({userId: await getItem('USER_ID')});
 
@@ -46,7 +46,7 @@ class Reviews extends Component {
   getUserInfo = async () => {
     const userId = this.state.userId;
 
-    const response = await apiRequests.get(`/user/${userId}`);
+    const response = await this.apiRequests.get(`/user/${userId}`);
 
     if (response) {
       this.setState({userInfo: response});
@@ -56,7 +56,7 @@ class Reviews extends Component {
   };
 
   deleteReview = async (locationId, reviewId) => {
-    const response = await apiRequests.delete(
+    const response = await this.apiRequests.delete(
       `/location/${locationId}/review/${reviewId}`,
     );
 
@@ -87,11 +87,11 @@ class Reviews extends Component {
         />
         <CardItem style={styles.last_item}>
           <Left>
-            <Button transparent style={styles.light_text}>
+            <Button transparent style={this.themeStyles.color_dark}>
               <FontAwesomeIcon
                 icon={this.state.liked ? faHeartSolid : faHeartRegular}
                 size={15}
-                color={'#808080'}
+                color={this.themeStyles.color_medium.color}
               />
             </Button>
             <Text style={styles.like_count}>{item.review.likes}</Text>
@@ -102,7 +102,7 @@ class Reviews extends Component {
               <FontAwesomeIcon
                 icon={faPencilAlt}
                 size={15}
-                color={'#F06543'}
+                color={this.themeStyles.color_primary.color}
                 onPress={() => this.editReview(item)}
               />
             </Button>
@@ -111,7 +111,7 @@ class Reviews extends Component {
               <FontAwesomeIcon
                 icon={faTrashAlt}
                 size={15}
-                color={'#F06543'}
+                color={this.themeStyles.color_primary.color}
                 onPress={() =>
                   this.deleteReview(
                     item.location.location_id,
@@ -129,7 +129,9 @@ class Reviews extends Component {
   renderNoData = () => {
     return (
       <View style={styles.loading_view}>
-        <Text style={styles.load_text}>{translate('no_results')}</Text>
+        <Text style={[styles.load_text, this.themeStyles.color_dark]}>
+          {translate('no_results')}
+        </Text>
       </View>
     );
   };
@@ -156,9 +158,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  light_text: {
-    color: '#313638',
-  },
   footer_right: {
     flex: 1,
     flexDirection: 'row',
@@ -175,7 +174,6 @@ const styles = StyleSheet.create({
   },
   load_text: {
     fontSize: 20,
-    color: '#313638',
   },
 });
 
