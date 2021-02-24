@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { DarkModeProvider } from 'react-native-dark-mode';
+import { DarkModeProvider } from 'react-native-dynamic';
 import * as RNLocalize from 'react-native-localize';
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 
