@@ -75,6 +75,9 @@ class Home extends Component {
   };
 
   filterResults = () => {
+    // Reset pagination values when filtering
+    this.setState({ limit: 5, offset: 0 });
+
     const overall = this.state.overallFilter;
     const price = this.state.priceFilter;
     const qual = this.state.qualFilter;
@@ -299,7 +302,7 @@ class Home extends Component {
           </View>
         )}
 
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={this.themeStyles.container}>
           <FlatList
             data={this.state.coffeeShops}
             renderItem={(shop) => this.renderItem(shop)}

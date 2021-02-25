@@ -48,7 +48,7 @@ class ApiRequests extends Component {
 
   post = (
     url,
-    body,
+    body = null,
     responseExpected = false,
     contentType = 'application/json',
   ) => fetch(API_URL + url, {

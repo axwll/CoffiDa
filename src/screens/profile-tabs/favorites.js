@@ -17,8 +17,9 @@ class Favorites extends Component {
     this.state = {
       loading: true,
       offset: 0,
-      limit: 2,
+      limit: 3,
       favorites: [],
+      favoriteTab: true,
     };
   }
 
@@ -32,17 +33,25 @@ class Favorites extends Component {
     this.findFavorites();
   }
 
-  findFavorites = async() => {
+  findFavorites = async(extendList = false) => {
     const query = `limit=${this.state.limit}&offset=${this.state.offset}&search_in=favourite`;
     const response = await this.apiRequests.get(`/find?${query}`);
 
     if (response) {
-      const existing = this.state.favorites;
-      this.setState({ favorites: existing.concat(response) });
+      if (extendList) {
+        this.setState({ favorites: this.state.favorites.concat(response) });
+      } else {
+        this.setState({ favorites: response });
+      }
     }
 
     this.setState({ loading: false });
   };
+
+  callback = () => {
+    this.setState({ loading: true });
+    this.findFavorites();
+  }
 
   renderNoData = () => (
     <View style={styles.loading_view}>
@@ -58,7 +67,7 @@ class Favorites extends Component {
     const off = this.state.offset;
     const { limit } = this.state;
     this.setState({ offset: off + limit }, () => {
-      this.findFavorites();
+      this.findFavorites(true);
     });
   };
 
@@ -74,6 +83,8 @@ class Favorites extends Component {
             <MainCard
               shopData={fav.item}
               navigation={this.props.navigation}
+              favoriteTab={this.state.favoriteTab}
+              callback={this.callback.bind(this)}
             />
           )}
           keyExtractor={(item) => item.location_id.toString()}

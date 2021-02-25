@@ -37,7 +37,7 @@ class PhotoDecision extends Component {
       this.props.navigation.navigate('TakePhoto', {
         locationId,
         reviewId,
-        update: true,
+        update: this.state.updateReview,
       });
       return;
     }

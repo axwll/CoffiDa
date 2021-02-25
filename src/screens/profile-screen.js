@@ -57,7 +57,10 @@ class Profile extends Component {
       );
     } if (this.state.activePage === 2) {
       return (
-        <FavoritesTab favorites={this.state.userInfo.favourite_locations} />
+        <FavoritesTab
+          navigation={this.props.navigation}
+          favorites={this.state.userInfo.favourite_locations}
+        />
       );
     }
     return (

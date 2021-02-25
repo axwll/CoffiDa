@@ -11,6 +11,7 @@ import { translate } from '../../locales';
 import ApiRequests from '../../utils/api-requests';
 import { getItem } from '../../utils/async-storage';
 import ThemeProvider from '../../utils/theme-provider';
+import toast from '../../utils/toast';
 
 class Reviews extends Component {
   constructor(props) {
@@ -62,6 +63,7 @@ class Reviews extends Component {
     );
 
     if (response) {
+      toast(translate('review_deleted_toast'));
       this.setState({ loading: true });
 
       this.getUserInfo();

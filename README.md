@@ -48,3 +48,8 @@ Checking peerDependencies of eslint-config-airbnb-base@latest
 - style guide
 - additional info
     patches folder
+- future improvements 
+    see notes folder 
+
+- would have done some data validation on client side such as email address already exists but this kind of validation really belongs on the server side
+check there is no validation like this before you test it

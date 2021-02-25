@@ -31,7 +31,7 @@ async function requestPermssion() {
       },
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('You can use my location');
+    //   console.log('You can use my location');
       return true;
     }
     console.log("You can't use my location");
@@ -108,8 +108,8 @@ class Explore extends Component {
     return new Promise((resolve, reject) => {
       Geolocation.getCurrentPosition(
         (position) => {
-          resolve(position.coords);
-        //   resolve({ latitude: 53.38587, longitude: -2.1455589 });
+        //   resolve(position.coords);
+          resolve({ latitude: 53.38587, longitude: -2.1455589 });
         },
         (error) => reject(error.message),
         {
@@ -145,7 +145,7 @@ class Explore extends Component {
     });
   };
 
-  getNearbyLocations = async() => {
+  getNearbyLocations = async(queryString = '') => {
     this.setState({
       showSingleMarker: false,
       showMyMarker: false,
@@ -153,7 +153,7 @@ class Explore extends Component {
     LATITUDE_DELTA = 0.0922;
     LONGITUDE_DELTA = 0.5;
 
-    const response = await this.apiRequests.get('/find');
+    const response = await this.apiRequests.get(`/find${queryString}`);
 
     if (response) {
       response.forEach((location) => {
@@ -206,6 +206,10 @@ class Explore extends Component {
       })
       .catch((err) => toast(err));
   };
+
+  search = (searchText) => {
+    this.getNearbyLocations(`?q=${searchText}`);
+  }
 
   shouldShow = (stateBoolean) => {
     if (stateBoolean && this.state.locationsList.length > 0) {
@@ -289,8 +293,8 @@ class Explore extends Component {
           {this.state.showMyMarker && (
             <Marker
               coordinate={this.state.myLocation}
-              title={'My location'}
-              description={'I am here'}
+              title={translate('my_location_title')}
+              description={translate('my_location_description')}
             />
           )}
 
@@ -346,6 +350,7 @@ class Explore extends Component {
                 <View
                   style={[styles.card, themeStyles.background_light]}
                   key={index}>
+                  {/* <Text>{location.photo_path}</Text> */}
                   <Image
                     source={{ uri: location.photo_path }}
                     style={styles.card_image}
@@ -403,7 +408,7 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     overflow: 'hidden',
   },
-  card_Image: {
+  card_image: {
     flex: 3,
     width: '100%',
     height: '100%',

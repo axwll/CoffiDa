@@ -83,8 +83,46 @@ class AddReview extends Component {
 
     if (response) {
       toast(translate('review_created_toast'));
-      this.props.navigation.goBack();
+      this.findReview(locationId);
     }
+  };
+
+  findReview = async(locationId) => {
+    const response = await this.apiRequests.get('/find?search_in=reviewed');
+
+    if (response) {
+      const location = response.find((loc) => loc.location_id === locationId);
+
+      // location has no reviews? Something has gone horribly wrong.
+      if (location.length === 0) return;
+
+      this.extractId(location);
+      if (this.state.reviewId) {
+        this.props.navigation.navigate('AddPhoto', {
+          locationId,
+          reviewId: this.state.reviewId,
+          displayText: translate('add_review_photo_text'),
+          updateReview: false,
+        });
+      }
+    }
+  };
+
+  extractId = (location) => {
+    const reviewIds = [];
+    location.location_reviews.forEach((rev) => {
+      // find the review matching the review body
+      if (rev.review_body === this.state.reviewBody) {
+        reviewIds.push(rev.review_id);
+      }
+    });
+
+    // cant find review in database, something went wrong but didnt error...
+    if (reviewIds.length === 0) return;
+
+    // The array will be greater than one if reviews have the same review body
+    // Find the largest ID (latest entry) and set state
+    this.setState({ reviewId: Math.max(...reviewIds) });
   };
 
   render() {

@@ -1,18 +1,38 @@
-import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { faMapMarkerAlt, faStar as faStarSolid } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Body, Card, CardItem, Left, Right } from 'native-base';
 import React, { Component } from 'react';
 import { Image, StyleSheet, Text } from 'react-native';
 
+import ApiRequests from '../utils/api-requests';
+import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 import ReviewIcon from './review-icon';
 
 class MainCard extends Component {
+  async componentDidMount() {
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+  }
+
+
   clicked = () => {
     this.props.navigation.navigate('SelectedShop', {
       locationId: this.props.shopData.location_id,
     });
   };
+
+  favButtonPressed = async() => {
+    const locationId = this.props.shopData.location_id;
+
+    const response = await this.apiRequests.delete(
+      `/location/${locationId}/favourite`,
+    );
+
+    if (response === 'OK') {
+      // Use the callback in props to refresh the data on the page
+      this.props.callback();
+    }
+  }
 
   render() {
     const shop = this.props.shopData;
@@ -26,6 +46,16 @@ class MainCard extends Component {
               <Text>{shop.location_name}</Text>
             </Body>
           </Left>
+          {this.props.favoriteTab && (
+            <Right>
+              <FontAwesomeIcon
+                icon={faStarSolid}
+                size={20}
+                color={themeStyles.color_primary.color}
+                onPress={() => this.favButtonPressed()}
+              />
+            </Right>
+          )}
         </CardItem>
         <CardItem cardBody>
           <Image

@@ -2,7 +2,7 @@ import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Body, Button, Card, CardItem, Container, Content, Header, Left, Text, Title } from 'native-base';
 import React, { Component } from 'react';
-import { StyleSheet, Switch, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 
 import LoadingSpinner from '../components/loading-spinner';
 import { translate } from '../locales';
@@ -17,7 +17,6 @@ class Settings extends Component {
     this.state = {
       loading: true,
       userInfo: [],
-      isEnabled: false,
     };
   }
 
@@ -119,27 +118,6 @@ class Settings extends Component {
                 </Body>
               </CardItem>
             </TouchableOpacity>
-          </Card>
-          <Text>{translate('preferences')}</Text>
-          <Card transparent>
-            <CardItem>
-              <Body styel={styles.dark_mode_body}>
-                <Text>Dark Mode</Text>
-                <Switch
-                  trackColor={{ false: '#767577', true: '#81b0ff' }}
-                  thumbColor={this.state.isEnabled ? '#f5dd4b' : '#f4f3f4'}
-                  onValueChange={this.toggleSwitch}
-                  value={this.state.isEnabled}
-                />
-              </Body>
-            </CardItem>
-          </Card>
-          <Card transparent>
-            <CardItem>
-              <Body>
-                <Text>{translate('accessibility')}</Text>
-              </Body>
-            </CardItem>
           </Card>
           <TouchableOpacity
             style={[styles.button, themeStyles.primary_button_color]}

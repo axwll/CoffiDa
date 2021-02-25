@@ -152,7 +152,6 @@ class SelectedShop extends Component {
         </Header>
 
         <Content style={styles.content} padder>
-          {/* Switch to flatlist */}
           <ScrollView>
             <Card>
               <CardItem cardBody button>
@@ -229,6 +228,7 @@ class SelectedShop extends Component {
               this.state.shopData.location_reviews.map((review) => (
                 <ReviewCard
                   key={review.review_id}
+                  currentUser={this.state.currentUser}
                   shopReview={review}
                   locationId={this.state.shopData.location_id}
                 />
