@@ -4,6 +4,10 @@ import { StyleSheet, Text, View } from 'react-native';
 import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 
+/**
+ * Splash Screen renders while checking if token exists
+ * Navigates appropriatley
+ */
 class SplashScreen extends Component {
   constructor() {
     super();

@@ -5,7 +5,7 @@
     "license": "UNLICENCED",
     "repository": {
         "type": "git",
-        "url": "https://bitbucket.org/max_johnson/coffida_ui"
+        "url": "https://github.com/axwll/CoffiDa"
     },
     "scripts": {
         "android": "react-native run-android",

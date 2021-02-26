@@ -6,6 +6,9 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { translate } from '../locales';
 import ThemeProvider from '../utils/theme-provider';
 
+/**
+ * Welcome Screen. First page users see and navigates to either Log In or Sign Up
+ */
 class Welcome extends Component {
   render() {
     const themeStyles = ThemeProvider.getTheme();

@@ -13,6 +13,9 @@ import { getItem } from '../../utils/async-storage';
 import ThemeProvider from '../../utils/theme-provider';
 import toast from '../../utils/toast';
 
+/**
+ * The Reviews Tab within the Profile screen
+ */
 class Reviews extends Component {
   constructor(props) {
     super(props);
@@ -32,6 +35,7 @@ class Reviews extends Component {
 
     this.getUserInfo();
 
+    // Listener runs when the page re focuses e.g. when a review is deleted
     this._onFocusListener = this.props.navigation.addListener(
       'didFocus',
       async() => {

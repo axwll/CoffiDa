@@ -5,6 +5,9 @@ import { Animated, Easing, View } from 'react-native';
 
 import ThemeProvider from '../utils/theme-provider';
 
+/**
+ * Renders Cog Icon that spins, usually called while a page is loading data
+ */
 class LoadingSpinner extends Component {
   spinValue = new Animated.Value(0);
 

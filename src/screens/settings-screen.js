@@ -10,6 +10,9 @@ import ApiRequests from '../utils/api-requests';
 import { clear, getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 
+/**
+ * Settings Screen
+ */
 class Settings extends Component {
   constructor(props) {
     super(props);
@@ -50,6 +53,7 @@ class Settings extends Component {
   };
 
   signOut = async() => {
+    // Clear the Token and User ID from async storage
     await clear();
     this.props.navigation.navigate('Auth');
   };

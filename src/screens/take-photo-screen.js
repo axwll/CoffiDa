@@ -10,6 +10,9 @@ import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 import toast from '../utils/toast';
 
+/**
+ * Take photo screen
+ */
 class TakePhoto extends Component {
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));

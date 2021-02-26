@@ -21,7 +21,7 @@ import ThemeProvider from '../utils/theme-provider';
 const themeStyles = ThemeProvider.getTheme();
 
 /**
- * The Profile stack has a nested Settings stack navigator
+ * The Settings stack navigator that is nested in the Profile stack
  */
 const SettingsStack = createStackNavigator(
   {
@@ -35,7 +35,7 @@ const SettingsStack = createStackNavigator(
 );
 
 /**
- * The Profile screen tab is set up as a stack navigator
+ * The Profile stack navigator that is used for the Profile tab
  */
 const ProfileStack = createStackNavigator(
   {
@@ -51,7 +51,7 @@ const ProfileStack = createStackNavigator(
 );
 
 /**
- * The home screen tab is set up as a stack navigator
+ * The Home stack navigator that is used for the Home tab
  */
 const HomeStack = createStackNavigator(
   {
@@ -86,7 +86,9 @@ HomeStack.navigationOptions = ({ navigation }) => {
 
 /**
  * Creates the bottom Tab navigator for the App
- * and decides which icon should be used
+ * Nav options:
+ * 'icon' => The icon is decided based on tab name
+ * 'label' => The label is a option to support transations
  */
 export default createBottomTabNavigator(
   {

@@ -9,6 +9,14 @@ import PrimaryFull from '../assets/ratings/rating-full-primary.png';
 import Half from '../assets/ratings/rating-half-light.png';
 import PrimaryHalf from '../assets/ratings/rating-half-primary.png';
 
+/**
+ * This uses the 'Stars' library to show ratings.
+ * It renders custom immages found in 'assets/ratings` to display ratings.
+ * The component accepts props that tell it how to customise the icons, such as:
+ * 'rotate'  => direction to rotate the icon
+ * 'spacing' => spacing between each individual icon
+ * 'primary' => whether to render the icons in the primary colour
+ */
 class ReviewIcon extends Component {
   render() {
     return (

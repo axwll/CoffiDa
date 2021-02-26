@@ -13,6 +13,9 @@ import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 
+/**
+ * Selected shop screen
+ */
 class SelectedShop extends Component {
   constructor(props) {
     super(props);
@@ -30,6 +33,7 @@ class SelectedShop extends Component {
 
     this.setState({ userId: await getItem('USER_ID') });
 
+    // Runs when the page focuses e.g. when navigating back from a sub screen
     this._onFocusListener = this.props.navigation.addListener(
       'didFocus',
       async() => {

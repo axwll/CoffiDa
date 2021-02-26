@@ -10,6 +10,13 @@ import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 import Validator from '../utils/validator';
 
+/**
+ * Edit account screen works dynamically. Renders one of the following
+ * based on navigation param 'type':
+ * - Update email form
+ * - Update name from
+ * - Change password form
+ */
 class EditAccount extends Component {
   constructor(props) {
     super(props);
@@ -114,6 +121,15 @@ class EditAccount extends Component {
     );
   };
 
+  /**
+   * Dynamically sets state with the given options:
+   *
+   * @param   {ValidationResponse}  response    The response from the validator
+   * @param   {string}              key         The key for state e.g. 'email'
+   * @param   {string}              value       The value of the state key e.g. 'test@test.com'
+   * @param   {string}              booleanKey  The boolean state key e.g. 'validEmail'
+   * @param   {string}              errorKey    The state key for the error message
+   */
   stateSetter = (response, key, value, booleanKey, errorKey) => {
     if (!response.status) {
       this.setState({
@@ -159,6 +175,7 @@ class EditAccount extends Component {
     const { confirmPassword } = this.state;
 
     if (!password || !confirmPassword) {
+      // If form is empty the handlers will not have been run
       this.handlePasswordInput(password);
       this.handlePasswordConfirmlInput(confirmPassword);
     }
@@ -184,6 +201,9 @@ class EditAccount extends Component {
     }
   };
 
+  /**
+   * Renders the correct form based on the 'type' prop
+   */
   _renderComponent = () => {
     if (this.state.type === 'email') {
       return this.emailForm();

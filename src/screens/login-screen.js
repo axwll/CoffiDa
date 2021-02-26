@@ -8,8 +8,12 @@ import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem, setItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
+import toast from '../utils/toast';
 import Validator from '../utils/validator';
 
+/**
+ * Login Screen
+ */
 class Login extends Component {
   constructor(props) {
     super(props);
@@ -65,6 +69,7 @@ class Login extends Component {
     this.setState({ submitted: true });
 
     if (!this.state.email || !this.state.password) {
+      // If either inputs havent been used, run the validation to show error
       this.handleEmailInput(this.state.email);
       this.handlePasswordlInput(this.state.password);
       return;
@@ -85,11 +90,14 @@ class Login extends Component {
 
     const response = await this.apiRequests.post('/user/login', postBody, true);
 
-    if (response) {
-      setItem('AUTH_TOKEN', response.token);
-      setItem('USER_ID', response.id.toString());
-      this.props.navigation.navigate('App');
+    if (!response) {
+      toast(translate('login_failed'));
     }
+
+    // Use async storage to set global properties
+    setItem('AUTH_TOKEN', response.token);
+    setItem('USER_ID', response.id.toString());
+    this.props.navigation.navigate('App');
   };
 
   render() {

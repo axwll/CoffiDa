@@ -5,6 +5,8 @@
     "login": "Log In",
     "new_here": "New to CoffiDa? Sign up.",
     "signup": "Sign Up",
+    "create_account_failed": "Failed to create account",
+    "login_failed": "Failed to Log In",
     "yes": "Yes",
     "no": "No",
     "search_box_placeholder": "Search",

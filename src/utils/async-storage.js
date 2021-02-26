@@ -1,5 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+/**
+ * Gets an Item from async storage
+ *
+ * @param   {string}  key  The key of the item in storage
+ *
+ * @return  {string|null}  The key value if exeists, else null
+ */
 export const getItem = async(key) => {
   try {
     return await AsyncStorage.getItem(key);
@@ -9,6 +16,14 @@ export const getItem = async(key) => {
   }
 };
 
+/**
+ * Sets an item in async storage
+ *
+ * @param   {string}  key    The key to store with
+ * @param   {string}  value  The Value to store
+ *
+ * @return  {string|null}  The key value if exeists, else null
+ */
 export const setItem = async(key, value) => {
   try {
     return await AsyncStorage.setItem(key, value);
@@ -18,4 +33,7 @@ export const setItem = async(key, value) => {
   }
 };
 
+/**
+ * Clears all values from async storage
+ */
 export const clear = async() => await AsyncStorage.clear();

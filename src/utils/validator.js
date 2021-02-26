@@ -5,6 +5,9 @@ import { translate } from '../locales';
 import ValidatorResponse from '../models/validation-response';
 import toast from './toast';
 
+/**
+ * Various validator functions
+ */
 class FormValidator extends Component {
   validateEmail = (email) => {
     const regex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
@@ -14,6 +17,7 @@ class FormValidator extends Component {
     }
 
     if (!regex.test(email)) {
+      // checks if the given email matches the regex pattern
       return new ValidatorResponse(false, translate('email_invalid_error'));
     }
 
@@ -36,6 +40,7 @@ class FormValidator extends Component {
     }
 
     if (!containsLetters || !containNumbers) {
+      // checks if the given password matches the regex patterns
       return new ValidatorResponse(
         false,
         translate('password_non_alphanumeric_error'),
@@ -93,10 +98,12 @@ class FormValidator extends Component {
       // Makes a capitalised string of each illegal word
       const capitalised = word.charAt(0).toUpperCase() + word.slice(1);
 
+      // Builds an array of all illegal words
       const toCheck = [word, capitalised];
 
       toCheck.forEach((check) => {
         if (sampleText.includes(check)) {
+          // Replace profanity if exists in sample text
           formatted = sampleText.replace(check, translate('profanity_replace'));
           toast(translate('profanity_error_toast'));
         }

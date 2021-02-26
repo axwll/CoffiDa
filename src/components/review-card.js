@@ -11,6 +11,10 @@ import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 import ReviewIcon from './review-icon';
 
+/**
+ * This renders a card to show reviews.
+ * It is used in multiple places in the app
+ */
 class ReviewCard extends Component {
   constructor(props) {
     super(props);
@@ -28,7 +32,6 @@ class ReviewCard extends Component {
 
     this.setState({ userId: await getItem('USER_ID') });
 
-    // await this.getUserInfo();
     await this.checkIfAlreadyLiked();
   }
 
@@ -145,6 +148,3 @@ class ReviewCard extends Component {
 }
 
 export default ReviewCard;
-
-
-//  [{"location": {"avg_clenliness_rating": 3, "avg_overall_rating": 3.6667, "avg_price_rating": 4.1667, "avg_quality_rating": 3.6667, "latitude": 53.388042, "location_id": 1, "location_name": "Just Coffee", "location_town": "London", "longitude": -2.160297, "photo_path": "https://cdnb.artstation.com/p/assets/images/images/027/245/631/large/bogdan-mb0sco-lw-summer-entry-previewhd.jpg?1591006318"}, "review": {"clenliness_rating": 4, "likes": 3, "overall_rating": 4, "price_rating": 5, "quality_rating": 3, "review_body": "Great atomosphere, great coffee", "review_id": 1}}, {"location": {"avg_clenliness_rating": 1.6, "avg_overall_rating": 2.4, "avg_price_rating": 2.6, "avg_quality_rating": 2.6, "latitude": 53.381145, "location_id": 4, "location_name": "Ben's Diner", "location_town": "London", "longitude": -2.125623, "photo_path": "https://cdnb.artstation.com/p/assets/images/images/029/320/301/large/bogdan-mb0sco-loficoffee-hdpreview.jpg?1597164052"}, "review": {"clenliness_rating": 0, "likes": 4, "overall_rating": 1, "price_rating": 1, "quality_rating": 1, "review_body": "Grim, and expensive", "review_id": 2}}, {"location": {"avg_clenliness_rating": 4, "avg_overall_rating": 4, "avg_price_rating": 3.5, "avg_quality_rating": 4.1667, "latitude": 53.388338, "location_id": 2, "location_name": "Coffee", "location_town": "Manchester", "longitude": -2.152658, "photo_path": "https://cdnb.artstation.com/p/assets/images/images/022/005/763/large/bogdan-mb0sco-donnuts-hd.jpg?1584319974"}, "review": {"clenliness_rating": 4, "likes": 1, "overall_rating": 4, "price_rating": 5, "quality_rating": 3, "review_body": "I like the coffee", "review_id": 4}}, {"location": {"avg_clenliness_rating": 3, "avg_overall_rating": 3.6667, "avg_price_rating": 4.1667, "avg_quality_rating": 3.6667, "latitude": 53.388042, "location_id": 1, "location_name": "Just Coffee", "location_town": "London", "longitude": -2.160297, "photo_path": "https://cdnb.artstation.com/p/assets/images/images/027/245/631/large/bogdan-mb0sco-lw-summer-entry-previewhd.jpg?1591006318"}, "review": {"clenliness_rating": 3, "likes": 3, "overall_rating": 3, "price_rating": 3, "quality_rating": 3, "review_body": "Not as good now that they've upped their prices", "review_id": 3}}, {"location": {"avg_clenliness_rating": 4, "avg_overall_rating": 4, "avg_price_rating": 3.5, "avg_quality_rating": 4.1667, "latitude": 53.388338, "location_id": 2, "location_name": "Coffee", "location_town": "Manchester", "longitude": -2.152658, "photo_path": "https://cdnb.artstation.com/p/assets/images/images/022/005/763/large/bogdan-mb0sco-donnuts-hd.jpg?1584319974"}, "review": {"clenliness_rating": 1, "likes": 1, "overall_rating": 4, "price_rating": 5, "quality_rating": 5, "review_body": "A quality establishment but not impressed by the filth of the bathrooms", "review_id": 16}}]

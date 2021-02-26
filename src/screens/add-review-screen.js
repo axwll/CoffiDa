@@ -14,6 +14,9 @@ import ThemeProvider from '../utils/theme-provider';
 import toast from '../utils/toast';
 import Validator from '../utils/validator';
 
+/**
+ * Add Review screen will validate and create reviews for a location
+ */
 class AddReview extends Component {
   constructor(props) {
     super(props);
@@ -81,15 +84,15 @@ class AddReview extends Component {
       postBody,
     );
 
-    
-
     if (response) {
       toast(translate('review_created_toast'));
+      // Review Id is not returned in the response. Id is found before asking to add photo
       this.findReview(locationId);
     }
   };
 
   findReview = async(locationId) => {
+    // Get all of the user reviews
     const response = await this.apiRequests.get('/find?search_in=reviewed');
 
     if (response) {
@@ -99,6 +102,7 @@ class AddReview extends Component {
       if (location.length === 0) return;
 
       this.extractId(location);
+
       if (this.state.reviewId) {
         this.props.navigation.navigate('AddPhoto', {
           locationId,

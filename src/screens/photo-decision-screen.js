@@ -8,6 +8,10 @@ import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 import toast from '../utils/toast';
 
+/**
+ * Asks the user a question about Creating, Updating or Deleting a photo.
+ * The navigation params decide what message to show and where to navigate.
+ */
 class PhotoDecision extends Component {
   constructor(props) {
     super(props);
@@ -34,6 +38,7 @@ class PhotoDecision extends Component {
     const { reviewId } = this.state;
 
     if (!this.state.deleteReview) {
+      // Create or update photo, nav to take photo screen
       this.props.navigation.navigate('TakePhoto', {
         locationId,
         reviewId,
@@ -58,6 +63,7 @@ class PhotoDecision extends Component {
       return;
     }
 
+    // User came from the Selected Shop screen, nav back there
     this.props.navigation.navigate('SelectedShop', {
       locationId: this.state.locationId,
     });

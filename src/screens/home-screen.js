@@ -14,6 +14,9 @@ import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 
+/**
+ * Home Screen of the App
+ */
 class Home extends Component {
   constructor(props) {
     super(props);
@@ -49,14 +52,17 @@ class Home extends Component {
   }
 
   find = async(extendList = false) => {
+    // Builds a query string to send to the find endpoint
     const query = `?limit=${this.state.limit}&offset=${this.state.offset}${this.state.filterQuery}${this.state.searchQuery}`;
 
     const response = await this.apiRequests.get(`/find${query}`);
 
     if (response) {
       if (extendList) {
+        // Add to the current list
         this.setState({ coffeeShops: this.state.coffeeShops.concat(response) });
       } else {
+        // Reset the list
         this.setState({ coffeeShops: response });
       }
     }
@@ -108,10 +114,19 @@ class Home extends Component {
     );
   };
 
-  formatQuery = (string, value, query = '') => {
+  /**
+   * Used by the filter and chains query strings together
+   *
+   * @param   {string}  filterType  The filter type query parameter
+   * @param   {string}  value       The value of the query parameter
+   * @param   {string}  query       The current query string. Defaults to empty if none supplied
+   *
+   * @return  {string}              The formatted query string
+   */
+  formatQuery = (filterType, value, query = '') => {
     let _query = query;
     if (value) {
-      _query += `&${string}=${value}`;
+      _query += `&${filterType}=${value}`;
     }
 
     return _query;
@@ -125,6 +140,7 @@ class Home extends Component {
       query = `&q=${text}`;
     }
 
+    // Once state has been set, runs the find
     this.setState(
       {
         offset: 0,
@@ -192,6 +208,7 @@ class Home extends Component {
         </Header>
         {this.state.modalVisible && (
           <View style={styles.centered_view}>
+            {/* Filter results Modal */}
             <Modal
               animationType='slide'
               transparent

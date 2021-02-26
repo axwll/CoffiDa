@@ -16,6 +16,10 @@ import ThemeProvider from '../utils/theme-provider';
 import toast from '../utils/toast';
 import Validator from '../utils/validator';
 
+/**
+ * Update review screen validates and updates given reviews
+ * Can Add, Update or delete a photo from here too
+ */
 class UpdateReview extends Component {
   constructor(props) {
     super(props);

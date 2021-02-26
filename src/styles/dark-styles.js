@@ -8,10 +8,10 @@ const darkStyles = StyleSheet.create({
     backgroundColor: '#F06543',
   },
   background_color: {
-    backgroundColor: '#E8E9EB',
+    backgroundColor: '#1D201F',
   },
   alt_background_color: {
-    backgroundColor: '#E0DFD5',
+    backgroundColor: '#474747',
   },
   background_light: {
     backgroundColor: '#FFFFFF',

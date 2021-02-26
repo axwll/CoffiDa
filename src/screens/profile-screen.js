@@ -13,6 +13,9 @@ import FavoritesTab from './profile-tabs/favorites';
 import LikesTab from './profile-tabs/likes';
 import ReviewsTab from './profile-tabs/reviews';
 
+/**
+ * Profile screen that houses the Sgments (Tabs)
+ */
 class Profile extends Component {
   constructor(props) {
     super(props);
@@ -47,6 +50,9 @@ class Profile extends Component {
     this.setState({ loading: false });
   };
 
+  /**
+   * Decides which tab to render based on the active page state var
+   */
   _renderComponent = () => {
     if (this.state.activePage === 1) {
       return (
@@ -71,6 +77,14 @@ class Profile extends Component {
     );
   };
 
+  /**
+   * Sets the style and behaviour of the tab button based on active page
+   *
+   * @param   {integer}  index    Index of the Tab
+   * @param   {string}   btnText  Text to render for the tab
+   *
+   * @return  {Button}            A Button used in the Segment
+   */
   _renderButton = (index, btnText) => (
     <Button
       style={[

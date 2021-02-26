@@ -11,6 +11,9 @@ import ApiRequests from '../../utils/api-requests';
 import { getItem } from '../../utils/async-storage';
 import ThemeProvider from '../../utils/theme-provider';
 
+/**
+ * The Likes Tab within the Profile screen
+ */
 class Likes extends Component {
   constructor(props) {
     super(props);

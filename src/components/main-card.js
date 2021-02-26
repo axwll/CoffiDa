@@ -9,6 +9,9 @@ import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 import ReviewIcon from './review-icon';
 
+/**
+ * This component renders a card that is used in multiple places through the app.
+ */
 class MainCard extends Component {
   async componentDidMount() {
     this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));

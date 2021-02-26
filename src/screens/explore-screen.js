@@ -17,6 +17,9 @@ import { getItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
 import toast from '../utils/toast';
 
+/**
+ * Request the users permission to use location
+ */
 async function requestPermssion() {
   try {
     const granted = await PermissionsAndroid.request(
@@ -31,7 +34,6 @@ async function requestPermssion() {
       },
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-    //   console.log('You can use my location');
       return true;
     }
     console.log("You can't use my location");
@@ -47,6 +49,9 @@ const CARD_WIDTH = width - 40;
 let LATITUDE_DELTA = 0.0922;
 let LONGITUDE_DELTA = 0.5;
 
+/**
+ * Explore screen renders a map with various searching options
+ */
 class Explore extends Component {
   constructor(props) {
     super(props);
@@ -108,8 +113,9 @@ class Explore extends Component {
     return new Promise((resolve, reject) => {
       Geolocation.getCurrentPosition(
         (position) => {
-        //   resolve(position.coords);
-          resolve({ latitude: 53.38587, longitude: -2.1455589 });
+          // Location I used for testing (emulator settings didn't work for me)
+          // resolve({ latitude: 53.38587, longitude: -2.1455589 });
+          resolve(position.coords);
         },
         (error) => reject(error.message),
         {
@@ -150,6 +156,8 @@ class Explore extends Component {
       showSingleMarker: false,
       showMyMarker: false,
     });
+
+    // Change these values so all markers are visable
     LATITUDE_DELTA = 0.0922;
     LONGITUDE_DELTA = 0.5;
 
@@ -197,6 +205,7 @@ class Explore extends Component {
       showMyMarker: true,
     });
 
+    // Zooms into the users location
     LONGITUDE_DELTA = 0.05;
     LATITUDE_DELTA = 0.05;
 
@@ -211,6 +220,9 @@ class Explore extends Component {
     this.getNearbyLocations(`?q=${searchText}`);
   }
 
+  /**
+   * Uses the bool value and decides whether to render sections of the map
+   */
   shouldShow = (stateBoolean) => {
     if (stateBoolean && this.state.locationsList.length > 0) {
       return true;
@@ -218,10 +230,6 @@ class Explore extends Component {
 
     return false;
   };
-
-  openSelectedShop = (locationId) => {
-    this.props.navigation.navigate('SelectedShop', { locationId });
-  }
 
   render() {
     const themeStyles = ThemeProvider.getTheme();
@@ -354,7 +362,6 @@ class Explore extends Component {
                 <View
                   style={[styles.card, themeStyles.background_light]}
                   key={index}>
-                  {/* <Text>{location.photo_path}</Text> */}
                   <Image
                     source={{ uri: location.photo_path }}
                     style={styles.card_image}
@@ -377,7 +384,11 @@ class Explore extends Component {
                         styles.btn,
                         themeStyles.primary_button_color_outline,
                       ]}
-                      onPress={() => this.openSelectedShop(location.location_id)}>
+                      onPress={() => {
+                        this.props.navigation.navigate('SelectedShop', {
+                          locationId: location.location_id,
+                        });
+                      }}>
                       <Text
                         style={[
                           styles.btn_text,
@@ -490,9 +501,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  load_text: {
-    fontSize: 20,
   },
 });
 

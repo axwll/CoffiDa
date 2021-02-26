@@ -8,6 +8,9 @@ import ApiRequests from '../../utils/api-requests';
 import { getItem } from '../../utils/async-storage';
 import ThemeProvider from '../../utils/theme-provider';
 
+/**
+ * The Favorites Tab within the Profile screen
+ */
 class Favorites extends Component {
   constructor(props) {
     super(props);
@@ -97,6 +100,7 @@ class Favorites extends Component {
     );
   }
 }
+
 const styles = StyleSheet.create({
   loading_view: {
     flex: 1,

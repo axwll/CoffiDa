@@ -5,6 +5,8 @@
     "login": "S'identifier",
     "new_here": "Nouveau sur CoffiDa? S'inscrire.",
     "signup": "Signer",
+    "create_account_failed": "Échec de la création du compte",
+    "login_failed": "Échec de la connexion",
     "yes": "Oui",
     "no": "Non",
     "search_box_placeholder": "Chercher",

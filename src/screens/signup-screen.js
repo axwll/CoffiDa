@@ -8,8 +8,12 @@ import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { setItem } from '../utils/async-storage';
 import ThemeProvider from '../utils/theme-provider';
+import toast from '../utils/toast';
 import Validator from '../utils/validator';
 
+/**
+ * SignUp Screen
+ */
 class Signup extends Component {
   constructor(props) {
     super(props);
@@ -99,6 +103,15 @@ class Signup extends Component {
     );
   };
 
+  /**
+   * Dynamically sets state with the given options:
+   *
+   * @param   {ValidationResponse}  response    The response from the validator
+   * @param   {string}              key         The key for state e.g. 'email'
+   * @param   {string}              value       The value of the state key e.g. 'test@test.com'
+   * @param   {string}              booleanKey  The boolean state key e.g. 'validEmail'
+   * @param   {string}              errorKey    The state key for the error message
+   */
   stateSetter = (response, key, value, booleanKey, errorKey) => {
     if (!response.status) {
       this.setState({
@@ -124,6 +137,7 @@ class Signup extends Component {
     const { confirmPassword } = this.state;
 
     if (!email || !firstName || !lastName || !password || !confirmPassword) {
+      // If any of the inputs have been left blank, run validation to show error
       this.handleEmailInput(email);
       this.handleFirstNameInput(firstName);
       this.handleLastNameInput(lastName);
@@ -141,7 +155,13 @@ class Signup extends Component {
       return;
     }
 
-    await this.signUp();
+    const response = await this.signUp();
+
+    if (response) {
+      toast(translate('create_account_failed'));
+    }
+
+    // If signup was successful, login
     await this.logIn();
   };
 

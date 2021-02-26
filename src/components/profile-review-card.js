@@ -6,6 +6,10 @@ import { translate } from '../locales';
 import ThemeProvider from '../utils/theme-provider';
 import ReviewIcon from './review-icon';
 
+/**
+ * This Component renders part of a card that is similar
+ * in a couple of places on the Profile screen
+ */
 class ProfileReviewCard extends Component {
   render() {
     const themeStyles = ThemeProvider.getTheme();
