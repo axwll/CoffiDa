@@ -7,10 +7,13 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { setItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
+import toast from '../utils/toast';
 import Validator from '../utils/validator';
 
-let apiRequests = null;
-
+/**
+ * SignUp Screen
+ */
 class Signup extends Component {
   constructor(props) {
     super(props);
@@ -31,10 +34,10 @@ class Signup extends Component {
   }
 
   componentDidMount() {
-    apiRequests = new ApiRequests(this.props, null);
+    this.apiRequests = new ApiRequests(this.props, null);
   }
 
-  handleEmailInput = async (email) => {
+  handleEmailInput = async(email) => {
     const response = Validator.validateEmail(email);
 
     await this.stateSetter(
@@ -46,7 +49,7 @@ class Signup extends Component {
     );
   };
 
-  handleFirstNameInput = async (firstName) => {
+  handleFirstNameInput = async(firstName) => {
     const response = Validator.validateName('First Name', firstName);
 
     await this.stateSetter(
@@ -58,7 +61,7 @@ class Signup extends Component {
     );
   };
 
-  handleLastNameInput = async (lastName) => {
+  handleLastNameInput = async(lastName) => {
     const response = Validator.validateName('Last Name', lastName);
 
     await this.stateSetter(
@@ -70,7 +73,7 @@ class Signup extends Component {
     );
   };
 
-  handlePasswordInput = async (password) => {
+  handlePasswordInput = async(password) => {
     const response = Validator.validatePassword(password);
 
     await this.stateSetter(
@@ -82,8 +85,8 @@ class Signup extends Component {
     );
   };
 
-  handlePasswordConfirmlInput = async (confirmPassword) => {
-    const password = this.state.password;
+  handlePasswordConfirmlInput = async(confirmPassword) => {
+    const { password } = this.state;
 
     if (!password) {
       // need to have a password before i can check they match
@@ -100,6 +103,15 @@ class Signup extends Component {
     );
   };
 
+  /**
+   * Dynamically sets state with the given options:
+   *
+   * @param   {ValidationResponse}  response    The response from the validator
+   * @param   {string}              key         The key for state e.g. 'email'
+   * @param   {string}              value       The value of the state key e.g. 'test@test.com'
+   * @param   {string}              booleanKey  The boolean state key e.g. 'validEmail'
+   * @param   {string}              errorKey    The state key for the error message
+   */
   stateSetter = (response, key, value, booleanKey, errorKey) => {
     if (!response.status) {
       this.setState({
@@ -115,16 +127,17 @@ class Signup extends Component {
     }
   };
 
-  signUpEvent = async () => {
-    this.setState({submitted: true});
+  signUpEvent = async() => {
+    this.setState({ submitted: true });
 
-    const email = this.state.email;
-    const firstName = this.state.firstName;
-    const lastName = this.state.lastName;
-    const password = this.state.password;
-    const confirmPassword = this.state.confirmPassword;
+    const { email } = this.state;
+    const { firstName } = this.state;
+    const { lastName } = this.state;
+    const { password } = this.state;
+    const { confirmPassword } = this.state;
 
     if (!email || !firstName || !lastName || !password || !confirmPassword) {
+      // If any of the inputs have been left blank, run validation to show error
       this.handleEmailInput(email);
       this.handleFirstNameInput(firstName);
       this.handleLastNameInput(lastName);
@@ -133,20 +146,26 @@ class Signup extends Component {
     }
 
     if (
-      !this.state.validEmail ||
-      !this.state.validFirstName ||
-      !this.state.validLastName ||
-      !this.state.validPassword ||
-      !this.state.validConfirmPassword
+      !this.state.validEmail
+      || !this.state.validFirstName
+      || !this.state.validLastName
+      || !this.state.validPassword
+      || !this.state.validConfirmPassword
     ) {
       return;
     }
 
-    await this.signUp();
+    const response = await this.signUp();
+
+    if (response) {
+      toast(translate('create_account_failed'));
+    }
+
+    // If signup was successful, login
     await this.logIn();
   };
 
-  signUp = async () => {
+  signUp = async() => {
     const postBody = JSON.stringify({
       first_name: this.state.firstName,
       last_name: this.state.lastName,
@@ -154,16 +173,16 @@ class Signup extends Component {
       password: this.state.password,
     });
 
-    await apiRequests.post('/user', postBody);
+    await this.apiRequests.post('/user', postBody);
   };
 
-  logIn = async () => {
+  logIn = async() => {
     const postBody = JSON.stringify({
       email: this.state.email,
       password: this.state.password,
     });
 
-    const response = await apiRequests.post('/user/login', postBody, true);
+    const response = await this.apiRequests.post('/user/login', postBody, true);
 
     if (response) {
       setItem('AUTH_TOKEN', response.token);
@@ -173,39 +192,44 @@ class Signup extends Component {
   };
 
   render() {
-    const navigation = this.props.navigation;
+    const { navigation } = this.props;
+    const themeStyles = ThemeProvider.getTheme();
 
     return (
-      <Container style={styles.container}>
-        <Header style={styles.header}>
+      <Container
+        style={[styles.container, themeStyles.alt_background_color]}>
+        <Header style={[styles.header, themeStyles.alt_background_color]}>
           <Left style={styles.header_left}>
             <Button transparent>
               <FontAwesomeIcon
                 icon={faChevronLeft}
                 size={20}
-                color={'#F06543'}
+                color={themeStyles.color_primary.color}
                 onPress={() => navigation.goBack()}
               />
             </Button>
           </Left>
           <Body style={styles.header_body}>
-            <Title style={styles.title}>Sign Up</Title>
+            <Title style={themeStyles.color_dark}>
+              {translate('signup')}
+            </Title>
           </Body>
         </Header>
 
         <ScrollView
-          contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}>
+          contentContainerStyle={styles.container_style}>
           <Form>
             <Item style={styles.item}>
               <Input
                 style={styles.input}
-                placeholder="Email"
+                placeholder={translate('email_placeholder')}
                 onChangeText={this.handleEmailInput}
               />
             </Item>
             {!this.state.validEmail && this.state.submitted && (
               <View>
-                <Text style={styles.error_text}>
+                <Text
+                  style={[styles.error_text, themeStyles.color_primary]}>
                   {this.state.emailErrorText}
                 </Text>
               </View>
@@ -214,13 +238,14 @@ class Signup extends Component {
             <Item style={styles.item}>
               <Input
                 style={styles.input}
-                placeholder="First Name"
+                placeholder={translate('first_name_placeholder')}
                 onChangeText={this.handleFirstNameInput}
               />
             </Item>
             {!this.state.validFirstName && this.state.submitted && (
               <View>
-                <Text style={styles.error_text}>
+                <Text
+                  style={[styles.error_text, themeStyles.color_primary]}>
                   {this.state.firstNameErrorText}
                 </Text>
               </View>
@@ -229,13 +254,14 @@ class Signup extends Component {
             <Item style={styles.item}>
               <Input
                 style={styles.input}
-                placeholder="Last Name"
+                placeholder={translate('last_name_placeholder')}
                 onChangeText={this.handleLastNameInput}
               />
             </Item>
             {!this.state.validLastName && this.state.submitted && (
               <View>
-                <Text style={styles.error_text}>
+                <Text
+                  style={[styles.error_text, themeStyles.color_primary]}>
                   {this.state.lastNameErrorText}
                 </Text>
               </View>
@@ -244,14 +270,15 @@ class Signup extends Component {
             <Item style={styles.item}>
               <Input
                 style={styles.input}
-                placeholder="Password"
+                placeholder={translate('password_placeholder')}
                 onChangeText={this.handlePasswordInput}
-                secureTextEntry={true}
+                secureTextEntry
               />
             </Item>
             {!this.state.validPassword && this.state.submitted && (
               <View>
-                <Text style={styles.error_text}>
+                <Text
+                  style={[styles.error_text, themeStyles.color_primary]}>
                   {this.state.passwordErrorText}
                 </Text>
               </View>
@@ -260,23 +287,26 @@ class Signup extends Component {
             <Item style={styles.item}>
               <Input
                 style={styles.input}
-                placeholder="Confirm Password"
+                placeholder={translate('confirm_password_placeholder')}
                 onChangeText={this.handlePasswordConfirmlInput}
-                secureTextEntry={true}
+                secureTextEntry
               />
             </Item>
             {!this.state.validConfirmPassword && this.state.submitted && (
               <View>
-                <Text style={styles.error_text}>
+                <Text
+                  style={[styles.error_text, themeStyles.color_primary]}>
                   {this.state.confirmPasswordErrorText}
                 </Text>
               </View>
             )}
 
             <TouchableOpacity
-              style={[styles.button, styles.btn_primary]}
+              style={[styles.button, themeStyles.primary_button_color]}
               onPress={() => this.signUpEvent()}>
-              <Text style={styles.btn_text}>{translate('signup')}</Text>
+              <Text style={[styles.btn_text, themeStyles.color_light]}>
+                {translate('signup')}
+              </Text>
             </TouchableOpacity>
           </Form>
         </ScrollView>
@@ -286,13 +316,9 @@ class Signup extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#E0DFD5',
-  },
   header: {
     height: 50,
     borderBottomWidth: 0.5,
-    backgroundColor: '#E0DFD5',
   },
   header_left: {
     position: 'absolute',
@@ -302,8 +328,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
-  title: {
-    color: '#313638',
+  container_style: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   item: {
     borderBottomWidth: 0,
@@ -321,7 +348,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   error_text: {
-    color: 'tomato',
     textAlign: 'center',
     fontSize: 16,
   },
@@ -332,13 +358,8 @@ const styles = StyleSheet.create({
     margin: 10,
     marginRight: 5,
   },
-  btn_primary: {
-    borderColor: '#F06543',
-    backgroundColor: '#F06543',
-  },
   btn_text: {
     padding: 10,
-    color: '#FFFFFF',
     alignItems: 'center',
   },
 });

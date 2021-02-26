@@ -1,19 +1,27 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 
 import ILLEGAL_WORDS from '../assets/data/profanity-filter.json';
+import { translate } from '../locales';
 import ValidatorResponse from '../models/validation-response';
+import toast from './toast';
 
+/**
+ * Various validator functions
+ */
 class FormValidator extends Component {
   validateEmail = (email) => {
-    const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    const regex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
     if (email.length === 0) {
-      return new ValidatorResponse(false, 'Email is required');
-    } else if (!regex.test(email)) {
-      return new ValidatorResponse(false, 'Email is an invalid format');
-    } else {
-      return new ValidatorResponse(true);
+      return new ValidatorResponse(false, translate('email_required_error'));
     }
+
+    if (!regex.test(email)) {
+      // checks if the given email matches the regex pattern
+      return new ValidatorResponse(false, translate('email_invalid_error'));
+    }
+
+    return new ValidatorResponse(true);
   };
 
   validatePassword = (password) => {
@@ -21,65 +29,88 @@ class FormValidator extends Component {
     const containNumbers = /\d/.test(password);
 
     if (password.length === 0) {
-      return new ValidatorResponse(false, 'Password is required');
-    } else if (password.length < 7) {
-      return new ValidatorResponse(
-        false,
-        'Password must be seven or more characters',
-      );
-    } else if (!containsLetters || !containNumbers) {
-      return new ValidatorResponse(
-        false,
-        'Password must contain both letters and numbers',
-      );
-    } else {
-      return new ValidatorResponse(true);
+      return new ValidatorResponse(false, translate('password_required_error'));
     }
+
+    if (password.length < 7) {
+      return new ValidatorResponse(
+        false,
+        translate('password_too_short_error'),
+      );
+    }
+
+    if (!containsLetters || !containNumbers) {
+      // checks if the given password matches the regex patterns
+      return new ValidatorResponse(
+        false,
+        translate('password_non_alphanumeric_error'),
+      );
+    }
+
+    return new ValidatorResponse(true);
   };
 
   validateName = (key, value) => {
     const lettersCheck = /[a-zA-Z]/g.test(value);
 
+    let keyTranslation = '';
+    if (key === 'First Name') {
+      keyTranslation = translate('first_name_for_sentance');
+    } else {
+      keyTranslation = translate('last_name_for_sentance');
+    }
+
     if (value.length === 0) {
-      return new ValidatorResponse(false, `${key} is required`);
-    } else if (value.length > 50) {
       return new ValidatorResponse(
         false,
-        `${key} must be no longer than fifty characters`,
+        keyTranslation + translate('name_required_error'),
       );
-    } else if (!lettersCheck) {
-      return new ValidatorResponse(false, `${key} must only contain letters`);
-    } else {
-      return new ValidatorResponse(true);
     }
+
+    if (value.length > 50) {
+      return new ValidatorResponse(
+        false,
+        keyTranslation + translate('name_too_long_error'),
+      );
+    }
+
+    if (!lettersCheck) {
+      return new ValidatorResponse(
+        false,
+        keyTranslation + translate('name_numeric_error'),
+      );
+    }
+
+    return new ValidatorResponse(true);
   };
 
   validatePasswordMatch = (password, conformation) => {
     if (password !== conformation) {
-      return new ValidatorResponse(false, 'Passwords do no match');
-    } else {
-      return new ValidatorResponse(true);
+      return new ValidatorResponse(false, translate('password_confirm_error'));
     }
+
+    return new ValidatorResponse(true);
   };
 
   profanityFilter = (sampleText) => {
+    let formatted = sampleText;
     ILLEGAL_WORDS.forEach((word) => {
       // Makes a capitalised string of each illegal word
       const capitalised = word.charAt(0).toUpperCase() + word.slice(1);
 
+      // Builds an array of all illegal words
       const toCheck = [word, capitalised];
 
       toCheck.forEach((check) => {
         if (sampleText.includes(check)) {
-          sampleText = sampleText.replace(check, 'non related coffee item');
-          toast(
-            'Please try to keep your reviews clean. I have had to remove all profanity from your review.',
-          );
+          // Replace profanity if exists in sample text
+          formatted = sampleText.replace(check, translate('profanity_replace'));
+          toast(translate('profanity_error_toast'));
         }
       });
     });
 
-    return sampleText;
+    return formatted;
   };
 }
 

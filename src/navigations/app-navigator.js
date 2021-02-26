@@ -1,9 +1,11 @@
 import { faCompass, faMugHot, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { Component } from 'react';
+import React from 'react';
+import { Text } from 'react-native';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
+import { translate } from '../locales';
 import AddReviewScreen from '../screens/add-review-screen';
 import EditAccountScreen from '../screens/edit-account-screen';
 import ExploreScreen from '../screens/explore-screen';
@@ -14,9 +16,12 @@ import SelectedShopScreen from '../screens/selected-shop-screen';
 import SettingsScreen from '../screens/settings-screen';
 import TakePhotoScreen from '../screens/take-photo-screen';
 import UpdateReviewScreen from '../screens/update-review-screen';
+import ThemeProvider from '../utils/theme-provider';
+
+const themeStyles = ThemeProvider.getTheme();
 
 /**
- * The Profile stack has a nested Settings stack navigator
+ * The Settings stack navigator that is nested in the Profile stack
  */
 const SettingsStack = createStackNavigator(
   {
@@ -30,7 +35,7 @@ const SettingsStack = createStackNavigator(
 );
 
 /**
- * The Profile screen tab is set up as a stack navigator
+ * The Profile stack navigator that is used for the Profile tab
  */
 const ProfileStack = createStackNavigator(
   {
@@ -46,7 +51,7 @@ const ProfileStack = createStackNavigator(
 );
 
 /**
- * The home screen tab is set up as a stack navigator
+ * The Home stack navigator that is used for the Home tab
  */
 const HomeStack = createStackNavigator(
   {
@@ -65,12 +70,12 @@ const HomeStack = createStackNavigator(
 /**
  * Hides the TabBar from the 'TakePhoto' Screen
  */
-HomeStack.navigationOptions = ({navigation}) => {
+HomeStack.navigationOptions = ({ navigation }) => {
   let tabBarVisible = true;
 
-  let routeName = navigation.state.routes[navigation.state.index].routeName;
+  const { routeName } = navigation.state.routes[navigation.state.index];
 
-  if (routeName == 'TakePhoto') {
+  if (routeName === 'TakePhoto') {
     tabBarVisible = false;
   }
 
@@ -81,7 +86,9 @@ HomeStack.navigationOptions = ({navigation}) => {
 
 /**
  * Creates the bottom Tab navigator for the App
- * and decides which icon should be used
+ * Nav options:
+ * 'icon' => The icon is decided based on tab name
+ * 'label' => The label is a option to support transations
  */
 export default createBottomTabNavigator(
   {
@@ -90,9 +97,9 @@ export default createBottomTabNavigator(
     Profile: ProfileStack,
   },
   {
-    defaultNavigationOptions: ({navigation}) => ({
-      tabBarIcon: ({focused, horizontal, tintColor}) => {
-        const {routeName} = navigation.state;
+    defaultNavigationOptions: ({ navigation }) => ({
+      tabBarIcon: ({ tintColor }) => {
+        const { routeName } = navigation.state;
         let iconName;
         if (routeName === 'Home') {
           iconName = faMugHot;
@@ -104,10 +111,27 @@ export default createBottomTabNavigator(
 
         return <FontAwesomeIcon icon={iconName} color={tintColor} size={20} />;
       },
+      tabBarLabel: () => {
+        const { routeName } = navigation.state;
+        let tabName;
+        if (routeName === 'Explore') {
+          tabName = translate('explore');
+        } else if (routeName === 'Profile') {
+          tabName = translate('profile');
+        } else {
+          tabName = translate('home');
+        }
+
+        return (
+          <Text style={[{ textAlign: 'center' }, themeStyles.color_dark]}>
+            {tabName}
+          </Text>
+        );
+      },
     }),
     tabBarOptions: {
-      activeTintColor: 'tomato',
-      inactiveTintColor: 'grey',
+      activeTintColor: themeStyles.color_primary.color,
+      inactiveTintColor: themeStyles.color_medium.color,
     },
   },
 );

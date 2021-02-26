@@ -1,31 +1,34 @@
 import { faFilter, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Container, Header, Icon, Input, Item } from 'native-base';
-import React from 'react';
+import React, { Component } from 'react';
 import { FlatList, Keyboard, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
 import Full from '../assets/ratings/rating-full-primary.png';
-import AbstractComponent from '../components/abstract-component';
 import LoadingSpinner from '../components/loading-spinner';
 import MainCard from '../components/main-card';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
-import { toast } from '../utils/toast';
+import ThemeProvider from '../utils/theme-provider';
 
-let apiRequests = null;
-
-class Home extends AbstractComponent {
+/**
+ * Home Screen of the App
+ */
+class Home extends Component {
   constructor(props) {
     super(props);
+
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.state = {
       loading: true,
       offset: 0,
       limit: 5,
-      queryParams: '',
+      filterQuery: '',
+      searchQuery: '',
       coffeeShops: [],
       modalVisible: false,
       overallFilter: 0,
@@ -42,23 +45,29 @@ class Home extends AbstractComponent {
       return;
     }
 
-    apiRequests = new ApiRequests(this.props, token);
+    this.apiRequests = new ApiRequests(this.props, token);
 
     // lists all shops
     this.find();
   }
 
-  find = async () => {
-    const query = `?limit=${this.state.limit}&offset=${this.state.offset}${this.state.queryParams}`;
+  find = async(extendList = false) => {
+    // Builds a query string to send to the find endpoint
+    const query = `?limit=${this.state.limit}&offset=${this.state.offset}${this.state.filterQuery}${this.state.searchQuery}`;
 
-    const response = await apiRequests.get(`/find${query}`);
+    const response = await this.apiRequests.get(`/find${query}`);
 
     if (response) {
-      const existing = this.state.coffeeShops;
-      this.setState({coffeeShops: existing.concat(response)});
+      if (extendList) {
+        // Add to the current list
+        this.setState({ coffeeShops: this.state.coffeeShops.concat(response) });
+      } else {
+        // Reset the list
+        this.setState({ coffeeShops: response });
+      }
     }
 
-    this.setState({loading: false});
+    this.setState({ loading: false });
   };
 
   clearFilters = () => {
@@ -67,18 +76,21 @@ class Home extends AbstractComponent {
       priceFilter: 0,
       qualFilter: 0,
       cleanFilter: 0,
-      queryParams: '',
+      filterQuery: '',
     });
   };
 
   filterResults = () => {
+    // Reset pagination values when filtering
+    this.setState({ limit: 5, offset: 0 });
+
     const overall = this.state.overallFilter;
     const price = this.state.priceFilter;
     const qual = this.state.qualFilter;
     const clean = this.state.cleanFilter;
 
     if (!overall && !price && !qual && !clean) {
-      toast('Please select some filter options');
+      this.toast(translate('select_filter_toast'));
       return;
     }
 
@@ -94,7 +106,7 @@ class Home extends AbstractComponent {
         modalVisible: false,
         coffeeShops: [],
         loading: true,
-        queryParams: query,
+        filterQuery: query,
       },
       () => {
         this.find();
@@ -102,26 +114,38 @@ class Home extends AbstractComponent {
     );
   };
 
-  formatQuery = (string, value, query = '') => {
+  /**
+   * Used by the filter and chains query strings together
+   *
+   * @param   {string}  filterType  The filter type query parameter
+   * @param   {string}  value       The value of the query parameter
+   * @param   {string}  query       The current query string. Defaults to empty if none supplied
+   *
+   * @return  {string}              The formatted query string
+   */
+  formatQuery = (filterType, value, query = '') => {
+    let _query = query;
     if (value) {
-      query += `&${string}=${value}`;
+      _query += `&${filterType}=${value}`;
     }
 
-    return query;
+    return _query;
   };
 
-  search = async (text) => {
+  search = async(text) => {
     Keyboard.dismiss();
 
     let query = '';
     if (text) {
-      query = '&q=' + text;
+      query = `&q=${text}`;
     }
 
+    // Once state has been set, runs the find
     this.setState(
       {
+        offset: 0,
         loading: true,
-        queryParams: query,
+        searchQuery: query,
       },
       () => {
         this.find();
@@ -129,180 +153,191 @@ class Home extends AbstractComponent {
     );
   };
 
-  renderItem = (shop) => {
-    return (
-      <MainCard
-        key={shop.item.location_id}
-        shopData={shop.item}
-        navigation={this.props.navigation}
-      />
-    );
-  };
+  renderItem = (shop) => (
+    <MainCard
+      key={shop.item.location_id}
+      shopData={shop.item}
+      navigation={this.props.navigation}
+    />
+  );
 
-  renderNoData = () => {
-    return (
-      <View style={styles.loading_view}>
-        <Text style={styles.load_text}>{translate('no_results')}</Text>
-      </View>
-    );
-  };
+  renderNoData = () => (
+    <View style={styles.loading_view}>
+      <Text style={[styles.load_text, this.themeStyles.color_dark]}>
+        {translate('no_results')}
+      </Text>
+    </View>
+  );
 
   handleLoadMore = (distanceFromEnd) => {
     if (distanceFromEnd < 0) return;
 
     const off = this.state.offset;
-    this.setState({offset: off + 5}, () => {
-      this.find();
+    const { limit } = this.state;
+    this.setState({ offset: off + limit }, () => {
+      this.find(true);
     });
   };
 
   render() {
     if (this.state.loading) {
       return <LoadingSpinner size={50} />;
-    } else {
-      return (
-        <Container style={styles.container}>
-          <Header searchBar rounded style={styles.header}>
-            <Item rounded style={styles.srch}>
-              <Icon name="ios-search" />
-              <Input
-                placeholder="Search"
-                onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
-              />
-            </Item>
-            <TouchableOpacity
-              style={styles.filter}
-              onPress={() => this.setState({modalVisible: true})}>
-              <FontAwesomeIcon
-                icon={faFilter}
-                style={styles.filter_icon}
-                size={20}
-              />
-            </TouchableOpacity>
-          </Header>
-          {this.state.modalVisible && (
-            <View style={styles.centered_view}>
-              <Modal
-                animationType="slide"
-                transparent={true}
-                visible={this.state.modalVisible}
-                onRequestClose={() => {
-                  Alert.alert('Modal has been closed.');
-                }}>
-                <View style={styles.centered_view}>
-                  <View style={styles.modal}>
-                    <View style={styles.modal_header}>
-                      <View style={styles.modal_header_left}>
-                        <TouchableOpacity onPress={() => this.clearFilters()}>
-                          <Text style={styles.header_left_text}>
-                            Clear Filters
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                      <View style={styles.modal_header_right}>
-                        <TouchableOpacity
-                          onPress={() => this.setState({modalVisible: false})}>
-                          <FontAwesomeIcon
-                            icon={faTimes}
-                            style={styles.close_modal_icon}
-                            size={20}
-                          />
-                        </TouchableOpacity>
-                      </View>
+    }
+    return (
+      <Container style={this.themeStyles.container}>
+        <Header
+          searchBar
+          rounded
+          style={[styles.header, this.themeStyles.background_light]}>
+          <Item rounded style={styles.srch}>
+            <Icon name='ios-search' />
+            <Input
+              placeholder={translate('search_box_placeholder')}
+              onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
+            />
+          </Item>
+          <TouchableOpacity
+            style={styles.filter}
+            onPress={() => this.setState({ modalVisible: true })}>
+            <FontAwesomeIcon
+              icon={faFilter}
+              style={[styles.filter_icon, this.themeStyles.color_primary]}
+              size={20}
+            />
+          </TouchableOpacity>
+        </Header>
+        {this.state.modalVisible && (
+          <View style={styles.centered_view}>
+            {/* Filter results Modal */}
+            <Modal
+              animationType='slide'
+              transparent
+              visible={this.state.modalVisible}>
+              <View style={styles.centered_view}>
+                <View
+                  style={[styles.modal, this.themeStyles.background_light]}>
+                  <View style={styles.modal_header}>
+                    <View style={styles.modal_header_left}>
+                      <TouchableOpacity onPress={() => this.clearFilters()}>
+                        <Text
+                          style={[
+                            styles.header_left_text,
+                            this.themeStyles.color_medium,
+                          ]}>
+                          {translate('clear_filters')}
+                        </Text>
+                      </TouchableOpacity>
                     </View>
-                    <View style={styles.modal_body}>
-                      <Text style={styles.modal_header_text}>
-                        Filter results by rating
-                      </Text>
-                      <Text style={styles.modal_text}>Overall Rating</Text>
-                      <Stars
-                        default={this.state.overallFilter}
-                        update={(rating) =>
-                          this.setState({overallFilter: rating})
-                        }
-                        spacing={5}
-                        starSize={25}
-                        count={5}
-                        fullStar={Full}
-                        emptyStar={Empty}
-                      />
-
-                      <Text style={styles.modal_text}>Price Rating</Text>
-                      <Stars
-                        default={this.state.priceFilter}
-                        update={(rating) =>
-                          this.setState({priceFilter: rating})
-                        }
-                        spacing={5}
-                        starSize={25}
-                        count={5}
-                        fullStar={Full}
-                        emptyStar={Empty}
-                      />
-
-                      <Text style={styles.modal_text}>Quality Rating</Text>
-                      <Stars
-                        default={this.state.qualFilter}
-                        update={(rating) => this.setState({qualFilter: rating})}
-                        spacing={5}
-                        starSize={25}
-                        count={5}
-                        fullStar={Full}
-                        emptyStar={Empty}
-                      />
-
-                      <Text style={styles.modal_text}>Cleanliness Rating</Text>
-                      <Stars
-                        default={this.state.cleanFilter}
-                        update={(rating) =>
-                          this.setState({cleanFilter: rating})
-                        }
-                        spacing={5}
-                        starSize={25}
-                        count={5}
-                        fullStar={Full}
-                        emptyStar={Empty}
-                      />
-
+                    <View style={styles.modal_header_right}>
                       <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => this.filterResults()}>
-                        <Text style={styles.text_style}>Filter Results</Text>
+                        onPress={() => this.setState({ modalVisible: false })}>
+                        <FontAwesomeIcon
+                          icon={faTimes}
+                          style={this.themeStyles.color_medium}
+                          size={20}
+                        />
                       </TouchableOpacity>
                     </View>
                   </View>
-                </View>
-              </Modal>
-            </View>
-          )}
+                  <View style={styles.modal_body}>
+                    <Text style={styles.modal_header_text}>
+                      {translate('filter_by_rating')}
+                    </Text>
+                    <Text style={styles.modal_text}>
+                      {translate('overall_rating')}
+                    </Text>
+                    <Stars
+                      default={this.state.overallFilter}
+                      update={(rating) => this.setState({ overallFilter: rating })
+                      }
+                      spacing={5}
+                      starSize={25}
+                      count={5}
+                      fullStar={Full}
+                      emptyStar={Empty}
+                    />
 
-          <SafeAreaView style={styles.container}>
-            <FlatList
-              data={this.state.coffeeShops}
-              renderItem={(shop) => this.renderItem(shop)}
-              keyExtractor={(shop) => shop.location_id.toString()}
-              onEndReachedThreshold={0.01}
-              onEndReached={({distanceFromEnd}) =>
-                this.handleLoadMore(distanceFromEnd)
-              }
-              ListEmptyComponent={this.renderNoData()}
-            />
-          </SafeAreaView>
-        </Container>
-      );
-    }
+                    <Text style={styles.modal_text}>
+                      {translate('price_rating')}
+                    </Text>
+                    <Stars
+                      default={this.state.priceFilter}
+                      update={(rating) => this.setState({ priceFilter: rating })
+                      }
+                      spacing={5}
+                      starSize={25}
+                      count={5}
+                      fullStar={Full}
+                      emptyStar={Empty}
+                    />
+
+                    <Text style={styles.modal_text}>
+                      {translate('quality_rating')}
+                    </Text>
+                    <Stars
+                      default={this.state.qualFilter}
+                      update={(rating) => this.setState({ qualFilter: rating })}
+                      spacing={5}
+                      starSize={25}
+                      count={5}
+                      fullStar={Full}
+                      emptyStar={Empty}
+                    />
+
+                    <Text style={styles.modal_text}>
+                      {translate('clean_rating')}
+                    </Text>
+                    <Stars
+                      default={this.state.cleanFilter}
+                      update={(rating) => this.setState({ cleanFilter: rating })
+                      }
+                      spacing={5}
+                      starSize={25}
+                      count={5}
+                      fullStar={Full}
+                      emptyStar={Empty}
+                    />
+
+                    <TouchableOpacity
+                      style={[
+                        styles.button,
+                        this.themeStyles.primary_button_color,
+                      ]}
+                      onPress={() => this.filterResults()}>
+                      <Text
+                        style={[
+                          styles.text_style,
+                          this.themeStyles.color_light,
+                        ]}>
+                        {translate('filter_results')}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </Modal>
+          </View>
+        )}
+
+        <SafeAreaView style={this.themeStyles.container}>
+          <FlatList
+            data={this.state.coffeeShops}
+            renderItem={(shop) => this.renderItem(shop)}
+            keyExtractor={(shop) => shop.location_id.toString()}
+            onEndReachedThreshold={0.01}
+            onEndReached={({ distanceFromEnd }) => this.handleLoadMore(distanceFromEnd)
+            }
+            ListEmptyComponent={this.renderNoData()}
+          />
+        </SafeAreaView>
+      </Container>
+    );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#E8E9EB',
-  },
   header: {
     borderBottomWidth: 0.5,
-    backgroundColor: 'white',
     alignItems: 'center',
   },
   srch: {
@@ -311,16 +346,7 @@ const styles = StyleSheet.create({
   filter: {
     flex: 1,
   },
-  subHeading: {
-    height: 50,
-    backgroundColor: 'grey',
-  },
-  right: {
-    flex: 1,
-    flexDirection: 'row',
-  },
   filter_icon: {
-    color: '#F06543',
     margin: 10,
   },
   loading_view: {
@@ -330,9 +356,7 @@ const styles = StyleSheet.create({
   },
   load_text: {
     fontSize: 20,
-    color: '#313638',
   },
-
   centered_view: {
     position: 'absolute',
     flex: 1,
@@ -343,12 +367,10 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   modal: {
-    backgroundColor: 'white',
     borderRadius: 20,
     padding: 5,
     marginLeft: 20,
     marginRight: 20,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -365,15 +387,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   header_left_text: {
-    color: 'grey',
     textDecorationLine: 'underline',
   },
   modal_header_right: {
     flex: 1,
     alignItems: 'flex-end',
-  },
-  close_modal_icon: {
-    color: 'grey',
   },
   modal_body: {
     alignItems: 'center',
@@ -385,10 +403,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
     elevation: 2,
-    backgroundColor: 'tomato',
   },
   text_style: {
-    color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
   },

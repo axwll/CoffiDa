@@ -9,6 +9,14 @@ import PrimaryFull from '../assets/ratings/rating-full-primary.png';
 import Half from '../assets/ratings/rating-half-light.png';
 import PrimaryHalf from '../assets/ratings/rating-half-primary.png';
 
+/**
+ * This uses the 'Stars' library to show ratings.
+ * It renders custom immages found in 'assets/ratings` to display ratings.
+ * The component accepts props that tell it how to customise the icons, such as:
+ * 'rotate'  => direction to rotate the icon
+ * 'spacing' => spacing between each individual icon
+ * 'primary' => whether to render the icons in the primary colour
+ */
 class ReviewIcon extends Component {
   render() {
     return (
@@ -18,8 +26,8 @@ class ReviewIcon extends Component {
             styles.review_rating,
             {
               transform: this.props.rotate
-                ? [{rotate: '270deg'}]
-                : [{rotate: '0deg'}],
+                ? [{ rotate: '270deg' }]
+                : [{ rotate: '0deg' }],
             },
           ]}>
           <Stars
@@ -43,12 +51,6 @@ class ReviewIcon extends Component {
 }
 
 const styles = StyleSheet.create({
-  color: {
-    backgroundColor: 'transparent',
-    textShadowColor: 'black',
-    textShadowOffset: {width: 1, height: 1},
-    textShadowRadius: 2,
-  },
   review_section: {
     justifyContent: 'center',
     flex: 1,

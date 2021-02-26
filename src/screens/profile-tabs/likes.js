@@ -9,12 +9,16 @@ import ProfileReviewCard from '../../components/profile-review-card';
 import { translate } from '../../locales';
 import ApiRequests from '../../utils/api-requests';
 import { getItem } from '../../utils/async-storage';
+import ThemeProvider from '../../utils/theme-provider';
 
-let apiRequests = null;
-
+/**
+ * The Likes Tab within the Profile screen
+ */
 class Likes extends Component {
   constructor(props) {
     super(props);
+
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.state = {
       loading: true,
@@ -23,29 +27,29 @@ class Likes extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
 
-    this.setState({userId: await getItem('USER_ID')});
+    this.setState({ userId: await getItem('USER_ID') });
 
     this.getUserInfo();
   }
 
-  getUserInfo = async () => {
-    const userId = this.state.userId;
+  getUserInfo = async() => {
+    const { userId } = this.state;
 
-    const response = await apiRequests.get(`/user/${userId}`);
+    const response = await this.apiRequests.get(`/user/${userId}`);
 
     if (response) {
-      this.setState({userInfo: response});
+      this.setState({ userInfo: response });
     }
 
-    this.setState({loading: false});
+    this.setState({ loading: false });
   };
 
-  unlikeReview = async (locationId, reviewId) => {
-    this.setState({loading: true});
+  unlikeReview = async(locationId, reviewId) => {
+    this.setState({ loading: true });
 
-    const response = await apiRequests.delete(
+    const response = await this.apiRequests.delete(
       `/location/${locationId}/review/${reviewId}/like`,
     );
 
@@ -53,70 +57,62 @@ class Likes extends Component {
       this.getUserInfo();
     }
 
-    this.setState({loading: false});
+    this.setState({ loading: false });
   };
 
-  renderItem = ({item}) => {
-    return (
-      <Card key={item.review.review_id}>
-        <ProfileReviewCard
-          title={item.location.location_name}
-          subHeading={item.location.location_town}
-          body={item.review.review_body}
-          overall_rate={item.review.overall_rating}
-          price_rate={item.review.price_rating}
-          clean_rate={item.review.clenliness_rating}
-          qual_rate={item.review.quality_rating}
-        />
-        <CardItem style={styles.last_item}>
-          <Left>
-            <Button transparent style={styles.light_text}>
-              <FontAwesomeIcon
-                icon={faHeartSolid}
-                size={15}
-                color={'#F06543'}
-                onPress={() =>
-                  this.unlikeReview(
-                    item.location.location_id,
-                    item.review.review_id,
-                  )
-                }
-              />
-            </Button>
-            <Text style={styles.like_count}>{item.review.likes}</Text>
-          </Left>
-        </CardItem>
-      </Card>
-    );
-  };
+  renderItem = ({ item }) => (
+    <Card key={item.review.review_id}>
+      <ProfileReviewCard
+        title={item.location.location_name}
+        subHeading={item.location.location_town}
+        body={item.review.review_body}
+        overall_rate={item.review.overall_rating}
+        price_rate={item.review.price_rating}
+        clean_rate={item.review.clenliness_rating}
+        qual_rate={item.review.quality_rating}
+      />
+      <CardItem style={styles.last_item}>
+        <Left>
+          <Button transparent style={this.themeStyles.color_dark}>
+            <FontAwesomeIcon
+              icon={faHeartSolid}
+              size={15}
+              color={this.themeStyles.color_primary.color}
+              onPress={() => this.unlikeReview(
+                item.location.location_id,
+                item.review.review_id,
+              )
+              }
+            />
+          </Button>
+          <Text style={styles.like_count}>{item.review.likes}</Text>
+        </Left>
+      </CardItem>
+    </Card>
+  );
 
-  renderNoData = () => {
-    return (
-      <View style={styles.loading_view}>
-        <Text style={styles.load_text}>{translate('no_results')}</Text>
-      </View>
-    );
-  };
+  renderNoData = () => (
+    <View style={styles.loading_view}>
+      <Text style={[styles.load_text, this.themeStyles.color_dark]}>
+        {translate('no_results')}
+      </Text>
+    </View>
+  );
 
   render() {
     if (this.state.loading) {
       return <LoadingSpinner size={50} />;
-    } else {
-      return (
-        <SafeAreaView style={styles.container}>
-          <FlatList
-            data={this.state.userInfo.liked_reviews}
-            renderItem={(item) => this.renderItem(item)}
-            keyExtractor={(item) => item.review.review_id.toString()}
-            // onEndReachedThreshold={0.01}
-            // onEndReached={({distanceFromEnd}) =>
-            //   this.handleLoadMore(distanceFromEnd)
-            // }
-            ListEmptyComponent={this.renderNoData()}
-          />
-        </SafeAreaView>
-      );
     }
+    return (
+      <SafeAreaView style={styles.container}>
+        <FlatList
+          data={this.state.userInfo.liked_reviews}
+          renderItem={(item) => this.renderItem(item)}
+          keyExtractor={(item) => item.review.review_id.toString()}
+          ListEmptyComponent={this.renderNoData()}
+        />
+      </SafeAreaView>
+    );
   }
 }
 
@@ -124,9 +120,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  light_text: {
-    color: '#313638',
-  },
+
   last_item: {
     paddingTop: 0,
     paddingBottom: 0,
@@ -138,7 +132,6 @@ const styles = StyleSheet.create({
   },
   load_text: {
     fontSize: 20,
-    color: '#313638',
   },
 });
 

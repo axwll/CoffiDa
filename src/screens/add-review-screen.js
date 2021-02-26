@@ -2,7 +2,7 @@ import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Body, Button, Container, Content, Form, Header, Left, Textarea, Title } from 'native-base';
 import React, { Component } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Stars from 'react-native-stars';
 
 import Empty from '../assets/ratings/rating-empty-primary.png';
@@ -10,11 +10,13 @@ import Full from '../assets/ratings/rating-full-primary.png';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
-import { toast } from '../utils/toast';
-import { profanityFilter } from '../utils/validator';
+import ThemeProvider from '../utils/theme-provider';
+import toast from '../utils/toast';
+import Validator from '../utils/validator';
 
-let apiRequests = null;
-
+/**
+ * Add Review screen will validate and create reviews for a location
+ */
 class AddReview extends Component {
   constructor(props) {
     super(props);
@@ -29,21 +31,7 @@ class AddReview extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
-
-    if (this.props.navigation.getParam('update')) {
-      const reviewData = this.props.navigation.getParam('reviewData');
-      this.setState({
-        reviewId: reviewData.review_id,
-        overallRating: reviewData.overall_rating,
-        priceRating: reviewData.price_rating,
-        cleanRating: reviewData.clenliness_rating,
-        qualRating: reviewData.quality_rating,
-        reviewBody: reviewData.review_body,
-      });
-    }
-
-    this.calculateOverall();
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
   }
 
   calculateOverall = () => {
@@ -52,159 +40,122 @@ class AddReview extends Component {
     const qual = this.state.qualRating;
     const avRating = Math.round((price + clean + qual) / 3);
 
-    this.setState({overallRating: avRating});
+    this.setState({ overallRating: avRating });
   };
 
   updateState = (identifier, rating) => {
-    this.setState({[identifier]: rating}, function () {
+    this.setState({ [identifier]: rating }, function calculate() {
       this.calculateOverall();
     });
   };
 
   validateReview = (text) => {
     if (text.length === 0) {
-      toast("Please write a review, thats why you're here");
+      toast(translate('empty_review_error_toast'));
       return false;
     }
 
     if (text.length > 500) {
-      toast('Too many characters in your review. Please write less. :)');
+      toast(translate('max_chars_error_toast'));
       return false;
     }
 
-    return profanityFilter(text);
+    return true;
   };
 
-  createReview = async (locationId) => {
-    if (!this.validateReview(this.state.reviewBody, locationId)) {
+  createReview = async(locationId) => {
+    let { reviewBody } = this.state;
+    if (!this.validateReview(reviewBody, locationId)) {
       return;
     }
+
+    reviewBody = Validator.profanityFilter(reviewBody);
 
     const postBody = JSON.stringify({
       overall_rating: this.state.overallRating,
       price_rating: this.state.priceRating,
       quality_rating: this.state.qualRating,
       clenliness_rating: this.state.cleanRating,
-      review_body: this.state.reviewBody,
+      review_body: reviewBody,
     });
 
-    const response = await apiRequests.post(
+    const response = await this.apiRequests.post(
       `/location/${locationId}/review`,
       postBody,
     );
 
     if (response) {
-      toast('Review created!');
-      // TODO: should this line go inside or out of the IF
+      toast(translate('review_created_toast'));
+      // Review Id is not returned in the response. Id is found before asking to add photo
       this.findReview(locationId);
     }
   };
 
-  updateReview = async (locationId) => {
-    if (!this.validateReview(this.state.reviewBody)) {
-      return;
-    }
-
-    const response = await apiRequests.patch(
-      `/location/${locationId}/review/${reviewId}`,
-      {
-        overall_rating: this.state.overallRating,
-        price_rating: this.state.priceRating,
-        quality_rating: this.state.qualRating,
-        clenliness_rating: this.state.cleanRating,
-        review_body: this.state.reviewBody,
-      },
-    );
+  findReview = async(locationId) => {
+    // Get all of the user reviews
+    const response = await this.apiRequests.get('/find?search_in=reviewed');
 
     if (response) {
-      toast('Review updated!');
-    }
-  };
+      const location = response.find((loc) => loc.location_id === locationId);
 
-  findReview = async (locationId) => {
-    const response = await apiRequests.get('/find?search_in=reviewed');
-
-    if (response) {
-      const location = responseJson.find(
-        (loc) => loc.location_id === locationId,
-      );
-
-      if (location.length === 0) {
-        // location has no reviews? it should do. Something must have gone wrong.
-        return;
-      }
+      // User has not reviewed anything. This shouldn't happen but catches anyway
+      if (location.length === 0) return;
 
       this.extractId(location);
+
       if (this.state.reviewId) {
         this.props.navigation.navigate('AddPhoto', {
-          locationId: locationId,
+          locationId,
           reviewId: this.state.reviewId,
+          displayText: translate('add_review_photo_text'),
+          updateReview: false,
         });
       }
     }
   };
 
   extractId = (location) => {
-    let reviewIds = [];
-    location.location_reviews.forEach((rev) => {
-      // find the review matching the review body
-      if (rev.review_body === this.state.reviewBody) {
-        reviewIds.push(rev.review_id);
-      }
-    });
+    // Location has no reviews. This shouldn't happen but catches anyway
+    if (location.location_reviews.length === 0) return;
 
-    if (reviewIds.length === 0) {
-      // cant find review in database, something went horribly wrong but didnt error
-      return;
-    }
+    const reviewIds = [];
+    location.location_reviews.forEach((rev) => reviewIds.push(rev.review_id));
 
-    // The array will be greater than one if reviews have the same review body
     // Find the largest ID (latest entry) and set state
-    this.setState({reviewId: Math.max(...reviewIds)});
-  };
-
-  checkImage = (updateReview, imageUri) => {
-    if (!updateReview) {
-      return false;
-    }
+    this.setState({ reviewId: Math.max(...reviewIds) });
   };
 
   render() {
+    const themeStyles = ThemeProvider.getTheme();
     const shopData = this.props.navigation.getParam('shopData');
-    const updateReview = this.props.navigation.getParam('update');
 
     return (
-      <Container style={styles.container}>
-        <Header style={styles.header}>
+      <Container style={themeStyles.container}>
+        <Header style={[styles.header, themeStyles.background_color]}>
           <Left style={styles.header_left}>
             <Button transparent>
               <FontAwesomeIcon
                 icon={faChevronLeft}
                 size={20}
-                color={'#F06543'}
+                color={themeStyles.color_primary.color}
                 onPress={() => this.props.navigation.goBack()}
               />
             </Button>
           </Left>
 
           <Body style={styles.header_body}>
-            <Title style={styles.title}>{translate('add_review')}</Title>
+            <Title style={[styles.title, themeStyles.color_dark]}>
+              {translate('new_review')}
+            </Title>
           </Body>
         </Header>
 
         <Content padder>
           <View>
-            <Text style={styles.title}>{shopData.location_name}</Text>
+            <Text style={[styles.title, themeStyles.color_dark]}>
+              {shopData.location_name}
+            </Text>
           </View>
-
-          {this.checkImage() && (
-            <View>
-              <Image
-                source={{uri: shopData.photo_path}}
-                style={{height: 200, width: 'auto', flex: 1}}
-              />
-            </View>
-          )}
 
           <View style={styles.review_container}>
             {/* Price Rating Buttons */}
@@ -270,7 +221,7 @@ class AddReview extends Component {
 
           <View>
             <Text>
-              {translate('overall_rating')} {this.state.overallRating}
+              {translate('overall_rating')}: {this.state.overallRating}
             </Text>
           </View>
 
@@ -280,22 +231,17 @@ class AddReview extends Component {
               bordered
               placeholder={translate('leave_review')}
               value={this.state.reviewBody}
-              onChangeText={(text) => this.setState({reviewBody: text})}
+              onChangeText={(text) => this.setState({ reviewBody: text })}
             />
           </Form>
-          {updateReview ? (
-            <TouchableOpacity
-              style={styles.btn_primary}
-              onPress={() => this.updateReview(shopData.location_id)}>
-              <Text style={styles.btn_text}>{translate('update_review')}</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={styles.btn_primary}
-              onPress={() => this.createReview(shopData.location_id)}>
-              <Text style={styles.btn_text}>{translate('post_review')}</Text>
-            </TouchableOpacity>
-          )}
+
+          <TouchableOpacity
+            style={[styles.btn_primary, themeStyles.primary_button_color]}
+            onPress={() => this.createReview(shopData.location_id)}>
+            <Text style={[styles.btn_text, themeStyles.color_light]}>
+              {translate('post_review')}
+            </Text>
+          </TouchableOpacity>
         </Content>
       </Container>
     );
@@ -303,15 +249,9 @@ class AddReview extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#E8E9EB',
-  },
   header: {
     height: 50,
     borderBottomWidth: 0.5,
-    backgroundColor: '#E8E9EB',
   },
   header_left: {
     position: 'absolute',
@@ -322,7 +262,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    color: '#313638',
     fontSize: 20,
   },
   review_container: {
@@ -341,7 +280,7 @@ const styles = StyleSheet.create({
   review_rating: {
     justifyContent: 'center',
     flex: 1,
-    transform: [{rotate: '270deg'}],
+    transform: [{ rotate: '270deg' }],
   },
   review_description: {
     alignItems: 'center',
@@ -349,13 +288,11 @@ const styles = StyleSheet.create({
   btn_primary: {
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#F06543',
-    backgroundColor: '#F06543',
     borderRadius: 5,
+    marginTop: 10,
   },
   btn_text: {
     padding: 10,
-    color: '#FFFFFF',
     alignItems: 'center',
   },
 });

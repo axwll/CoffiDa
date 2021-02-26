@@ -1,6 +1,6 @@
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Body, Button, Container, Header, Left, Right, Segment, Title } from 'native-base';
+import { Body, Button, Container, Header, Right, Segment, Title } from 'native-base';
 import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -8,160 +8,161 @@ import LoadingSpinner from '../components/loading-spinner';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
 import FavoritesTab from './profile-tabs/favorites';
 import LikesTab from './profile-tabs/likes';
 import ReviewsTab from './profile-tabs/reviews';
 
-let apiRequests = null;
-
+/**
+ * Profile screen that houses the Sgments (Tabs)
+ */
 class Profile extends Component {
   constructor(props) {
     super(props);
+
+    // set in constructor because it is used in functions other that render
+    this.themeStyles = ThemeProvider.getTheme();
 
     this.state = {
       loading: true,
       activePage: 1,
       userInfo: [],
-      tab: 'review',
     };
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
 
-    this.setState({userId: await getItem('USER_ID')});
+    this.setState({ userId: await getItem('USER_ID') });
 
     this.getUserInfo();
   }
 
-  getUserInfo = async () => {
-    const userId = this.state.userId;
+  getUserInfo = async() => {
+    const { userId } = this.state;
 
-    const response = await apiRequests.get(`/user/${userId}`);
+    const response = await this.apiRequests.get(`/user/${userId}`);
 
     if (response) {
-      this.setState({userInfo: response});
+      this.setState({ userInfo: response });
     }
 
-    this.setState({loading: false});
+    this.setState({ loading: false });
   };
 
-  openSettings = () => {
-    this.props.navigation.navigate('Settings', {userInfo: this.state.userInfo});
-  };
-
-  selectComponent = (activePage) => () => this.setState({activePage});
-
+  /**
+   * Decides which tab to render based on the active page state var
+   */
   _renderComponent = () => {
     if (this.state.activePage === 1) {
-      return <ReviewsTab reviews={this.state.userInfo.reviews} />;
-    } else if (this.state.activePage === 2) {
       return (
-        <FavoritesTab favorites={this.state.userInfo.favourite_locations} />
+        <ReviewsTab
+          navigation={this.props.navigation}
+          reviews={this.state.userInfo.reviews}
+        />
       );
-    } else {
-      return <LikesTab likes={this.state.userInfo.liked_reviews} />;
+    } if (this.state.activePage === 2) {
+      return (
+        <FavoritesTab
+          navigation={this.props.navigation}
+          favorites={this.state.userInfo.favourite_locations}
+        />
+      );
     }
+    return (
+      <LikesTab
+        navigation={this.props.navigation}
+        likes={this.state.userInfo.liked_reviews}
+      />
+    );
   };
+
+  /**
+   * Sets the style and behaviour of the tab button based on active page
+   *
+   * @param   {integer}  index    Index of the Tab
+   * @param   {string}   btnText  Text to render for the tab
+   *
+   * @return  {Button}            A Button used in the Segment
+   */
+  _renderButton = (index, btnText) => (
+    <Button
+      style={[
+        this.state.activePage === index
+          ? this.themeStyles.active_segment
+          : this.themeStyles.segment_btn,
+      ]}
+      active={this.state.activePage === index}
+      onPress={this.selectComponent(index)}>
+      <Text>{btnText}</Text>
+    </Button>
+  );
+
+  selectComponent = (activePage) => () => this.setState({ activePage });
 
   render() {
     if (this.state.loading) {
       return <LoadingSpinner size={50} />;
-    } else {
-      return (
-        <Container style={styles.container}>
-          <Header style={styles.header}>
-            <Left style={styles.header_left}>
-              <Button transparent></Button>
-            </Left>
-
-            <Body style={styles.header_body}>
-              <Title style={styles.title}>Profile</Title>
-            </Body>
-
-            <Right style={styles.header_right}>
-              <FontAwesomeIcon
-                icon={faCog}
-                size={20}
-                color={'#F06543'}
-                onPress={() => this.openSettings()}
-              />
-            </Right>
-          </Header>
-
-          <View style={styles.content}>
-            <View>
-              <Text>
-                {this.state.userInfo.first_name} {this.state.userInfo.last_name}
-              </Text>
-            </View>
-            <View style={styles.segment_view}>
-              <Segment style={styles.segment}>
-                <Button
-                  style={[
-                    this.state.activePage === 1
-                      ? styles.active_segment
-                      : styles.segment_btn,
-                  ]}
-                  active={this.state.activePage === 1}
-                  onPress={this.selectComponent(1)}>
-                  <Text>{translate('reviews')}</Text>
-                </Button>
-                <Button
-                  style={[
-                    this.state.activePage === 2
-                      ? styles.active_segment
-                      : styles.segment_btn,
-                  ]}
-                  active={this.state.activePage === 2}
-                  onPress={this.selectComponent(2)}>
-                  <Text>{translate('favorites')}</Text>
-                </Button>
-                <Button
-                  style={[
-                    this.state.activePage === 3
-                      ? styles.active_segment
-                      : styles.segment_btn,
-                  ]}
-                  active={this.state.activePage === 3}
-                  onPress={this.selectComponent(3)}>
-                  <Text>{translate('likes')}</Text>
-                </Button>
-              </Segment>
-            </View>
-            <View style={styles.segment_content}>
-              {this._renderComponent()}
-            </View>
-          </View>
-        </Container>
-      );
     }
+    return (
+      <Container style={this.themeStyles.container}>
+        <Header style={[styles.header, this.themeStyles.background_color]}>
+          <Body style={styles.header_body}>
+            <Title style={this.themeStyles.color_dark}>
+              {translate('profile')}
+            </Title>
+          </Body>
+
+          <Right style={styles.header_right}>
+            <FontAwesomeIcon
+              icon={faCog}
+              size={20}
+              color={this.themeStyles.color_primary.color}
+              onPress={() => this.props.navigation.navigate('Settings', {
+                userInfo: this.state.userInfo,
+                onGoBack: () => this.getUserInfo(),
+              })
+              }
+            />
+          </Right>
+        </Header>
+
+        <View style={styles.content}>
+          <View>
+            <Text style={styles.username}>
+              {this.state.userInfo.first_name} {this.state.userInfo.last_name}
+            </Text>
+          </View>
+          <View
+            style={[styles.segment_view, this.themeStyles.background_color]}>
+            <Segment
+              style={[styles.segment, this.themeStyles.background_color]}>
+              {this._renderButton(1, translate('reviews'))}
+              {this._renderButton(2, translate('favorites'))}
+              {this._renderButton(3, translate('likes'))}
+            </Segment>
+          </View>
+          <View style={styles.segment_content}>
+            {this._renderComponent()}
+          </View>
+        </View>
+      </Container>
+    );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#E8E9EB',
-  },
   header: {
     height: 50,
     borderBottomWidth: 0.5,
-    backgroundColor: '#E8E9EB',
-  },
-  header_left: {
-    flex: 1,
   },
   header_body: {
-    flex: 4,
+    flex: 1,
     alignItems: 'center',
   },
-  title: {
-    color: '#313638',
-  },
   header_right: {
-    flex: 1,
+    position: 'absolute',
+    right: 10,
   },
   icon: {
     fontSize: 20,
@@ -169,31 +170,19 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  username: {
+    paddingTop: 10,
+    fontSize: 20,
+    textAlign: 'center',
+  },
   segment: {
     flex: 1,
     flexDirection: 'row',
     marginBottom: 0,
     paddingBottom: 0,
-    backgroundColor: '#E8E9EB',
   },
   segment_view: {
     height: 50,
-    backgroundColor: '#E8E9EB',
-  },
-  segment_btn: {
-    flex: 1,
-    justifyContent: 'center',
-    borderBottomColor: '#FFFFFF',
-    borderBottomWidth: 1.5,
-    borderColor: '#E8E9EB',
-  },
-  active_segment: {
-    flex: 1,
-    justifyContent: 'center',
-    borderBottomWidth: 3,
-    borderBottomColor: 'tomato',
-    backgroundColor: '#E8E9EB',
-    borderColor: '#E8E9EB',
   },
   segment_content: {
     flex: 1,

@@ -2,12 +2,16 @@ import { Container } from 'native-base';
 import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
-import { toast } from '../utils/toast';
+import ThemeProvider from '../utils/theme-provider';
+import toast from '../utils/toast';
 
-let apiRequests = null;
-
+/**
+ * Asks the user a question about Creating, Updating or Deleting a photo.
+ * The navigation params decide what message to show and where to navigate.
+ */
 class PhotoDecision extends Component {
   constructor(props) {
     super(props);
@@ -18,7 +22,7 @@ class PhotoDecision extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
 
     this.setState({
       locationId: this.props.navigation.getParam('locationId'),
@@ -29,25 +33,26 @@ class PhotoDecision extends Component {
     });
   }
 
-  yesClicked = async () => {
-    const locationId = this.state.locationId;
-    const reviewId = this.state.reviewId;
+  yesClicked = async() => {
+    const { locationId } = this.state;
+    const { reviewId } = this.state;
 
     if (!this.state.deleteReview) {
+      // Create or update photo, nav to take photo screen
       this.props.navigation.navigate('TakePhoto', {
-        locationId: locationId,
-        reviewId: reviewId,
-        update: true,
+        locationId,
+        reviewId,
+        update: this.state.updateReview,
       });
       return;
     }
 
-    const response = await apiRequests.delete(
-      `/location${locationId}/review/${reviewId}/photo`,
+    const response = await this.apiRequests.delete(
+      `/location/${locationId}/review/${reviewId}/photo`,
     );
 
     if (response === 'OK') {
-      toast('Review photo deleted');
+      toast(translate('photo_deleted_toast'));
       this.props.navigation.navigate('Profile');
     }
   };
@@ -58,28 +63,35 @@ class PhotoDecision extends Component {
       return;
     }
 
+    // User came from the Selected Shop screen, nav back there
     this.props.navigation.navigate('SelectedShop', {
       locationId: this.state.locationId,
     });
   };
 
   render() {
+    const themeStyles = ThemeProvider.getTheme();
+
     return (
-      <Container style={styles.container}>
+      <Container style={[styles.container, themeStyles.background_color]}>
         <View style={styles.content}>
           <Text style={styles.header_text}>{this.state.displayText}</Text>
 
           <View style={styles.buttons}>
             <TouchableOpacity
-              style={[styles.button, styles.btn_primary]}
+              style={[styles.button, themeStyles.primary_button_color]}
               onPress={() => this.yesClicked()}>
-              <Text style={styles.btn_text}>Yes</Text>
+              <Text style={[styles.btn_text, themeStyles.color_light]}>
+                {translate('yes')}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.button, styles.btn_secondary]}
+              style={[styles.button, themeStyles.secondary_button_color]}
               onPress={() => this.noClicked()}>
-              <Text style={styles.btn_text}>No</Text>
+              <Text style={[styles.btn_text, themeStyles.color_light]}>
+                {translate('no')}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -91,7 +103,6 @@ class PhotoDecision extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E8E9EB',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -116,17 +127,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1,
   },
-  btn_primary: {
-    borderColor: '#F06543',
-    backgroundColor: '#F06543',
-  },
-  btn_secondary: {
-    borderColor: 'grey',
-    backgroundColor: 'grey',
-  },
   btn_text: {
     padding: 10,
-    color: '#FFFFFF',
     alignItems: 'center',
   },
 });

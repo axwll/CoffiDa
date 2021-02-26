@@ -4,30 +4,29 @@ import React, { Component } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
-import { toast } from '../utils/toast';
+import ThemeProvider from '../utils/theme-provider';
+import toast from '../utils/toast';
 
-let apiRequests = null;
-
+/**
+ * Take photo screen
+ */
 class TakePhoto extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
   }
 
-  takePicture = async () => {
+  takePicture = async() => {
     if (this.camera) {
-      const options = {quality: 0.5, base64: true};
+      const options = { quality: 0.5, base64: true };
       const data = await this.camera.takePictureAsync(options);
 
       const locationId = this.props.navigation.getParam('locationId');
       const reviewId = this.props.navigation.getParam('reviewId');
 
-      const response = await apiRequests.post(
+      const response = await this.apiRequests.post(
         `/location/${locationId}/review/${reviewId}/photo`,
         data,
         false,
@@ -35,7 +34,7 @@ class TakePhoto extends Component {
       );
 
       if (response === 'OK') {
-        toast('Picture Added');
+        toast(translate('photo_added_toast'));
 
         if (this.props.navigation.getParam('update')) {
           this.props.navigation.navigate('Profile');
@@ -43,15 +42,17 @@ class TakePhoto extends Component {
         }
 
         this.props.navigation.navigate('SelectedShop', {
-          locationId: locationId,
+          locationId,
         });
       }
     }
   };
 
   render() {
+    const themeStyles = ThemeProvider.getTheme();
+
     return (
-      <View style={{flex: 1, width: '100%'}}>
+      <View style={{ flex: 1, width: '100%' }}>
         <RNCamera
           captureAudio={false} // Removes the CaptureAudio warning from screen
           ref={(ref) => {
@@ -64,8 +65,12 @@ class TakePhoto extends Component {
             onPress={() => {
               this.takePicture();
             }}
-            style={styles.button}>
-            <FontAwesomeIcon icon={faCamera} style={styles.icon} size={25} />
+            style={[styles.button, themeStyles.background_color]}>
+            <FontAwesomeIcon
+              icon={faCamera}
+              style={themeStyles.color_medium}
+              size={25}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -74,10 +79,6 @@ class TakePhoto extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#E0DFD5',
-  },
   preview: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -94,13 +95,9 @@ const styles = StyleSheet.create({
     margin: 10,
     width: 50,
     height: 50,
-    backgroundColor: '#E0DFD5',
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  icon: {
-    color: 'grey',
   },
 });
 

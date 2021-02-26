@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 import { METER_FEET_CONVERSION_R, METER_MILES_CONVERSION_R } from '@env';
 import { faMugHot, faSearchLocation, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -10,12 +11,16 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 import LoadingSpinner from '../components/loading-spinner';
 import ReviewIcon from '../components/review-icon';
+import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
-import { toast } from '../utils/toast';
+import ThemeProvider from '../utils/theme-provider';
+import toast from '../utils/toast';
 
-// import {mapDarkStyle} from '../styles/map-style';
-async function requestPermssion(params) {
+/**
+ * Request the users permission to use location
+ */
+async function requestPermssion() {
   try {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -29,131 +34,195 @@ async function requestPermssion(params) {
       },
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('You can use my location');
       return true;
-    } else {
-      console.log("You can't use my location");
-      return false;
     }
+    console.log("You can't use my location");
+    return false;
   } catch (err) {
     console.warn(err);
+    return false;
   }
 }
 
-let apiRequests = null;
-let mapRef = null;
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width - 40;
 let LATITUDE_DELTA = 0.0922;
 let LONGITUDE_DELTA = 0.5;
 
+/**
+ * Explore screen renders a map with various searching options
+ */
 class Explore extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      location: null,
+      myLocation: null,
       locationPermission: false,
       loading: true,
-      clicked: false,
-      showCards: false,
+      showCardList: false,
       showMarkers: false,
       locationsList: [],
+      showSingleMarker: false,
+      singleShop: {},
     };
 
     this.getNearbyLocations = this.getNearbyLocations.bind(this);
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
 
-    this.findCoordinates();
+    this.mapSetup();
 
-    this.setState({loading: false});
+    this._onFocusListener = this.props.navigation.addListener(
+      'didFocus',
+      async() => {
+        this.setState({ loading: true });
+        this.mapSetup();
+      },
+    );
   }
 
-  findCoordinates = async () => {
+  componentWillUnmount() {
+    this._onFocusListener.remove();
+  }
+
+  mapSetup = () => {
+    this.findCoordinates()
+      .then((coordinates) => {
+        this.setState({ myLocation: coordinates });
+      })
+      .then(() => {
+        const shopData = this.props.navigation.getParam('shopData');
+        if (this.props.navigation.getParam('shopData')) {
+          // Will have this prop if passed from 'SelectedShop'
+          this.setShopLocation(shopData);
+        }
+      })
+      .catch((err) => toast(err));
+
+    this.setState({ loading: false });
+  };
+
+  findCoordinates = async() => {
     if (!this.state.locationPermission) {
       this.state.locationPermission = await requestPermssion();
     }
 
-    Geolocation.getCurrentPosition(
-      (position) => {
-        this.setState({
-          //   location: position.coords,
-          location: {
-            accuracy: 603,
-            altitude: 0,
-            heading: 90,
-            latitude: 53.38587,
-            longitude: -2.1455589,
-            speed: 0,
-          },
-        });
-      },
-      (error) => {
-        toast(error.message);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 20000,
-        maximumAge: 1000,
-      },
-    );
+    return new Promise((resolve, reject) => {
+      Geolocation.getCurrentPosition(
+        (position) => {
+          // Location I used for testing (emulator settings didn't work for me)
+          // resolve({ latitude: 53.38587, longitude: -2.1455589 });
+          resolve(position.coords);
+        },
+        (error) => reject(error.message),
+        {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 1000,
+        },
+      );
+    });
   };
 
-  getNearbyLocations = async () => {
-    this.setState({showMyMarker: false});
+  setShopLocation = (shopData) => {
+    const shopLocation = {
+      latitude: shopData.latitude,
+      longitude: shopData.longitude,
+    };
+
+    shopData.distance_from_me = this.distanceBetween(
+      this.state.myLocation,
+      shopLocation,
+    );
+
+    this.setState({
+      singleShop: {
+        location: {
+          latitude: shopData.latitude,
+          longitude: shopData.longitude,
+        },
+        title: shopData.location_name,
+        description: this.parseDistanceValue(shopData.distance_from_me),
+      },
+      showSingleMarker: true,
+    });
+  };
+
+  getNearbyLocations = async(queryString = '') => {
+    this.setState({
+      showSingleMarker: false,
+      showMyMarker: false,
+    });
+
+    // Change these values so all markers are visable
     LATITUDE_DELTA = 0.0922;
     LONGITUDE_DELTA = 0.5;
 
-    const response = await apiRequests.get('/find');
+    const response = await this.apiRequests.get(`/find${queryString}`);
 
     if (response) {
-      const myLocation = this.state.location;
       response.forEach((location) => {
-        location.distance_from_me = getDistance(
-          {latitude: myLocation.latitude, longitude: myLocation.longitude},
-          {latitude: location.latitude, longitude: location.longitude},
+        location.distance_from_me = this.distanceBetween(
+          this.state.myLocation,
+          location,
         );
       });
 
-      const sortedLocations = response.sort(function (a, b) {
-        return a.distance_from_me - b.distance_from_me;
-      });
+      const sortedLocations = response.sort((a, b) => a.distance_from_me - b.distance_from_me);
 
       this.setState({
-        showCards: true,
+        showCardList: true,
         showMarkers: true,
-        locationsList: sortedLocations.slice(0, 9),
+        locationsList: sortedLocations.slice(0, 5),
       });
     }
   };
+
+  distanceBetween = (location1, location2) => getDistance(
+    { latitude: location1.latitude, longitude: location1.longitude },
+    { latitude: location2.latitude, longitude: location2.longitude },
+  );
 
   parseDistanceValue = (distance) => {
     if (distance < 160) {
       // 160 meters is 0.1 mile - any less than this show in feet
       const distanceInFeet = Math.round(distance * METER_FEET_CONVERSION_R);
-      return distanceInFeet + ' ft';
+      return `${distanceInFeet} ft`;
     }
 
     const distanceInMiles = distance * METER_MILES_CONVERSION_R;
-    return distanceInMiles.toFixed(1) + ' miles';
+    return `${distanceInMiles.toFixed(1)} miles`;
   };
 
   moveToMyLocation = () => {
-    const myLocation = this.state.location;
-
     this.setState({
-      showCards: false,
+      showCardList: false,
       showMarkers: false,
+      showSingleMarker: false,
       showMyMarker: true,
-      location: myLocation,
     });
-    LONGITUDE_DELTA = 0.005;
-    LATITUDE_DELTA = 0.005;
+
+    // Zooms into the users location
+    LONGITUDE_DELTA = 0.05;
+    LATITUDE_DELTA = 0.05;
+
+    this.findCoordinates()
+      .then((coordinates) => {
+        this.setState({ myLocation: coordinates });
+      })
+      .catch((err) => toast(err));
   };
 
+  search = (searchText) => {
+    this.getNearbyLocations(`?q=${searchText}`);
+  }
+
+  /**
+   * Uses the bool value and decides whether to render sections of the map
+   */
   shouldShow = (stateBoolean) => {
     if (stateBoolean && this.state.locationsList.length > 0) {
       return true;
@@ -163,128 +232,179 @@ class Explore extends Component {
   };
 
   render() {
-    if (!this.state.location) {
+    const themeStyles = ThemeProvider.getTheme();
+
+    if (!this.state.myLocation) {
       if (!this.state.locationPermission) return <LoadingSpinner size={50} />;
 
       return (
         <View style={styles.loading_view}>
-          <Text style={styles.load_text}>Location could not be determined</Text>
+          <Text style={[styles.btn_text, themeStyles.color_dark]}>
+            {translate('cant_get_location')}
+          </Text>
         </View>
       );
-    } else {
-      return (
-        <Container style={styles.map_container}>
-          <View style={styles.header}>
-            <Item rounded style={styles.srch}>
-              <Icon name="ios-search" />
-              <Input
-                placeholder="Search"
-                onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
-              />
-            </Item>
-          </View>
-          <View style={styles.button_view}>
-            <TouchableOpacity
-              style={styles.text_button}
-              onPress={() => this.getNearbyLocations()}>
-              <FontAwesomeIcon icon={faMugHot} size={20} color={'#F06543'} />
-              <Text style={styles.btn_text}>Find Coffee Shops</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.text_button}
-              onPress={() => this.moveToMyLocation()}>
-              <FontAwesomeIcon
-                icon={faSearchLocation}
-                size={20}
-                color={'#F06543'}
-              />
-              <Text style={styles.btn_text}>Find Me</Text>
-            </TouchableOpacity>
-          </View>
-
-          <MapView
-            provider={PROVIDER_GOOGLE}
-            style={styles.map}
-            // customMapStyle={mapDarkStyle}
-            region={{
-              latitude: this.state.location.latitude,
-              longitude: this.state.location.longitude,
-              latitudeDelta: LATITUDE_DELTA,
-              longitudeDelta: (LONGITUDE_DELTA * width) / height,
-            }}>
-            {this.state.showMyMarker && (
-              <Marker
-                coordinate={this.state.location}
-                title={'My location'}
-                description={'I am here'}
-              />
-            )}
-
-            {this.shouldShow(this.state.showMarkers) &&
-              this.state.locationsList.map((location, index) => {
-                return (
-                  <Marker
-                    key={location.location_id}
-                    coordinate={{
-                      latitude: location.latitude,
-                      longitude: location.longitude,
-                    }}
-                    title={location.location_name}
-                    description={this.parseDistanceValue(
-                      location.distance_from_me,
-                    )}
-                  />
-                );
-              })}
-          </MapView>
-          {this.shouldShow(this.state.showCards) && (
-            <View style={styles.card_view}>
-              <TouchableOpacity
-                style={[styles.text_button, styles.close_button]}
-                onPress={() => this.setState({showCards: false})}>
-                <FontAwesomeIcon icon={faTimes} size={15} color={'#F06543'} />
-              </TouchableOpacity>
-
-              <Animated.ScrollView
-                horizontal
-                pagingEnabled
-                scrollEventThrottle={1}
-                showHorizontalScrollIndicator={false}
-                snapToAlignment="center">
-                {this.state.locationsList.map((location, index) => {
-                  return (
-                    <View style={styles.card} key={index}>
-                      <Image
-                        source={{uri: location.photo_path}}
-                        style={styles.card_image}
-                        resizeMode="cover"
-                      />
-                      <View style={styles.text_content}>
-                        <Text>{location.location_name}</Text>
-                        <View style={styles.review}>
-                          <View style={styles.review_icon}>
-                            <ReviewIcon
-                              rating={location.avg_overall_rating}
-                              primary={true}
-                            />
-                          </View>
-
-                          <Text>({location.location_reviews.length})</Text>
-                        </View>
-                        <TouchableOpacity style={styles.btn}>
-                          <Text style={styles.btn_text}>More info</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  );
-                })}
-              </Animated.ScrollView>
-            </View>
-          )}
-        </Container>
-      );
     }
+    return (
+      <Container style={styles.map_container}>
+        <View style={styles.header}>
+          <Item rounded style={[styles.srch, themeStyles.background_light]}>
+            <Icon name='ios-search' />
+            <Input
+              placeholder={translate('search_box_placeholder')}
+              onSubmitEditing={(event) => this.search(event.nativeEvent.text)}
+            />
+          </Item>
+        </View>
+        <View style={styles.button_view}>
+          <TouchableOpacity
+            style={[
+              styles.text_button,
+              themeStyles.background_light,
+              themeStyles.color_primary,
+            ]}
+            onPress={() => this.getNearbyLocations()}>
+            <FontAwesomeIcon
+              icon={faMugHot}
+              size={20}
+              color={themeStyles.color_primary.color}
+            />
+            <Text style={[styles.btn_text, themeStyles.color_primary]}>
+              {translate('find_coffee_shops_btn')}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.text_button,
+              themeStyles.background_light,
+              themeStyles.color_primary,
+            ]}
+            onPress={() => this.moveToMyLocation()}>
+            <FontAwesomeIcon
+              icon={faSearchLocation}
+              size={20}
+              color={themeStyles.color_primary.color}
+            />
+            <Text style={[styles.btn_text, themeStyles.color_primary]}>
+              {translate('find_me_btn')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <MapView
+          provider={PROVIDER_GOOGLE}
+          style={styles.map}
+          region={{
+            latitude: this.state.myLocation.latitude,
+            longitude: this.state.myLocation.longitude,
+            latitudeDelta: LATITUDE_DELTA,
+            longitudeDelta: (LONGITUDE_DELTA * width) / height,
+          }}>
+          {/* This renders if the map is navigated to from 'SelectedShop' */}
+          {this.state.showMyMarker && (
+            <Marker
+              coordinate={this.state.myLocation}
+              title={translate('my_location_title')}
+              description={translate('my_location_description')}
+            />
+          )}
+
+          {/* This renders if the 'find me' button is clicked*/}
+          {this.state.showSingleMarker && (
+            <Marker
+              coordinate={this.state.singleShop.location}
+              title={this.state.singleShop.title}
+              description={this.state.singleShop.description}
+            />
+          )}
+
+          {/* This renders if the 'find coffee shops' button is clicked*/}
+          {this.shouldShow(this.state.showMarkers)
+              && this.state.locationsList.map((location) => (
+                <Marker
+                  key={location.location_id}
+                  coordinate={{
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                  }}
+                  title={location.location_name}
+                  description={this.parseDistanceValue(
+                    location.distance_from_me,
+                  )}
+                />
+              ))}
+        </MapView>
+        {this.shouldShow(this.state.showCardList) && (
+          <View style={styles.card_view}>
+            <TouchableOpacity
+              style={[
+                styles.text_button,
+                styles.close_button,
+                themeStyles.background_light,
+                themeStyles.color_primary,
+              ]}
+              onPress={() => this.setState({ showCardList: false })}>
+              <FontAwesomeIcon
+                icon={faTimes}
+                size={15}
+                color={themeStyles.color_primary.color}
+              />
+            </TouchableOpacity>
+
+            <Animated.ScrollView
+              horizontal
+              pagingEnabled
+              scrollEventThrottle={1}
+              showHorizontalScrollIndicator={false}
+              snapToAlignment='center'>
+              {this.state.locationsList.map((location, index) => (
+                <View
+                  style={[styles.card, themeStyles.background_light]}
+                  key={index}>
+                  <Image
+                    source={{ uri: location.photo_path }}
+                    style={styles.card_image}
+                    resizeMode='cover'
+                  />
+                  <View style={styles.text_content}>
+                    <Text>{location.location_name}</Text>
+                    <View style={styles.review}>
+                      <View style={styles.review_icon}>
+                        <ReviewIcon
+                          rating={location.avg_overall_rating}
+                          primary
+                        />
+                      </View>
+
+                      <Text>({location.location_reviews.length})</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={[
+                        styles.btn,
+                        themeStyles.primary_button_color_outline,
+                      ]}
+                      onPress={() => {
+                        this.props.navigation.navigate('SelectedShop', {
+                          locationId: location.location_id,
+                        });
+                      }}>
+                      <Text
+                        style={[
+                          styles.btn_text,
+                          themeStyles.color_primary,
+                        ]}>
+                        {translate('more_info_btn')}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </Animated.ScrollView>
+          </View>
+        )}
+      </Container>
+    );
   }
 }
 
@@ -303,9 +423,8 @@ const styles = StyleSheet.create({
     height: 250,
     width: CARD_WIDTH,
     overflow: 'hidden',
-    backgroundColor: 'white',
   },
-  card_Image: {
+  card_image: {
     flex: 3,
     width: '100%',
     height: '100%',
@@ -339,7 +458,6 @@ const styles = StyleSheet.create({
   },
   srch: {
     flex: 9,
-    backgroundColor: 'white',
   },
   button_view: {
     zIndex: 1,
@@ -351,8 +469,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    color: 'tomato',
-    backgroundColor: 'white',
     margin: 10,
     paddingLeft: 10,
     borderRadius: 20,
@@ -376,21 +492,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     marginTop: 5,
-    borderColor: '#F06543',
   },
   btn_text: {
     padding: 10,
-    color: '#F06543',
     alignItems: 'center',
   },
   loading_view: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  load_text: {
-    fontSize: 20,
-    color: '#313638',
   },
 });
 

@@ -3,60 +3,74 @@ import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Button, Card, CardItem, Left, Right } from 'native-base';
 import React, { Component } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 
-import ReviewIcon from '../components/review-icon';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
+import ReviewIcon from './review-icon';
 
-let apiRequests = null;
-
+/**
+ * This renders a card to show reviews.
+ * It is used in multiple places in the app
+ */
 class ReviewCard extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      //   loading: true,
-      userInfo: [],
+      userInfo: this.props.currentUser,
+      review: this.props.shopReview,
+      locationId: this.props.locationId,
       liked: false,
     };
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
 
-    this.setState({userId: await getItem('USER_ID')});
+    this.setState({ userId: await getItem('USER_ID') });
 
-    await this.getUserInfo();
     await this.checkIfAlreadyLiked();
-    // this.setState({loading: false});
   }
 
-  getUserInfo = async () => {
-    const userId = this.state.userId;
-    const response = await apiRequests.get(`/user/${userId}`);
+  getUserInfo = async() => {
+    const { userId } = this.state;
+    const response = await this.apiRequests.get(`/user/${userId}`);
 
     if (response) {
-      this.setState({userInfo: response});
+      this.setState({ userInfo: response });
+    }
+
+    this.checkIfAlreadyLiked();
+  };
+
+  updateReview = async() => {
+    const { locationId } = this.state;
+    const response = await this.apiRequests.get(`/location/${locationId}`);
+
+    if (response) {
+      const reviewId = this.state.review.review_id;
+      const updated = response.location_reviews.find((review) => review.review_id === reviewId);
+      if (updated) {
+        this.setState({ review: updated });
+      }
     }
   };
 
   checkIfAlreadyLiked = () => {
-    const liked_reviews = this.state.userInfo.liked_reviews;
-    if (liked_reviews.length !== 0) {
-      liked_reviews.forEach((like) => {
+    const likedReviews = this.state.userInfo.liked_reviews;
+    let liked = false;
+    if (likedReviews.length !== 0) {
+      likedReviews.forEach((like) => {
         if (like.review.review_id === this.props.shopReview.review_id) {
-          // User has already liked this review
-          this.setState({liked: true});
-          return;
+          liked = true;
         }
       });
     }
 
-    // User has not previously liked the review
-    this.setState({liked: false});
-    return;
+    this.setState({ liked });
   };
 
   likeButtonPressed = (locationId, reviewId) => {
@@ -68,89 +82,69 @@ class ReviewCard extends Component {
     this.likeReview(locationId, reviewId);
   };
 
-  likeReview = async (locationId, reviewId) => {
-    const response = await apiRequests.post(
-      `location/${locationId}/review/${reviewId}/like`,
-      {}, // This request doesnt need a request body
-    );
+  likeReview = async(locationId, reviewId) => {
+    const response = await this.apiRequests.post(`/location/${locationId}/review/${reviewId}/like`);
 
     if (response) {
-      this.setState({liked: true});
+      this.setState({ liked: true });
+      await this.updateReview();
     }
   };
 
-  unlikeReview = async (locationId, reviewId) => {
-    const response = await apiRequests.delete(
-      `location/${locationId}/review/${reviewId}/like`,
+  unlikeReview = async(locationId, reviewId) => {
+    const response = await this.apiRequests.delete(
+      `/location/${locationId}/review/${reviewId}/like`,
     );
 
     if (response) {
-      this.setState({liked: false});
+      this.setState({ liked: false });
+      await this.updateReview();
     }
   };
 
   render() {
-    const review = this.props.shopReview;
-    const locationId = this.props.locationId;
+    const themeStyles = ThemeProvider.getTheme();
 
     return (
       <Card>
         <CardItem>
           <Left>
-            <Text>{review.review_body}</Text>
+            <Text>{this.state.review.review_body}</Text>
           </Left>
 
           <Right>
-            <Text style={styles.light_text}>
-              {translate('price')}: {review.price_rating}/5
+            <Text style={themeStyles.color_dark}>
+              {translate('price')}: {this.state.review.price_rating}/5
             </Text>
-            <Text style={styles.light_text}>
-              {translate('cleanliness')}: {review.clenliness_rating}/5
+            <Text style={themeStyles.color_dark}>
+              {translate('cleanliness')}: {this.state.review.clenliness_rating}/5
             </Text>
-            <Text style={styles.light_text}>
-              {translate('quality')}: {review.quality_rating}/5
+            <Text style={themeStyles.color_dark}>
+              {translate('quality')}: {this.state.review.quality_rating}/5
             </Text>
           </Right>
         </CardItem>
-        <CardItem style={styles.last_item}>
+        <CardItem style={{ paddingTop: 0, paddingBottom: 0 }}>
           <Left>
-            <Button transparent style={styles.light_text}>
+            <Button transparent style={themeStyles.color_dark}>
               <FontAwesomeIcon
                 icon={this.state.liked ? faHeartSolid : faHeartRegular}
                 size={15}
-                color={'#F06543'}
-                onPress={() =>
-                  this.likeButtonPressed(locationId, review.review_id)
-                }
+                color={themeStyles.color_primary.color}
+                onPress={() => {
+                  this.likeButtonPressed(this.state.locationId, this.state.review.review_id);
+                }}
               />
             </Button>
-            <Text style={styles.like_count}>{review.likes}</Text>
+            <Text>{this.state.review.likes}</Text>
           </Left>
           <Right>
-            <ReviewIcon rating={review.overall_rating} size={15} spacing={5} />
+            <ReviewIcon rating={this.state.review.overall_rating} size={15} spacing={5} />
           </Right>
         </CardItem>
       </Card>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  first_item: {
-    paddingBottom: 0,
-    marginBottom: 0,
-  },
-  user: {
-    color: 'tomato',
-    fontWeight: 'bold',
-  },
-  light_text: {
-    color: '#313638',
-  },
-  last_item: {
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
-});
 
 export default ReviewCard;

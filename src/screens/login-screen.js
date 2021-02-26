@@ -7,10 +7,13 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { translate } from '../locales';
 import ApiRequests from '../utils/api-requests';
 import { getItem, setItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
+import toast from '../utils/toast';
 import Validator from '../utils/validator';
 
-let apiRequests = null;
-
+/**
+ * Login Screen
+ */
 class Login extends Component {
   constructor(props) {
     super(props);
@@ -25,7 +28,7 @@ class Login extends Component {
   }
 
   async componentDidMount() {
-    apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
+    this.apiRequests = new ApiRequests(this.props, await getItem('AUTH_TOKEN'));
   }
 
   handleEmailInput = (email) => {
@@ -35,12 +38,12 @@ class Login extends Component {
       this.setState({
         validEmail: false,
         emailErrorText: response.message,
-        email: email,
+        email,
       });
     } else {
       this.setState({
         validEmail: true,
-        email: email,
+        email,
       });
     }
   };
@@ -52,20 +55,21 @@ class Login extends Component {
       this.setState({
         validPassword: false,
         passwordErrorText: response.message,
-        password: password,
+        password,
       });
     } else {
       this.setState({
         validPassword: true,
-        password: password,
+        password,
       });
     }
   };
 
-  logInEvent = async () => {
-    this.setState({submitted: true});
+  logInEvent = async() => {
+    this.setState({ submitted: true });
 
     if (!this.state.email || !this.state.password) {
+      // If either inputs havent been used, run the validation to show error
       this.handleEmailInput(this.state.email);
       this.handlePasswordlInput(this.state.password);
       return;
@@ -78,38 +82,42 @@ class Login extends Component {
     this.logIn();
   };
 
-  logIn = async () => {
+  logIn = async() => {
     const postBody = JSON.stringify({
       email: this.state.email,
       password: this.state.password,
     });
 
-    const response = await apiRequests.post('/user/login', postBody, true);
+    const response = await this.apiRequests.post('/user/login', postBody, true);
 
-    if (response) {
-      setItem('AUTH_TOKEN', response.token);
-      setItem('USER_ID', response.id.toString());
-      this.props.navigation.navigate('App');
+    if (!response) {
+      toast(translate('login_failed'));
     }
+
+    // Use async storage to set global properties
+    setItem('AUTH_TOKEN', response.token);
+    setItem('USER_ID', response.id.toString());
+    this.props.navigation.navigate('App');
   };
 
   render() {
-    const navigation = this.props.navigation;
+    const { navigation } = this.props;
+    const themeStyles = ThemeProvider.getTheme();
     return (
-      <Container style={styles.container}>
-        <Header style={styles.header}>
+      <Container style={[styles.container, themeStyles.alt_background_color]}>
+        <Header style={[styles.header, themeStyles.alt_background_color]}>
           <Left style={styles.header_left}>
             <Button transparent>
               <FontAwesomeIcon
                 icon={faChevronLeft}
                 size={20}
-                color={'#F06543'}
+                color={themeStyles.color_primary.color}
                 onPress={() => navigation.goBack()}
               />
             </Button>
           </Left>
           <Body style={styles.header_body}>
-            <Title style={styles.title}>Log In</Title>
+            <Title style={themeStyles.color_dark}>{translate('login')}</Title>
           </Body>
         </Header>
 
@@ -117,36 +125,40 @@ class Login extends Component {
           <Item style={styles.item}>
             <Input
               style={styles.input}
-              placeholder="Email"
+              placeholder={translate('email_placeholder')}
               onChangeText={this.handleEmailInput}
             />
           </Item>
           {!this.state.validEmail && this.state.submitted && (
             <View>
-              <Text style={styles.error_text}>{this.state.emailErrorText}</Text>
+              <Text style={[styles.error_text, themeStyles.color_primary]}>
+                {this.state.emailErrorText}
+              </Text>
             </View>
           )}
 
           <Item style={styles.item}>
             <Input
               style={styles.input}
-              placeholder="Password"
+              placeholder={translate('password_placeholder')}
               onChangeText={this.handlePasswordlInput}
-              secureTextEntry={true}
+              secureTextEntry
             />
           </Item>
           {!this.state.validPassword && this.state.submitted && (
             <View>
-              <Text style={styles.error_text}>
+              <Text style={[styles.error_text, themeStyles.color_primary]}>
                 {this.state.passwordErrorText}
               </Text>
             </View>
           )}
 
           <TouchableOpacity
-            style={[styles.button, styles.btn_primary]}
+            style={[styles.button, themeStyles.primary_button_color]}
             onPress={() => this.logInEvent()}>
-            <Text style={styles.btn_text}>{translate('login')}</Text>
+            <Text style={[styles.btn_text, themeStyles.color_light]}>
+              {translate('login')}
+            </Text>
           </TouchableOpacity>
         </Form>
       </Container>
@@ -155,13 +167,9 @@ class Login extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#E0DFD5',
-  },
   header: {
     height: 50,
     borderBottomWidth: 0.5,
-    backgroundColor: '#E0DFD5',
   },
   header_left: {
     position: 'absolute',
@@ -170,9 +178,6 @@ const styles = StyleSheet.create({
   header_body: {
     flex: 1,
     alignItems: 'center',
-  },
-  title: {
-    color: '#313638',
   },
   form: {
     flex: 1,
@@ -189,7 +194,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   error_text: {
-    color: 'tomato',
     textAlign: 'center',
     fontSize: 16,
   },
@@ -200,13 +204,8 @@ const styles = StyleSheet.create({
     margin: 10,
     marginRight: 5,
   },
-  btn_primary: {
-    borderColor: '#F06543',
-    backgroundColor: '#F06543',
-  },
   btn_text: {
     padding: 10,
-    color: '#FFFFFF',
     alignItems: 'center',
   },
 });

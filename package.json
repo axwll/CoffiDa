@@ -5,15 +5,16 @@
     "license": "UNLICENCED",
     "repository": {
         "type": "git",
-        "url": "https://bitbucket.org/max_johnson/coffida_ui"
+        "url": "https://github.com/axwll/CoffiDa"
     },
     "scripts": {
         "android": "react-native run-android",
         "start": "react-native start",
         "test": "jest",
         "lint": "eslint .",
-        "audit": "npm audit --json | npm-audit-helper --prod-only",
-        "pre-push": "npm run audit && npm run lint && npm run test",
+        "lintfixall": "eslint --fix .",
+        "lintfile": "eslint",
+        "fixfile": "eslint --fix",
         "postinstall": "jetifier -r && patch-package"
     },
     "dependencies": {
@@ -33,6 +34,7 @@
         "react-native-appearance": "^0.3.4",
         "react-native-camera": "^3.42.2",
         "react-native-dotenv": "^2.5.3",
+        "react-native-dynamic": "^1.0.0",
         "react-native-geolocation-service": "^5.2.0",
         "react-native-gesture-handler": "^1.9.0",
         "react-native-localize": "^2.0.1",

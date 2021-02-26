@@ -2,23 +2,29 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { getItem } from '../utils/async-storage';
+import ThemeProvider from '../utils/theme-provider';
 
+/**
+ * Splash Screen renders while checking if token exists
+ * Navigates appropriatley
+ */
 class SplashScreen extends Component {
   constructor() {
     super();
     this.checkToken();
   }
 
-  checkToken = async () => {
+  checkToken = async() => {
     const authToken = await getItem('AUTH_TOKEN');
 
     this.props.navigation.navigate(authToken ? 'App' : 'Auth');
   };
 
   render() {
+    const themeStyles = ThemeProvider.getTheme();
     return (
-      <View style={styles.view}>
-        <Text style={styles.text}>CoffiDa</Text>
+      <View style={[styles.view, themeStyles.primary_background_color]}>
+        <Text style={[styles.text, themeStyles.color_light]}>CoffiDa</Text>
       </View>
     );
   }
@@ -30,12 +36,10 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'tomato',
   },
   text: {
     fontSize: 50,
     fontFamily: 'Pacifico-Regular',
-    color: 'white',
   },
 });
 
