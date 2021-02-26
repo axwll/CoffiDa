@@ -269,6 +269,7 @@ class EditAccount extends Component {
           style={styles.input}
           placeholder={translate('password_placeholder')}
           onChangeText={this.handlePasswordInput}
+          secureTextEntry
         />
       </Item>
       {!this.state.validPassword && this.state.submitted && (
@@ -284,6 +285,7 @@ class EditAccount extends Component {
           style={styles.input}
           placeholder={translate('confirm_password_placeholder')}
           onChangeText={this.handlePasswordConfirmlInput}
+          secureTextEntry
         />
       </Item>
       {!this.state.validConfirmPassword && this.state.submitted && (

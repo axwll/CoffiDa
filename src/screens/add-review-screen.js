@@ -81,6 +81,8 @@ class AddReview extends Component {
       postBody,
     );
 
+    
+
     if (response) {
       toast(translate('review_created_toast'));
       this.findReview(locationId);
@@ -93,7 +95,7 @@ class AddReview extends Component {
     if (response) {
       const location = response.find((loc) => loc.location_id === locationId);
 
-      // location has no reviews? Something has gone horribly wrong.
+      // User has not reviewed anything. This shouldn't happen but catches anyway
       if (location.length === 0) return;
 
       this.extractId(location);
@@ -109,18 +111,12 @@ class AddReview extends Component {
   };
 
   extractId = (location) => {
+    // Location has no reviews. This shouldn't happen but catches anyway
+    if (location.location_reviews.length === 0) return;
+
     const reviewIds = [];
-    location.location_reviews.forEach((rev) => {
-      // find the review matching the review body
-      if (rev.review_body === this.state.reviewBody) {
-        reviewIds.push(rev.review_id);
-      }
-    });
+    location.location_reviews.forEach((rev) => reviewIds.push(rev.review_id));
 
-    // cant find review in database, something went wrong but didnt error...
-    if (reviewIds.length === 0) return;
-
-    // The array will be greater than one if reviews have the same review body
     // Find the largest ID (latest entry) and set state
     this.setState({ reviewId: Math.max(...reviewIds) });
   };

@@ -106,6 +106,7 @@ class Profile extends Component {
               color={this.themeStyles.color_primary.color}
               onPress={() => this.props.navigation.navigate('Settings', {
                 userInfo: this.state.userInfo,
+                onGoBack: () => this.getUserInfo(),
               })
               }
             />

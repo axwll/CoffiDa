@@ -219,6 +219,10 @@ class Explore extends Component {
     return false;
   };
 
+  openSelectedShop = (locationId) => {
+    this.props.navigation.navigate('SelectedShop', { locationId });
+  }
+
   render() {
     const themeStyles = ThemeProvider.getTheme();
 
@@ -372,7 +376,8 @@ class Explore extends Component {
                       style={[
                         styles.btn,
                         themeStyles.primary_button_color_outline,
-                      ]}>
+                      ]}
+                      onPress={() => this.openSelectedShop(location.location_id)}>
                       <Text
                         style={[
                           styles.btn_text,

@@ -6,10 +6,6 @@ import * as RNLocalize from 'react-native-localize';
 import EN from './en.json';
 import FR from './fr.json';
 
-
-// Code sourced from online tutorial
-// URL: https://medium.com/better-programming/creating-a-multi-language-app-in-react-native-9828b138c274
-
 const translationGetters = {
   en: () => EN,
   fr: () => FR,
@@ -22,7 +18,7 @@ export const translate = memoize(
 
 export const setI18nConfig = () => {
   // fallback if no available language fits
-  const fallback = { languageTag: 'en', isRTL: false };
+  const fallback = { languageTag: 'fr', isRTL: false };
   const keys = Object.keys(translationGetters);
   const { languageTag, isRTL } = RNLocalize.findBestAvailableLanguage(keys) || fallback;
 

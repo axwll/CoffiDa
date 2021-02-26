@@ -60,7 +60,6 @@ class Settings extends Component {
     if (this.state.loading) {
       return <LoadingSpinner size={50} />;
     }
-    const { navigation } = this.props;
 
     return (
       <Container style={themeStyles.container}>
@@ -71,7 +70,10 @@ class Settings extends Component {
                 icon={faChevronLeft}
                 size={20}
                 color={themeStyles.color_primary.color}
-                onPress={() => navigation.navigate('Profile')}
+                onPress={() => {
+                  this.props.navigation.state.params.onGoBack();
+                  this.props.navigation.goBack();
+                }}
               />
             </Button>
           </Left>
@@ -84,13 +86,7 @@ class Settings extends Component {
         </Header>
 
         <Content padder style={styles.content}>
-          <Text>
-            {translate('account')}: {this.state.userInfo.email}
-          </Text>
-          <Text>
-            {translate('name')}: {this.state.userInfo.first_name}{' '}
-            {this.state.userInfo.last_name}
-          </Text>
+          <Text style={styles.user_email}>{this.state.userInfo.email}</Text>
           <Card transparent>
             <TouchableOpacity onPress={() => this.openEditProfile('email')}>
               <CardItem>
@@ -145,8 +141,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
-  dark_mode_body: {
-    flexDirection: 'row',
+  user_email: {
+    textAlign: 'center',
+    margin: 10,
   },
   button: {
     alignItems: 'center',
