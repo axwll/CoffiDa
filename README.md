@@ -24,9 +24,6 @@ As you will see I have opted to use the [AirBnB Style Guide](https://github.com/
 
 Running ``npm run lint`` will lint all the files in the project. As I upload this on Friday 26th February 2021, no lint errors exist. 
 
-### Screencast ###
-
-My Screencast video exceeded 100 MB, so it has been uploaded to OnDrive. The link to both a .mp4 and .mov of the video can be found [here](https://github.com/axwll/CoffiDa/blob/master/screencast.txt) 
 
 ### Extension Tasks ###
 
